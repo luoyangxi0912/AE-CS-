@@ -1,0 +1,84 @@
+
+NDO(
+  (loss_func): MSELoss()
+  (seq): Sequential(
+    (layer_0): Layer(
+      (0): Linear(in_features=23, out_features=150, bias=True)
+      (1): Gaussian()
+    )
+    (layer_1): Layer(
+      (0): Linear(in_features=150, out_features=300, bias=True)
+      (1): Gaussian()
+    )
+    (layer_2): Layer(
+      (0): Linear(in_features=300, out_features=150, bias=True)
+      (1): Gaussian()
+    )
+    (layer_3): Layer(
+      (0): Linear(in_features=150, out_features=20, bias=True)
+      (1): Affine()
+    )
+  )
+)
+
+run paras: {'run_times': 1, 'multirun_seed': 'r*2', '_run_id': '', 'e': 5, 'load_para_type': None, 'load_sub': None, 'load_file_name': None, 'load_path_replace': None, 'view_addi_info': ['obs_erorr', 'unobs_stb_loss', 'M_obs', 'M_unobs', 'fix_pro', 'P_norm', 'loss'], 'if_log': True, 'if_epoch_eval': None, 'if_vmap': False, 'if_save_excel': True, 'if_save_plot': True, 'fd_pr': ['cust_mm_ey-T2&Q-kde'], 'fd_pr_dt': [{'mm': 'cust_mm_ey', 'ts': 'T2', 'thrd_meth': 'kde'}, {'mm': 'cust_mm_ey', 'ts': 'Q', 'thrd_meth': 'kde'}], 'fd_pr_name': ['cust_mm_ey-T2-kde', 'cust_mm_ey-Q-kde'], 'expt_FAR': 0.005, 'ts_post_op': None, 'if_use_lstsq': True, 'if_plot_mm_kde': False, 'if_plot_score_hm': False, 'if_plot_cov_inv': False, 'if_save_ts': False, 'alld_error': 0.005, 'cl': 0.995, 'if_intp': False}
+
+Train NDO_CSTR/fd_Act1 via cuda:
+Epoch: 5 - 1998/1998 | obs_erorr = 34.0331, unobs_stb_loss = 9.2627, M_obs = 17.1870, M_unobs = 0.0000, fix_pro = 1.1765, P_norm = 1.0133, loss = 43.2959                
+Finish training~ Spend 565 seconds
+
+Mean training losses: ['train-obs_erorr' 'train-unobs_stb_loss' 'train-M_obs' 'train-M_unobs'
+ 'train-fix_pro' 'train-P_norm' 'train-loss'] = [23.5448 10.4227 16.3258  0.      0.8807  0.9553 33.9675]
+
+Save model paras [Last] in 'file:///F:/torch_joff/joff/Result/NDO_CSTR/fd_Act1'
+
+1) 'cust_mm_ey-T2-kde':
+Threshold = 434.24
+
+The test false alarm rates (FARs) are:
+[15.34 15.87 15.34 15.87 15.87 15.87 16.4  16.4  14.29 15.87](%)
+
+The test missed detection rates (MDRs) are:
+[29.73 85.89 28.63 35.84 40.04 71.97  2.1  57.56 49.45 48.85](%)
+
+The test AFAR is 15.71(%).
+The test AMDR is 45.01(%).
+
+2) 'cust_mm_ey-Q-kde':
+Threshold = 459.42
+
+The test false alarm rates (FARs) are:
+[0.   0.   0.53 0.   0.53 1.06 0.   7.41 1.06 2.65](%)
+
+The test missed detection rates (MDRs) are:
+[48.85 39.34 35.74 33.13 25.13 21.72  6.21 28.93 40.04 98.8 ](%)
+
+The test AFAR is 1.32(%).
+The test AMDR is 37.79(%).
+
+Save FD Result.xlsx in 'file:///F:/torch_joff/joff/Result/NDO_CSTR/fd_Act1/FD%20Result.xlsx'
+Plot Epoch-Loss.pdf in 'file:///F:/torch_joff/joff/Result/NDO_CSTR/fd_Act1/Epoch-Loss.pdf'
+Plot Normal.pdf [ey-T2-kde] in 'file:///F:/torch_joff/joff/Result/NDO_CSTR/fd_Act1/cust_mm_ey-T2-kde/Normal.pdf'
+Plot Fault 01.pdf [ey-T2-kde] in 'file:///F:/torch_joff/joff/Result/NDO_CSTR/fd_Act1/cust_mm_ey-T2-kde/Fault%2001.pdf'
+Plot Fault 02.pdf [ey-T2-kde] in 'file:///F:/torch_joff/joff/Result/NDO_CSTR/fd_Act1/cust_mm_ey-T2-kde/Fault%2002.pdf'
+Plot Fault 03.pdf [ey-T2-kde] in 'file:///F:/torch_joff/joff/Result/NDO_CSTR/fd_Act1/cust_mm_ey-T2-kde/Fault%2003.pdf'
+Plot Fault 04.pdf [ey-T2-kde] in 'file:///F:/torch_joff/joff/Result/NDO_CSTR/fd_Act1/cust_mm_ey-T2-kde/Fault%2004.pdf'
+Plot Fault 05.pdf [ey-T2-kde] in 'file:///F:/torch_joff/joff/Result/NDO_CSTR/fd_Act1/cust_mm_ey-T2-kde/Fault%2005.pdf'
+Plot Fault 06.pdf [ey-T2-kde] in 'file:///F:/torch_joff/joff/Result/NDO_CSTR/fd_Act1/cust_mm_ey-T2-kde/Fault%2006.pdf'
+Plot Fault 07.pdf [ey-T2-kde] in 'file:///F:/torch_joff/joff/Result/NDO_CSTR/fd_Act1/cust_mm_ey-T2-kde/Fault%2007.pdf'
+Plot Fault 08.pdf [ey-T2-kde] in 'file:///F:/torch_joff/joff/Result/NDO_CSTR/fd_Act1/cust_mm_ey-T2-kde/Fault%2008.pdf'
+Plot Fault 09.pdf [ey-T2-kde] in 'file:///F:/torch_joff/joff/Result/NDO_CSTR/fd_Act1/cust_mm_ey-T2-kde/Fault%2009.pdf'
+Plot Fault 10.pdf [ey-T2-kde] in 'file:///F:/torch_joff/joff/Result/NDO_CSTR/fd_Act1/cust_mm_ey-T2-kde/Fault%2010.pdf'
+Plot Whole_fd.pdf [ey-T2-kde] in 'file:///F:/torch_joff/joff/Result/NDO_CSTR/fd_Act1/cust_mm_ey-T2-kde/Whole_fd.pdf'
+Plot Normal.pdf [ey-Q-kde] in 'file:///F:/torch_joff/joff/Result/NDO_CSTR/fd_Act1/cust_mm_ey-Q-kde/Normal.pdf'
+Plot Fault 01.pdf [ey-Q-kde] in 'file:///F:/torch_joff/joff/Result/NDO_CSTR/fd_Act1/cust_mm_ey-Q-kde/Fault%2001.pdf'
+Plot Fault 02.pdf [ey-Q-kde] in 'file:///F:/torch_joff/joff/Result/NDO_CSTR/fd_Act1/cust_mm_ey-Q-kde/Fault%2002.pdf'
+Plot Fault 03.pdf [ey-Q-kde] in 'file:///F:/torch_joff/joff/Result/NDO_CSTR/fd_Act1/cust_mm_ey-Q-kde/Fault%2003.pdf'
+Plot Fault 04.pdf [ey-Q-kde] in 'file:///F:/torch_joff/joff/Result/NDO_CSTR/fd_Act1/cust_mm_ey-Q-kde/Fault%2004.pdf'
+Plot Fault 05.pdf [ey-Q-kde] in 'file:///F:/torch_joff/joff/Result/NDO_CSTR/fd_Act1/cust_mm_ey-Q-kde/Fault%2005.pdf'
+Plot Fault 06.pdf [ey-Q-kde] in 'file:///F:/torch_joff/joff/Result/NDO_CSTR/fd_Act1/cust_mm_ey-Q-kde/Fault%2006.pdf'
+Plot Fault 07.pdf [ey-Q-kde] in 'file:///F:/torch_joff/joff/Result/NDO_CSTR/fd_Act1/cust_mm_ey-Q-kde/Fault%2007.pdf'
+Plot Fault 08.pdf [ey-Q-kde] in 'file:///F:/torch_joff/joff/Result/NDO_CSTR/fd_Act1/cust_mm_ey-Q-kde/Fault%2008.pdf'
+Plot Fault 09.pdf [ey-Q-kde] in 'file:///F:/torch_joff/joff/Result/NDO_CSTR/fd_Act1/cust_mm_ey-Q-kde/Fault%2009.pdf'
+Plot Fault 10.pdf [ey-Q-kde] in 'file:///F:/torch_joff/joff/Result/NDO_CSTR/fd_Act1/cust_mm_ey-Q-kde/Fault%2010.pdf'
+Plot Whole_fd.pdf [ey-Q-kde] in 'file:///F:/torch_joff/joff/Result/NDO_CSTR/fd_Act1/cust_mm_ey-Q-kde/Whole_fd.pdf'

@@ -1,0 +1,1991 @@
+nn客户案号我方案号来案名称一种基于一致掩码与时空邻域保持的深度缺失数据补全方法专利名称（必填）一种基于一致掩码与时空邻域保持的深度缺失数据补全方法专利申请类型（必填）发明         实用新型          外观设计客户名称湖南工商大学技术负责人姓名：电话/邮箱：负责代理师姓名 电话/邮箱 初稿时间2025年  月  日备注
+
+
+
+
+
+
+
+　　
+
+
+　　本发明公开了一种多变量时间序列缺失数据插补方法，其特征在于包括：采集含有缺失值的多变量时间序列数据；将原始不完备数据进行多次随机掩码处理，通过深度自编码器A得到多掩码特征，并设计一致性损失函数，使得不同掩码视图下的特征在潜在空间中保持对齐；分别在时间和空间维度上建立邻域保持模块，在空间领域上基于完备数据集有效观测维度的最近邻样本计算空间权重并通过B编码器提取空间压缩特征，在时间领域上基于完备数据集有效观测维度的最近邻变量计算时间权重并通过C编码器提取时间压缩特征，保持降维后的局部流形一致性；构建自适应融合网络对模型进行训练，生成动态权重对特征进行融合并优化参数；利用训练好的模型对测试集数据进行测试，通过一次前向传播输出最终的缺失值填补结果 。本发明在复杂缺失下提升插补精度与鲁棒性并保持时空局部结构。
+
+
+　　1.一种基于一致性降噪和时空邻域保持嵌入的深度自编码器缺失数据填补方法，其特征在于，包括以下步骤：
+步骤S1：获取待处理的包含缺失值的多变量时间序列数据集X和对应二进制掩码矩阵M^((0) )，对缺失位置进行归零处理，并将X⊙M^((0) )与M^((0) )沿特征维度拼接得到网络输入；同时计算数据集的整体缺失率ρ；
+　　步骤S2：构建深度自编码器网络，包括编码器、解码器以及嵌入在二者之间的相干去噪模块、空间流形模块、时间流形模块和自适应融合模块；
+　　步骤S3：利用编码器对步骤S1的输入进行非线性映射压缩成低维度的潜在表示，生成原始潜在特征表示Z_orig；
+　　步骤S4：在训练阶段，所述相干去噪模块通过对掩码矩阵进行多次伯努利随机损坏生成增强掩码并得到对应潜在表示，构造与损坏程度相关的加权一致性损失，以约束模型对不同缺失模式的鲁棒性。所述空间流形模块与时间流形模块分别采用仅基于共同观测条目的策略计算相似度、K近邻确定邻域并采用核函数计算并归一化邻域权重进行加权聚合，生成空间特征Z_space与经变量级到时间级映射后的时间特征Z_time；
+　　步骤S5：利用所述自适应融合模块，利用GAP归一化与整体缺失率ρ计算注意力权重，分别将Z_orig、Z_space、经变量级到时间级映射后的时间特征Z_time 加权融合得到融合特征 Z_fused。 
+　　步骤S6：利用解码器将Z_fused映射回原始数据空间以输出重构后的完整数据矩阵，构建仅在观测条目上计算的重构损失、一致性损失、空间保持损失和时间保持损失的联合损失函数，通过梯度下降优化网络参数。
+　　2. 根据权利要求1所述的方法，其特征在于，在步骤S3中，所述编码器通过非线性变换将输入数据映射到潜在空间，具体表示为：
+Z_orig=f_θ (X⊙M^((0) ),M^((0) ) )=σ(W^((2) ) σ(W^((1) ) [X⊙M^((0) )∥M^((0) ) ]+b^((1) ) )+b^((2) ) )
+⊙表示哈达玛积，W^((1) )和W^((2) )为权重矩阵，b^((1) )和b^((2) )为偏置向量，σ为激活函数，[?∥?]表示拼接操作。
+　　3.根据权利要求1所述的方法，其特征在于，在步骤S4中，所述一致性去噪机制包括：
+　　在每次训练迭代中，通过伯努利采样生成 Q个增强掩码矩阵：
+　　其中 k为时间步索引，n 为变量索引，q=1,2,…,Q 表示增强掩码的索引。
+　　M^((q) )=M⊙B^((0) ),B_(k,n)^((q) )?Bernoulli(1-p_drop),
+在每个掩码 M^((q) )下，通过编码器得到对应的潜在表示 Z^((q) )，并记 Z^((0) )为原始潜在表示 Z_"orig" 。
+　　构造一致性正则化损失：
+L_consist=1/Q ∑_(q=1)^Q?w^((q) )  〖∥Z^((q) )-Z_orig∥〗_F^2,
+　　其中，q=1,2,…,Q 为增强掩码编号，Z_orig (Z^((0) )) 为原始潜在表示，w^((q) ) 为基于损坏严重程度的权重，且随 ∥M^((q) )-M^((0) ) ∥_1大而减小；优选地，
+w^((q) )=exp(-∥M^((q) )-M^((0) ) ∥_1/(σ_c^2 )),?q=1,2,…,Q
+　　其中∥?∥_1表示L1范数，σ_c为控制带宽参数。
+4. 根据权利要求1所述的方法，其特征在于，在步骤S4中：
+(1) 空间邻域权重采用核函数计算：
+w_(t,s)^space=exp(-(∥x_t-x_s ∥_2^2)/(σ_s^2 ))
+并通过k近邻确定空间邻域集合 N_k^space，空间特征通过归一化加权聚合得到：
+z_k^space=(∑_(s∈N_k^space)?w_(k,s)^space  z_s^orig)/(∑_(s∈N_k^space)?w_(k,s)^space );
+(2) 时间邻域权重采用核函数计算：
+w_(k,t)^time=exp?"?"  （-(∥x_k-x_(k,t) ∥_2^2)/(σ_t^2 ))
+
+其中，k和t为变量索引，∥x_k-x_(k,t) ∥_2^2表示仅基于共同被观测时间点计算的欧氏距离；
+通过K近邻确定时间邻域集合?N_k^time，时间特征?z_k^time通过对邻域变量的特征表示进行归一化加权聚合及映射得到：
+z_k^time=(∑_(t∈N_k^time)?w_(k,t)^time  z_t^orig)/(∑_(t∈N_k^time)?w_(k,t)^time ).
+其中，z_t^orig?表示邻居变量?t的潜在特征表示。
+5. 根据权利要求1所述的方法，其特征在于在步骤S5中，所述自适应融合网络生成注意力权重并进行加权融合的过程表示为：计算融合系数向量α：
+α=softmax(W_a [Z??^((orig) )∥Z??^((space) )∥Z??^((time) )∥ρ]+b_a )
+其中 z?ˉ_?表示全局平均池化结果，ρ 表示整体缺失率；融合特征为：
+Z^fused=α_1 Z^orig+α_2 Z^space+α_3 Z^time
+中Z^orig为原始嵌入，Z^space为空间流形嵌入，Z^time为时间流形嵌入。
+6. 根据权利要求1所述的方法，其特征在于，在步骤S6中，所述联合损失函数满足： 
+L_total=L_recon+λ_1 L_consist+λ_2 L_space+λ_3 L_time
+其中重构损失L_recon仅在观测条目上计算：其中?λ_1,λ_2,λ_3为超参数，重构损失?L_recon仅在掩码?M^((0) )标示的观测条目上计算：
+L_recon=1/(∑_(t,n)^??m_(t,n)^((0) ) ) ∥(X-X?? )⊙M^((0) ) ∥_F^2
+7. 根据权利要求1所述的方法，其特征在于，在推理阶段不执行所述伯努利随机损坏生成增强掩码及一致性损失计算，仅进行一次前向传播完成缺失值填补。
+基于一致性去噪与时空邻域保持嵌入的深度自编码器缺失数据填补方法
+
+技术领域
+　　本发明属于工业/医疗传感器数据处理技术领域，具体涉及一种面向多变量时间序列数据的缺失值填补方法，尤其涉及一种结合一致性去噪与时空邻域保持嵌入的深度自编码器填补方法，可用于工业过程监控、软测量、故障诊断及医疗监测数据的预处理。
+背景技术
+　　多变量时间序列数据的完整性是工业过程监控如化工反应过程、污水处理与医疗健康监测等领域中的核心基础。从受损或不完整的传感器测量中准确重建缺失的数据，对于实施有效的故障检测、软测量开发及下游优化控制策略至关重要。随着现代工业系统日益向高维化、强非线性及动态时变方向发展，且常受传感器故障、信号传输中断或设备检修维护等不可控因素干扰，鲁棒的缺失数据填补方法的发展变得尤为重要。最根本的挑战在于设计既能适应复杂多变的缺失模式如非随机缺失，又能在填补过程中保持数据内在物理流形结构的算法。
+　　现有的缺失数据填补方法主要分为传统统计学方法、基于传统机器学习的方法以及基于深度学习的生成式方法三类。传统的统计学方法如均值填补、多重插补通常依赖于强统计分布假设或变量间的线性相关性假设，但在面对具有强非线性耦合、非平稳特性的复杂工业数据时，往往难以捕捉潜在的动态变化规律，导致填补结果偏差较大或丢失关键的高频细节信息。
+　　近年来，基于深度学习的数据驱动方法如生成对抗网络、循环神经网络和去噪自编码器因其强大的非线性映射能力而受到广泛关注。然而，现有的深度学习填补模型往往忽视了数据在潜在空间中的固有流形几何结构，即无法保证重构后的数据点严格分布在真实的物理流形面上；且在缺乏一致性正则化约束的情况下，模型容易对特定的训练掩码分布产生过拟合，导致其在面对训练数据分布之外的复杂缺失模式如连续块状缺失时泛化能力较差，这在对数据可靠性与物理一致性要求极高的工业应用中是不可接受的。
+　　现有的时空建模方法虽然试图结合时间依赖性与变量相关性，但现有方法往往缺乏一种统一的机制来同时显式地保持空间变量维与时间序列维的局部邻域结构，难以在保证数据一致性的同时兼顾拓扑结构的完整性，这可能限制了它们在处理具有复杂耦合关系的一般非线性系统数据时的适用性。
+　　
+发明内容
+　　本发明采用如下技术方案：
+　　一种基于一致性降噪和时空邻域保持嵌入的深度自编码器缺失数据填补方法，包括以下步骤：
+　　S1：获取待处理的包含缺失值的多变量时间序列数据矩阵X∈R^(T×N)以及对应的二值掩码矩阵M^((0) )；对X中的缺失位置进行归零处理得到观测矩阵X^obs，并将X^obs与M^((0) )沿特征维度拼接得到网络输入[X^obs∥M^((0) ) ]同时计算数据集的整体缺失率ρ，作为后续自适应融合的先验输入；
+　　S2：构建深度自编码器（AE-CS）网络，其结构包括编码器、解码器以及嵌入在二者之间的相干去噪模块、空间流形模块、时间流形模块和自适应融合模块；
+　　S3：利用编码器对步骤S1所述的网络输入?
+　　[X^obs∥M^((0) ) ]
+　　?进行非线性映射与特征压缩，生成原始潜在特征表示Z_orig；
+　　S4：在训练阶段，执行以下并行操作以增强特征的鲁棒性与结构保持能力：
+　　1) 相干去噪：所述相干去噪模块通过对初始掩码矩阵M^((0) )进行多次伯努利随机损坏生成多视图增强掩码M^((q) )，并基于增强掩码生成对应的潜在表示，构造权重与损坏程度自适应相关的加权一致性损失，以约束模型对复杂缺失模式的鲁棒性；
+　　2) 空间流形保持：以时间步为节点，采用部分距离策略（仅基于共同被观测的变量）计算时间步之间的相似度，利用kNN确定空间邻域，并采用核函数计算归一化权重进行聚合，生成空间特征Z_space；
+　　3) 时间流形保持：以变量为节点，采用部分距离策略（仅基于共同被观测的时间点）计算变量之间的相似度，利用kNN确定时间邻域并计算归一化权重；由于变量级特征与时间步级特征维度不匹配，需进一步执行“变量级→时间级”嵌入映射，将变量维度的聚合特征映射回时间步维度，生成时间特征Z_time；
+　　S5：?利用自适应融合模块，将特征的全局平均池化结果与步骤S1计算的整体缺失率ρ
+?共同输入网络，生成动态注意力权重α，对Z_orig、Z_space、Z_time进行加权融合得到融合特征Z_fused，从而根据数据稀疏程度自动调整对时空邻域信息的依赖比例；
+　　S6：利用解码器将Z_fused映射回原始数据空间以输出重构后的完整数据矩阵，构建包含仅在观测条目上计算的重构损失、一致性损失、空间保持损失和时间保持损失的联合损失函数，通过梯度下降算法端到端优化网络参数。
+
+
+有益效果：
+　　(1) 显著提升了模型对复杂缺失模式的鲁棒性与泛化能力。
+本发明引入了相干去噪机制，通过构建多视图掩码一致性约束，迫使模型学习对输入掩码扰动不敏感的鲁棒特征。这种自监督机制有效模拟了随机缺失甚至部分非随机缺失场景，使得模型在面对高缺失率或连续块状缺失时，仍能依据未损坏的上下文信息准确判断缺失值，避免了传统模型对特定掩码分布的过拟合。
+　　(2) 有效保持了多变量时间序列的内蕴几何拓扑结构与物理一致性。
+区别于传统仅关注数值重构误差的方法，本发明创新性地设计了空间与时间双域邻域保持模块，并采用基于部分观测距离的度量策略，解决了缺失值干扰相似度计算的难题。这使得填补后的数据在潜在空间中严格遵循原始数据的流形分布，不仅保持了时间上的工况连续性，也保持了变量间的物理耦合关系（如传感器冗余性），从而显著降低了因填补导致的结构扭曲对下游任务（如故障检测、软测量）精度的负面影响。
+　　(3) 实现了针对不同数据质量场景的自适应动态填补。
+通过引入结合整体缺失率先验的融合机制，模型能够“感知”当前数据的稀疏程度：在数据完整度高时优先保留原始特征细节，在数据极度稀疏时自动切换为依赖历史相似工况（空间流形）和相关传感器信息（时间流形）进行推理。这种机制保证了算法在不同工业场景下的通用性和有效性。
+　　(4) 兼顾了训练的充分性与推理的高效性。
+虽然在训练阶段引入了复杂的多掩码增强与流形约束以保证模型性能，但在在线推理阶段，无需执行随机损坏及一致性计算分支，仅需一次前向传播即可输出填补结果，计算复杂度低，满足工业过程监控对实时性的严苛要求。
+　　
+　　附图说明
+　　为了更清楚地说明本发明实施例或现有技术中的技术方案，下面将对实施例描述中所需要使用的附图作简要介绍。显而易见地，下面描述中的附图仅仅是本发明的一些实施例，对于本领域普通技术人员来讲，在不付出创造性劳动的前提下，还可以根据这些附图获得其他的附图。
+　　图1为本发明实施例的基于一致性去噪与时空邻域保持嵌入的深度自编码器缺失数据填补方法的流程图。
+　　
+
+
+　　具体实施方式
+　　
+　　使本发明的上述目的、特征和优点能够更加明显易懂，下面结合附图对本发明的具体实施方式做详细说明。在下面的描述中阐述了很多具体细节以便于充分理解本发明。但是本发明能够以很多不同于在此描述的其它方式来实施，本领域技术人员可以在不违背本发明内涵的情况下做类似改进，因此本发明不受下面公开的具体实施例的限制。
+　　此外，术语“第一”、“第二”仅用于描述目的，而不能理解为指示或暗示相对重要性或者隐含指明所指示的技术特征的数量；限定有“第一”、“第二”的特征可以明示或者隐含地包括至少一个该特征；在本发明的描述中，“多个”的含义是至少两个，除非另有明确限定。
+　　实施例1
+　　如图1所示，本实施例提供了一种基于一致性去噪与时空邻域保持嵌入的深度自编码器缺失数据填补方法，该方法包括以下步骤：
+S1：数据与掩码获取、预处理
+　　S1：获取待处理的包含缺失值的多变量时间序列数据矩阵?
+X∈R^(T×N)
+　　?和对应的初始二值掩码矩阵?
+　　M^((0) )∈{0,1}^(T×N)
+其中，矩阵元素?m_(k,n)^((0) )=1表示第k个时间步第n个变量的观测值存在，m_(k,n)^((0) )=0表示缺失（其中?k=1,…,T，n=1,…,N）。
+将X中缺失位置归零，得到观测矩阵[X^obs∥M^((0) ) ]，其中⊙表示哈达玛积。
+　　进一步地，为便于网络训练，对每个变量进行归一化处理；优选地，采用基于观测值的均值方差归一化，参数仅由m_(k,n)^((0) )=1的条目计算得到。
+　　更进一步地，计算整体缺失率ρ，用于后续自适应权重生成网络的输入，计算公式为：
+
+　　ρ=1-1/(T×N) ∑_(k=1)^T?∑_(n=1)^N?m_(k,n)^((0) ) 
+
+S2：构建深度自编码器网络（AE-CS）
+　　S2：构建基于一致性降噪与时空邻域保持嵌入的深度自编码器网络。该网络采用端到端的层次化特征提取架构，主要包含编码器、解码器，以及嵌入在二者潜在空间的并行特征处理分支：相干去噪模块、空间流形模块、时间流形模块和自适应融合模块。
+　　具体的网络配置如下：
+　　1. 编码器： 用于将高维的输入数据（观测数据与掩码的拼接，维度为2N）非线性映射到低维潜在空间。
+a) 结构上，优选采用多层全连接网络，也可扩展为一维卷积神经网络。
+b) 网络层数设置为 L层，通过层级降维强制网络学习数据的压缩表示。层与层之间采用 ReLU作为激活函数 ，以引入非线性变换并缓解梯度消失问题；进一步地， 训练过程中可结合梯度裁剪技术以防止梯度爆炸，并采用早停策略以防止过拟合。
+　　2. 并行处理分支：
+a) 相干去噪分支： 仅在训练阶段激活，通过伯努利采样生成多视图增强掩码 
+b) 时空流形分支： 分别基于变量维度和时间维度的邻域拓扑结构对潜在特征进行聚合；
+c) 自适应融合模块： 构建网络，由全连接层与 Softmax 归一化层组成，用于动态输出各分支的注意力权重。
+　　3. 解码器： 其结构与编码器呈镜像对称，用于将融合后的潜在特征 % MathType!Translator!2!1!LaTeX.tdl!LaTeX 2.09 and later!
+　　4. % MathType!MTEF!2!1!+-
+　　5. % feaahOart1ev3aqatCvAUfeBSjuyZL2yd9gzLbvyNv2CaerbuLwBLn
+　　6. % hiov2DGi1BTfMBaeXatLxBI9gBaerbd9wDYLwzYbItLDharqqtubsr
+　　7. % 4rNCHbWexLMBbXgBd9gzLbvyNv2CaeHbl7mZLdGeaGqiVCI8FfYJH8
+　　8. % YrFfeuY-Hhbbf9v8qqaqFr0xc9pk0xbba9q8WqFfeaY-biLkVcLq-J
+　　9. % Hqpepeea0-as0Fb9pgeaYRXxe9vr0-vr0-vqpWqaaeaabiGaciaaca
+　　10. % qabeaadaqaaqaafaGcbaaeaaaaaaaaa8qacaWGAbWdamaaBaaaleaa
+　　11. % peGaamOzaiaadwhacaWGZbGaamyzaiaadsgaa8aabeaaaaa!4523!
+　　12. ${Z_{fused}}$% MathType!End!2!1!
+　　13.  映射回原始数据空间，输出维度为N的重构矩阵。
+　　S3：拼接缺失指示器并编码得到原始潜在表示 % MathType!Translator!2!1!LaTeX.tdl!LaTeX 2.09 and later!
+　　% MathType!MTEF!2!1!+-
+　　% feaahOart1ev3aqatCvAUfeBSjuyZL2yd9gzLbvyNv2CaerbuLwBLn
+　　% hiov2DGi1BTfMBaeXatLxBI9gBaerbd9wDYLwzYbItLDharqqtubsr
+　　% 4rNCHbWexLMBbXgBd9gzLbvyNv2CaeHbl7mZLdGeaGqiVCI8FfYJH8
+　　% YrFfeuY-Hhbbf9v8qqaqFr0xc9pk0xbba9q8WqFfeaY-biLkVcLq-J
+　　% Hqpepeea0-as0Fb9pgeaYRXxe9vr0-vr0-vqpWqaaeaabiGaciaaca
+　　% qabeaadaqaaqaafaGcbaacbmaeaaaaaaaaa8qacaWFAbWdamaaBaaa
+　　% leaapeGaa83Baiaa-jhacaWFPbGaa83zaaWdaeqaaaaa!4430!
+　　${Z_{orig}}$% MathType!End!2!1!
+　　
+S3：将观测矩阵与掩码沿特征维度拼接作为编码器输入，此时输入特征维度由 N 变为 2N
+　　以区分“真实零值”与“缺失导致的归零”， 即：
+	% MathType!Translator!2!1!LaTeX.tdl!LaTeX 2.09 and later!
+% MathType!MTEF!2!1!+-
+% feaahOart1ev3aqatCvAUfeBSjuyZL2yd9gzLbvyNv2CaerbuLwBLn
+% hiov2DGi1BTfMBaeXatLxBI9gBaerbd9wDYLwzYbItLDharqqtubsr
+% 4rNCHbWexLMBbXgBd9gzLbvyNv2CaeHbl7mZLdGeaGqiVCI8FfYJH8
+% YrFfeuY-Hhbbf9v8qqaqFr0xc9pk0xbba9q8WqFfeaY-biLkVcLq-J
+% Hqpepeea0-as0Fb9pgeaYRXxe9vr0-vr0-vqpWqaaeaabiGaciaaca
+% qabeaadaqaaqaafaGcbaaeaaaaaaaaa8qadaWadaWdaeaapeGaamiw
+% aiablMPiLjaad2eacqWILicucaWGnbaacaGLBbGaayzxaaaaaa!46A5!
+$\left[ {X \odot M\parallel M} \right]$% MathType!End!2!1!
+
+　　中“% MathType!Translator!2!1!LaTeX.tdl!LaTeX 2.09 and later!
+　　% MathType!MTEF!2!1!+-
+　　% feaahOart1ev3aqatCvAUfeBSjuyZL2yd9gzLbvyNv2CaerbuLwBLn
+　　% hiov2DGi1BTfMBaeXatLxBI9gBaerbd9wDYLwzYbItLDharqqtubsr
+　　% 4rNCHbWexLMBbXgBd9gzLbvyNv2CaeHbl7mZLdGeaGqiVCI8FfYJH8
+　　% YrFfeuY-Hhbbf9v8qqaqFr0xc9pk0xbba9q8WqFfeaY-biLkVcLq-J
+　　% Hqpepeea0-as0Fb9pgeaYRXxe9vr0-vr0-vqpWqaaeaabiGaciaaca
+　　% qabeaadaqaaqaafaGcbaaeaaaaaaaaa8qacqWILicuaaa!4062!
+　　$\parallel $% MathType!End!2!1!
+　　”表示拼接操作。编码器输出原始潜在表示：
+　　
+	% MathType!Translator!2!1!LaTeX.tdl!LaTeX 2.09 and later!
+% MathType!MTEF!2!1!+-
+% feaahOart1ev3aqatCvAUfeBSjuyZL2yd9gzLbvyNv2CaerbuLwBLn
+% hiov2DGi1BTfMBaeXatLxBI9gBaerbd9wDYLwzYbItLDharqqtubsr
+% 4rNCHbWexLMBbXgBd9gzLbvyNv2CaeHbl7mZLdGeaGqiVCI8FfYJH8
+% YrFfeuY-Hhbbf9v8qqaqFr0xc9pk0xbba9q8WqFfeaY-biLkVcLq-J
+% Hqpepeea0-as0Fb9pgeaYRXxe9vr0-vr0-vqpWqaaeaabiGaciaaca
+% qabeaadaqaaqaafaGcbaaeaaaaaaaaa8qacaWGAbWdamaaBaaaleaa
+% peGaam4BaiaadkhacaWGPbGaam4zaaWdaeqaaOWdbiabg2da9iaadA
+% gapaWaaSbaaSqaa8qacqaH4oqCa8aabeaak8qadaqadaWdaeaapeGa
+% amiwaiablMPiLjaad2eacaGGSaGaamytaaGaayjkaiaawMcaaiaac6
+% caaaa!4FA9!
+${Z_{orig}} = {f_\theta }\left( {X \odot M,M} \right).$% MathType!End!2!1!
+
+　　具体的，若采用两层非线性网络，编码过程可表示为：
+	% MathType!Translator!2!1!LaTeX.tdl!LaTeX 2.09 and later!
+% MathType!MTEF!2!1!+-
+% feaahOart1ev3aqatCvAUfeBSjuyZL2yd9gzLbvyNv2CaerbuLwBLn
+% hiov2DGi1BTfMBaeXatLxBI9gBaerbd9wDYLwzYbItLDharqqtubsr
+% 4rNCHbWexLMBbXgBd9gzLbvyNv2CaeHbl7mZLdGeaGqiVCI8FfYJH8
+% YrFfeuY-Hhbbf9v8qqaqFr0xc9pk0xbba9q8WqFfeaY-biLkVcLq-J
+% Hqpepeea0-as0Fb9pgeaYRXxe9vr0-vr0-vqpWqaaeaabiGaciaaca
+% qabeaadaqaaqaafaGcbaaeaaaaaaaaa8qacaWGAbWdamaaBaaaleaa
+% peGaam4BaiaadkhacaWGPbGaam4zaaWdaeqaaOWdbiabg2da9iabeo
+% 8aZjaacIcacaWGxbWdamaaCaaaleqabaWdbmaabmaapaqaa8qacaaI
+% YaaacaGLOaGaayzkaaaaaOGaeq4Wdm3aaeWaa8aabaWdbiaadEfapa
+% WaaWbaaSqabeaapeWaaeWaa8aabaWdbiaaigdaaiaawIcacaGLPaaa
+% aaGcdaWadaWdaeaapeGaamiwaiablMPiLjaad2eacaGGGcGaeSyjIa
+% LaaiiOaiaad2eaaiaawUfacaGLDbaacqGHRaWkcaWGIbWdamaaCaaa
+% leqabaWdbmaabmaapaqaa8qacaaIXaaacaGLOaGaayzkaaaaaaGcca
+% GLOaGaayzkaaGaaiiFaiaadkgapaWaaWbaaSqabeaapeWaaeWaa8aa
+% baWdbiaaikdaaiaawIcacaGLPaaaaaGccaGGPaGaaiilaaaa!6690!
+${Z_{orig}} = \sigma ({W^{\left( 2 \right)}}\sigma \left( {{W^{\left( 1 \right)}}\left[ {X \odot M\;\parallel \;M} \right] + {b^{\left( 1 \right)}}} \right)|{b^{\left( 2 \right)}}),$% MathType!End!2!1!
+
+　　其中 % MathType!Translator!2!1!LaTeX.tdl!LaTeX 2.09 and later!
+　　% MathType!MTEF!2!1!+-
+　　% feaahOart1ev3aqatCvAUfeBSjuyZL2yd9gzLbvyNv2CaerbuLwBLn
+　　% hiov2DGi1BTfMBaeXatLxBI9gBaerbd9wDYLwzYbItLDharqqtubsr
+　　% 4rNCHbWexLMBbXgBd9gzLbvyNv2CaeHbl7mZLdGeaGqiVCI8FfYJH8
+　　% YrFfeuY-Hhbbf9v8qqaqFr0xc9pk0xbba9q8WqFfeaY-biLkVcLq-J
+　　% Hqpepeea0-as0Fb9pgeaYRXxe9vr0-vr0-vqpWqaaeaabiGaciaaca
+　　% qabeaadaqaaqaafaGcbaaeaaaaaaaaa8qacqaHdpWCdaqadaWdaeaa
+　　% peGaeyyXICnacaGLOaGaayzkaaaaaa!44EF!
+　　$\sigma \left(  \cdot  \right)$% MathType!End!2!1!
+　　为ReLU激活函数， 为可训练参数。
+S4：训练阶段的相干去噪 + 时空邻域保持嵌入
+　　S4：在训练阶段，执行相干去噪过程并构造一致性损失；同时执行时空邻域保持嵌入，生成空间特征 % MathType!Translator!2!1!LaTeX.tdl!LaTeX 2.09 and later!
+　　% MathType!MTEF!2!1!+-
+　　% feaahOart1ev3aqatCvAUfeBSjuyZL2yd9gzLbvyNv2CaerbuLwBLn
+　　% hiov2DGi1BTfMBaeXatLxBI9gBaerbd9wDYLwzYbItLDharqqtubsr
+　　% 4rNCHbWexLMBbXgBd9gzLbvyNv2CaeHbl7mZLdGeaGqiVCI8FfYJH8
+　　% YrFfeuY-Hhbbf9v8qqaqFr0xc9pk0xbba9q8WqFfeaY-biLkVcLq-J
+　　% Hqpepeea0-as0Fb9pgeaYRXxe9vr0-vr0-vqpWqaaeaabiGaciaaca
+　　% qabeaadaqaaqaafaGcbaaeaaaaaaaaa8qacaWGAbWdamaaBaaaleaa
+　　% peGaam4CaiaadchacaWGHbGaam4yaiaadwgaa8aabeaaaaa!4518!
+　　${Z_{space}}$% MathType!End!2!1!
+　　与时间特征 % MathType!Translator!2!1!LaTeX.tdl!LaTeX 2.09 and later!
+　　% MathType!MTEF!2!1!+-
+　　% feaahOart1ev3aqatCvAUfeBSjuyZL2yd9gzLbvyNv2CaerbuLwBLn
+　　% hiov2DGi1BTfMBaeXatLxBI9gBaerbd9wDYLwzYbItLDharqqtubsr
+　　% 4rNCHbWexLMBbXgBd9gzLbvyNv2CaeHbl7mZLdGeaGqiVCI8FfYJH8
+　　% YrFfeuY-Hhbbf9v8qqaqFr0xc9pk0xbba9q8WqFfeaY-biLkVcLq-J
+　　% Hqpepeea0-as0Fb9pgeaYRXxe9vr0-vr0-vqpWqaaeaabiGaciaaca
+　　% qabeaadaqaaqaafaGcbaaeaaaaaaaaa8qacaWGAbWdamaaBaaaleaa
+　　% peGaamiDaiaadMgacaWGTbGaamyzaaWdaeqaaaaa!4436!
+　　${Z_{time}}$% MathType!End!2!1!
+　　。
+（一） 相干去噪模块：多掩码伯努利损坏与一致性损失
+　本模块旨在通过构建自监督信号，利用“多视图学习”策略强迫编码器捕捉数据中对缺失模式不敏感的鲁棒特征，从而提升模型在面对任意缺失模式（包括随机缺失及连续块状缺失）时的泛化能力。
+　　在模型训练的每一次迭代中，不仅使用原始掩码% MathType!Translator!2!1!LaTeX.tdl!LaTeX 2.09 and later!
+　　% MathType!MTEF!2!1!+-
+　　% feaahOart1ev3aqatCvAUfeBSjuyZL2yd9gzLbvyNv2CaerbuLwBLn
+　　% hiov2DGi1BTfMBaeXatLxBI9gBaerbd9wDYLwzYbItLDharqqtubsr
+　　% 4rNCHbWexLMBbXgBd9gzLbvyNv2CaeHbl7mZLdGeaGqiVCI8FfYJH8
+　　% YrFfeuY-Hhbbf9v8qqaqFr0xc9pk0xbba9q8WqFfeaY-biLkVcLq-J
+　　% Hqpepeea0-as0Fb9pgeaYRXxe9vr0-vr0-vqpWqaaeaabiGaciaaca
+　　% qabeaadaqaaqaafaGcbaaeaaaaaaaaa8qacaWHnbWdamaaCaaaleqa
+　　% baWdbmaabmaapaqaa8qacaaIWaaacaGLOaGaayzkaaaaaaaa!42BE!
+　　${{\bf{M}}^{\left( 0 \right)}}$% MathType!End!2!1!
+　　进行训练，还通过随机损坏生成% MathType!Translator!2!1!LaTeX.tdl!LaTeX 2.09 and later!
+　　% MathType!MTEF!2!1!+-
+　　% feaahOart1ev3aqatCvAUfeBSjuyZL2yd9gzLbvyNv2CaerbuLwBLn
+　　% hiov2DGi1BTfMBaeXatLxBI9gBaerbd9wDYLwzYbItLDharqqtubsr
+　　% 4rNCHbWexLMBbXgBd9gzLbvyNv2CaeHbl7mZLdGeaGqiVCI8FfYJH8
+　　% YrFfeuY-Hhbbf9v8qqaqFr0xc9pk0xbba9q8WqFfeaY-biLkVcLq-J
+　　% Hqpepeea0-as0Fb9pgeaYRXxe9vr0-vr0-vqpWqaaeaabiGaciaaca
+　　% qabeaadaqaaqaafaGcbaaeaaaaaaaaa8qacaWGrbaaaa!4010!
+　　$Q$% MathType!End!2!1!
+　　个增强掩码视图
+　　具体过程如下：
+对于第% MathType!Translator!2!1!LaTeX.tdl!LaTeX 2.09 and later!
+　　% MathType!MTEF!2!1!+-
+　　% feaahOart1ev3aqatCvAUfeBSjuyZL2yd9gzLbvyNv2CaerbuLwBLn
+　　% hiov2DGi1BTfMBaeXatLxBI9gBaerbd9wDYLwzYbItLDharqqtubsr
+　　% 4rNCHbWexLMBbXgBd9gzLbvyNv2CaeHbl7mZLdGeaGqiVCI8FfYJH8
+　　% YrFfeuY-Hhbbf9v8qqaqFr0xc9pk0xbba9q8WqFfeaY-biLkVcLq-J
+　　% Hqpepeea0-as0Fb9pgeaYRXxe9vr0-vr0-vqpWqaaeaabiGaciaaca
+　　% qabeaadaqaaqaafaGcbaaeaaaaaaaaa8qacaWGXbaaaa!4030!
+　　$q$% MathType!End!2!1!
+　　个视图（% MathType!Translator!2!1!LaTeX.tdl!LaTeX 2.09 and later!
+　　% MathType!MTEF!2!1!+-
+　　% feaahOart1ev3aqatCvAUfeBSjuyZL2yd9gzLbvyNv2CaerbuLwBLn
+　　% hiov2DGi1BTfMBaeXatLxBI9gBaerbd9wDYLwzYbItLDharqqtubsr
+　　% 4rNCHbWexLMBbXgBd9gzLbvyNv2CaeHbl7mZLdGeaGqiVCI8FfYJH8
+　　% YrFfeuY-Hhbbf9v8qqaqFr0xc9pk0xbba9q8WqFfeaY-biLkVcLq-J
+　　% Hqpepeea0-as0Fb9pgeaYRXxe9vr0-vr0-vqpWqaaeaabiGaciaaca
+　　% qabeaadaqaaqaafaGcbaaeaaaaaaaaa8qacaWGXbGaeyypa0JaaGym
+　　% aiaacYcacaaIYaGaaiilaiabgAci8kaacYcacaWGrbaaaa!4721!
+　　$q = 1,2, \ldots ,Q$% MathType!End!2!1!
+　　），通过伯努利采样生成一个与数据维度相同的随机损坏矩阵% MathType!Translator!2!1!LaTeX.tdl!LaTeX 2.09 and later!
+　　% MathType!MTEF!2!1!+-
+　　% feaahOart1ev3aqatCvAUfeBSjuyZL2yd9gzLbvyNv2CaerbuLwBLn
+　　% hiov2DGi1BTfMBaeXatLxBI9gBaerbd9wDYLwzYbItLDharqqtubsr
+　　% 4rNCHbWexLMBbXgBd9gzLbvyNv2CaeHbl7mZLdGeaGqiVCI8FfYJH8
+　　% YrFfeuY-Hhbbf9v8qqaqFr0xc9pk0xbba9q8WqFfeaY-biLkVcLq-J
+　　% Hqpepeea0-as0Fb9pgeaYRXxe9vr0-vr0-vqpWqaaeaabiGaciaaca
+　　% qabeaadaqaaqaafaGcbaaeaaaaaaaaa8qacaWHcbWdamaaCaaaleqa
+　　% baWdbmaabmaapaqaa8qacaWGXbaacaGLOaGaayzkaaaaaaaa!42EF!
+　　${{\bf{B}}^{\left( q \right)}}$% MathType!End!2!1!
+　　。矩阵中每个元素% MathType!Translator!2!1!LaTeX.tdl!LaTeX 2.09 and later!
+　　% MathType!MTEF!2!1!+-
+　　% feaahOart1ev3aqatCvAUfeBSjuyZL2yd9gzLbvyNv2CaerbuLwBLn
+　　% hiov2DGi1BTfMBaeXatLxBI9gBaerbd9wDYLwzYbItLDharqqtubsr
+　　% 4rNCHbWexLMBbXgBd9gzLbvyNv2CaeHbl7mZLdGeaGqiVCI8FfYJH8
+　　% YrFfeuY-Hhbbf9v8qqaqFr0xc9pk0xbba9q8WqFfeaY-biLkVcLq-J
+　　% Hqpepeea0-as0Fb9pgeaYRXxe9vr0-vr0-vqpWqaaeaabiGaciaaca
+　　% qabeaadaqaaqaafaGcbaaeaaaaaaaaa8qacaWHcbWdamaaDaaaleaa
+　　% peGaam4AaiaacYcacaWGUbaapaqaa8qadaqadaWdaeaapeGaamyCaa
+　　% GaayjkaiaawMcaaaaaaaa!45A1!
+　　${\bf{B}}_{k,n}^{\left( q \right)}$% MathType!End!2!1!
+　　独立服从伯努利分布：% MathType!Translator!2!1!LaTeX.tdl!LaTeX 2.09 and later!
+　　% MathType!MTEF!2!1!+-
+　　% feaahOart1ev3aqatCvAUfeBSjuyZL2yd9gzLbvyNv2CaerbuLwBLn
+　　% hiov2DGi1BTfMBaeXatLxBI9gBaerbd9wDYLwzYbItLDharqqtubsr
+　　% 4rNCHbWexLMBbXgBd9gzLbvyNv2CaeHbl7mZLdGeaGqiVCI8FfYJH8
+　　% YrFfeuY-Hhbbf9v8qqaqFr0xc9pk0xbba9q8WqFfeaY-biLkVcLq-J
+　　% Hqpepeea0-as0Fb9pgeaYRXxe9vr0-vr0-vqpWqaaeaabiGaciaaca
+　　% qabeaadaqaaqaafaGcbaaeaaaaaaaaa8qacaWHcbWdamaaDaaaleaa
+　　% peGaam4AaiaacYcacaWGUbaapaqaa8qadaqadaWdaeaapeGaamyCaa
+　　% GaayjkaiaawMcaaaaakiabgYJi+jaabkeacaqGLbGaaeOCaiaab6ga
+　　% caqGVbGaaeyDaiaabYgacaqGSbGaaeyAamaabmaapaqaa8qacaaIXa
+　　% GaeyOeI0IaamiCa8aadaWgaaWcbaWdbiaadsgacaWGYbGaam4Baiaa
+　　% dchaa8aabeaaaOWdbiaawIcacaGLPaaaaaa!57DC!
+　　${\bf{B}}_{k,n}^{\left( q \right)} \sim {\rm{Bernoulli}}\left( {1 - {p_{drop}}} \right)$% MathType!End!2!1!
+　　
+其中，% MathType!Translator!2!1!LaTeX.tdl!LaTeX 2.09 and later!
+　　% MathType!MTEF!2!1!+-
+　　% feaahOart1ev3aqatCvAUfeBSjuyZL2yd9gzLbvyNv2CaerbuLwBLn
+　　% hiov2DGi1BTfMBaeXatLxBI9gBaerbd9wDYLwzYbItLDharqqtubsr
+　　% 4rNCHbWexLMBbXgBd9gzLbvyNv2CaeHbl7mZLdGeaGqiVCI8FfYJH8
+　　% YrFfeuY-Hhbbf9v8qqaqFr0xc9pk0xbba9q8WqFfeaY-biLkVcLq-J
+　　% Hqpepeea0-as0Fb9pgeaYRXxe9vr0-vr0-vqpWqaaeaabiGaciaaca
+　　% qabeaadaqaaqaafaGcbaaeaaaaaaaaa8qacaWGRbaaaa!402A!
+　　$k$% MathType!End!2!1!
+　　为时间步索引，% MathType!Translator!2!1!LaTeX.tdl!LaTeX 2.09 and later!
+　　% MathType!MTEF!2!1!+-
+　　% feaahOart1ev3aqatCvAUfeBSjuyZL2yd9gzLbvyNv2CaerbuLwBLn
+　　% hiov2DGi1BTfMBaeXatLxBI9gBaerbd9wDYLwzYbItLDharqqtubsr
+　　% 4rNCHbWexLMBbXgBd9gzLbvyNv2CaeHbl7mZLdGeaGqiVCI8FfYJH8
+　　% YrFfeuY-Hhbbf9v8qqaqFr0xc9pk0xbba9q8WqFfeaY-biLkVcLq-J
+　　% Hqpepeea0-as0Fb9pgeaYRXxe9vr0-vr0-vqpWqaaeaabiGaciaaca
+　　% qabeaadaqaaqaafaGcbaaeaaaaaaaaa8qacaWGUbaaaa!402D!
+　　$n$% MathType!End!2!1!
+　　为变量索引，% MathType!Translator!2!1!LaTeX.tdl!LaTeX 2.09 and later!
+　　% MathType!MTEF!2!1!+-
+　　% feaahOart1ev3aqatCvAUfeBSjuyZL2yd9gzLbvyNv2CaerbuLwBLn
+　　% hiov2DGi1BTfMBaeXatLxBI9gBaerbd9wDYLwzYbItLDharqqtubsr
+　　% 4rNCHbWexLMBbXgBd9gzLbvyNv2CaeHbl7mZLdGeaGqiVCI8FfYJH8
+　　% YrFfeuY-Hhbbf9v8qqaqFr0xc9pk0xbba9q8WqFfeaY-biLkVcLq-J
+　　% Hqpepeea0-as0Fb9pgeaYRXxe9vr0-vr0-vqpWqaaeaabiGaciaaca
+　　% qabeaadaqaaqaafaGcbaaeaaaaaaaaa8qacaWGWbWdamaaBaaaleaa
+　　% peGaamizaiaadkhacaWGVbGaamiCaaWdaeqaaaaa!4452!
+　　${p_{drop}}$% MathType!End!2!1!
+　　为预设的丢弃概率（即人为引入缺失的概率），将随机损坏矩阵作用于原始掩码% MathType!Translator!2!1!LaTeX.tdl!LaTeX 2.09 and later!
+　　% MathType!MTEF!2!1!+-
+　　% feaahOart1ev3aqatCvAUfeBSjuyZL2yd9gzLbvyNv2CaerbuLwBLn
+　　% hiov2DGi1BTfMBaeXatLxBI9gBaerbd9wDYLwzYbItLDharqqtubsr
+　　% 4rNCHbWexLMBbXgBd9gzLbvyNv2CaeHbl7mZLdGeaGqiVCI8FfYJH8
+　　% YrFfeuY-Hhbbf9v8qqaqFr0xc9pk0xbba9q8WqFfeaY-biLkVcLq-J
+　　% Hqpepeea0-as0Fb9pgeaYRXxe9vr0-vr0-vqpWqaaeaabiGaciaaca
+　　% qabeaadaqaaqaafaGcbaaeaaaaaaaaa8qacaWGnbWdamaaCaaaleqa
+　　% baWdbmaabmaapaqaa8qacaaIWaaacaGLOaGaayzkaaaaaaaa!42BA!
+　　${M^{\left( 0 \right)}}$% MathType!End!2!1!
+　　，得到增强掩码% MathType!Translator!2!1!LaTeX.tdl!LaTeX 2.09 and later!
+　　% MathType!MTEF!2!1!+-
+　　% feaahOart1ev3aqatCvAUfeBSjuyZL2yd9gzLbvyNv2CaerbuLwBLn
+　　% hiov2DGi1BTfMBaeXatLxBI9gBaerbd9wDYLwzYbItLDharqqtubsr
+　　% 4rNCHbWexLMBbXgBd9gzLbvyNv2CaeHbl7mZLdGeaGqiVCI8FfYJH8
+　　% YrFfeuY-Hhbbf9v8qqaqFr0xc9pk0xbba9q8WqFfeaY-biLkVcLq-J
+　　% Hqpepeea0-as0Fb9pgeaYRXxe9vr0-vr0-vqpWqaaeaabiGaciaaca
+　　% qabeaadaqaaqaafaGcbaaeaaaaaaaaa8qacaWGnbWdamaaCaaaleqa
+　　% baWdbmaabmaapaqaa8qacaWGXbaacaGLOaGaayzkaaaaaaaa!42F6!
+　　${M^{\left( q \right)}}$% MathType!End!2!1!
+　　：
+	% MathType!Translator!2!1!LaTeX.tdl!LaTeX 2.09 and later!
+% MathType!MTEF!2!1!+-
+% feaahOart1ev3aqatCvAUfeBSjuyZL2yd9gzLbvyNv2CaerbuLwBLn
+% hiov2DGi1BTfMBaeXatLxBI9gBaerbd9wDYLwzYbItLDharqqtubsr
+% 4rNCHbWexLMBbXgBd9gzLbvyNv2CaeHbl7mZLdGeaGqiVCI8FfYJH8
+% YrFfeuY-Hhbbf9v8qqaqFr0xc9pk0xbba9q8WqFfeaY-biLkVcLq-J
+% Hqpepeea0-as0Fb9pgeaYRXxe9vr0-vr0-vqpWqaaeaabiGaciaaca
+% qabeaadaqaaqaafaGcbaaeaaaaaaaaa8qacaWGnbWdamaaCaaaleqa
+% baWdbmaabmaapaqaa8qacaWGXbaacaGLOaGaayzkaaaaaOGaeyypa0
+% Jaamyta8aadaahaaWcbeqaa8qadaqadaWdaeaapeGaaGimaaGaayjk
+% aiaawMcaaaaakiablMPiLjaadkeapaWaaWbaaSqabeaapeWaaeWaa8
+% aabaWdbiaadghaaiaawIcacaGLPaaaaaaaaa!4CF2!
+${M^{\left( q \right)}} = {M^{\left( 0 \right)}} \odot {B^{\left( q \right)}}$% MathType!End!2!1!
+
+　　技术原理说明
+　　由于采用逐元素乘法（% MathType!Translator!2!1!LaTeX.tdl!LaTeX 2.09 and later!
+　　% MathType!MTEF!2!1!+-
+　　% feaahOart1ev3aqatCvAUfeBSjuyZL2yd9gzLbvyNv2CaerbuLwBLn
+　　% hiov2DGi1BTfMBaeXatLxBI9gBaerbd9wDYLwzYbItLDharqqtubsr
+　　% 4rNCHbWexLMBbXgBd9gzLbvyNv2CaeHbl7mZLdGeaGqiVCI8FfYJH8
+　　% YrFfeuY-Hhbbf9v8qqaqFr0xc9pk0xbba9q8WqFfeaY-biLkVcLq-J
+　　% Hqpepeea0-as0Fb9pgeaYRXxe9vr0-vr0-vqpWqaaeaabiGaciaaca
+　　% qabeaadaqaaqaafaGcbaaeaaaaaaaaa8qacqWIzkszaaa!40EB!
+　　$ \odot $% MathType!End!2!1!
+　　），生成的增强掩码% MathType!Translator!2!1!LaTeX.tdl!LaTeX 2.09 and later!
+　　% MathType!MTEF!2!1!+-
+　　% feaahOart1ev3aqatCvAUfeBSjuyZL2yd9gzLbvyNv2CaerbuLwBLn
+　　% hiov2DGi1BTfMBaeXatLxBI9gBaerbd9wDYLwzYbItLDharqqtubsr
+　　% 4rNCHbWexLMBbXgBd9gzLbvyNv2CaeHbl7mZLdGeaGqiVCI8FfYJH8
+　　% YrFfeuY-Hhbbf9v8qqaqFr0xc9pk0xbba9q8WqFfeaY-biLkVcLq-J
+　　% Hqpepeea0-as0Fb9pgeaYRXxe9vr0-vr0-vqpWqaaeaabiGaciaaca
+　　% qabeaadaqaaqaafaGcbaaeaaaaaaaaa8qacaWGnbWdamaaCaaaleqa
+　　% baWdbmaabmaapaqaa8qacaWGXbaacaGLOaGaayzkaaaaaaaa!42F6!
+　　${M^{\left( q \right)}}$% MathType!End!2!1!
+　　必然是原始掩码% MathType!Translator!2!1!LaTeX.tdl!LaTeX 2.09 and later!
+　　% MathType!MTEF!2!1!+-
+　　% feaahOart1ev3aqatCvAUfeBSjuyZL2yd9gzLbvyNv2CaerbuLwBLn
+　　% hiov2DGi1BTfMBaeXatLxBI9gBaerbd9wDYLwzYbItLDharqqtubsr
+　　% 4rNCHbWexLMBbXgBd9gzLbvyNv2CaeHbl7mZLdGeaGqiVCI8FfYJH8
+　　% YrFfeuY-Hhbbf9v8qqaqFr0xc9pk0xbba9q8WqFfeaY-biLkVcLq-J
+　　% Hqpepeea0-as0Fb9pgeaYRXxe9vr0-vr0-vqpWqaaeaabiGaciaaca
+　　% qabeaadaqaaqaafaGcbaaeaaaaaaaaa8qacaWGnbWdamaaCaaaleqa
+　　% baWdbmaabmaapaqaa8qacaaIWaaacaGLOaGaayzkaaaaaaaa!42BA!
+　　${M^{\left( 0 \right)}}$% MathType!End!2!1!
+　　的子集。这基于一个关键逻辑：即只能在“已观测”的数据上进行进一步的“伪人为缺失”操作，而无法对原本就缺失的数据进行标记。虽然训练过程中采用的是独立随机丢弃，但这种高强度的随机性迫使模型学习数据间的长程依赖，从而间接赋予模型处理工业场景中常见的连续“块状缺失”的能力。
+　　在每个掩码 % MathType!Translator!2!1!LaTeX.tdl!LaTeX 2.09 and later!
+　　% MathType!MTEF!2!1!+-
+　　% feaahOart1ev3aqatCvAUfeBSjuyZL2yd9gzLbvyNv2CaerbuLwBLn
+　　% hiov2DGi1BTfMBaeXatLxBI9gBaerbd9wDYLwzYbItLDharqqtubsr
+　　% 4rNCHbWexLMBbXgBd9gzLbvyNv2CaeHbl7mZLdGeaGqiVCI8FfYJH8
+　　% YrFfeuY-Hhbbf9v8qqaqFr0xc9pk0xbba9q8WqFfeaY-biLkVcLq-J
+　　% Hqpepeea0-as0Fb9pgeaYRXxe9vr0-vr0-vqpWqaaeaabiGaciaaca
+　　% qabeaadaqaaqaafaGcbaaeaaaaaaaaa8qacaWGnbWdamaaCaaaleqa
+　　% baWdbmaabmaapaqaa8qacaWGXbaacaGLOaGaayzkaaaaaaaa!42F6!
+　　${M^{\left( q \right)}}$% MathType!End!2!1!
+　　下，通过编码器得到对应的潜在表示 % MathType!Translator!2!1!LaTeX.tdl!LaTeX 2.09 and later!
+　　% MathType!MTEF!2!1!+-
+　　% feaahOart1ev3aqatCvAUfeBSjuyZL2yd9gzLbvyNv2CaerbuLwBLn
+　　% hiov2DGi1BTfMBaeXatLxBI9gBaerbd9wDYLwzYbItLDharqqtubsr
+　　% 4rNCHbWexLMBbXgBd9gzLbvyNv2CaeHbl7mZLdGeaGqiVCI8FfYJH8
+　　% YrFfeuY-Hhbbf9v8qqaqFr0xc9pk0xbba9q8WqFfeaY-biLkVcLq-J
+　　% Hqpepeea0-as0Fb9pgeaYRXxe9vr0-vr0-vqpWqaaeaabiGaciaaca
+　　% qabeaadaqaaqaafaGcbaaeaaaaaaaaa8qacaWGAbWdamaaCaaaleqa
+　　% baWdbmaabmaapaqaa8qacaWGXbaacaGLOaGaayzkaaaaaaaa!4303!
+　　${Z^{\left( q \right)}}$% MathType!End!2!1!
+　　，并记 % MathType!Translator!2!1!LaTeX.tdl!LaTeX 2.09 and later!
+　　% MathType!MTEF!2!1!+-
+　　% feaahOart1ev3aqatCvAUfeBSjuyZL2yd9gzLbvyNv2CaerbuLwBLn
+　　% hiov2DGi1BTfMBaeXatLxBI9gBaerbd9wDYLwzYbItLDharqqtubsr
+　　% 4rNCHbWexLMBbXgBd9gzLbvyNv2CaeHbl7mZLdGeaGqiVCI8FfYJH8
+　　% YrFfeuY-Hhbbf9v8qqaqFr0xc9pk0xbba9q8WqFfeaY-biLkVcLq-J
+　　% Hqpepeea0-as0Fb9pgeaYRXxe9vr0-vr0-vqpWqaaeaabiGaciaaca
+　　% qabeaadaqaaqaafaGcbaaeaaaaaaaaa8qacaWGAbWdamaaCaaaleqa
+　　% baWdbmaabmaapaqaa8qacaaIWaaacaGLOaGaayzkaaaaaaaa!42C7!
+　　${Z^{\left( 0 \right)}}$% MathType!End!2!1!
+　　为原始潜在表示 % MathType!Translator!2!1!LaTeX.tdl!LaTeX 2.09 and later!
+　　% MathType!MTEF!2!1!+-
+　　% feaahOart1ev3aqatCvAUfeBSjuyZL2yd9gzLbvyNv2CaerbuLwBLn
+　　% hiov2DGi1BTfMBaeXatLxBI9gBaerbd9wDYLwzYbItLDharqqtubsr
+　　% 4rNCHbWexLMBbXgBd9gzLbvyNv2CaeHbl7mZLdGeaGqiVCI8FfYJH8
+　　% YrFfeuY-Hhbbf9v8qqaqFr0xc9pk0xbba9q8WqFfeaY-biLkVcLq-J
+　　% Hqpepeea0-as0Fb9pgeaYRXxe9vr0-vr0-vqpWqaaeaabiGaciaaca
+　　% qabeaadaqaaqaafaGcbaaeaaaaaaaaa8qacaWGAbWdamaaBaaaleaa
+　　% peGaam4BaiaadkhacaWGPbGaam4zaaWdaeqaaaaa!4438!
+　　${Z_{orig}}$% MathType!End!2!1!
+　　。
+　　并计算增强掩码对应的潜在表示：
+	
+　　当 % MathType!Translator!2!1!LaTeX.tdl!LaTeX 2.09 and later!
+　　% MathType!MTEF!2!1!+-
+　　% feaahOart1ev3aqatCvAUfeBSjuyZL2yd9gzLbvyNv2CaerbuLwBLn
+　　% hiov2DGi1BTfMBaeXatLxBI9gBaerbd9wDYLwzYbItLDharqqtubsr
+　　% 4rNCHbWexLMBbXgBd9gzLbvyNv2CaeHbl7mZLdGeaGqiVCI8FfYJH8
+　　% YrFfeuY-Hhbbf9v8qqaqFr0xc9pk0xbba9q8WqFfeaY-biLkVcLq-J
+　　% Hqpepeea0-as0Fb9pgeaYRXxe9vr0-vr0-vqpWqaaeaabiGaciaaca
+　　% qabeaadaqaaqaafaGcbaaeaaaaaaaaa8qacaWGXbGaeyypa0JaaGim
+　　% aaaa!41F0!
+　　$q = 0$% MathType!End!2!1!
+　　时对应原始掩码 % MathType!Translator!2!1!LaTeX.tdl!LaTeX 2.09 and later!
+　　% MathType!MTEF!2!1!+-
+　　% feaahOart1ev3aqatCvAUfeBSjuyZL2yd9gzLbvyNv2CaerbuLwBLn
+　　% hiov2DGi1BTfMBaeXatLxBI9gBaerbd9wDYLwzYbItLDharqqtubsr
+　　% 4rNCHbWexLMBbXgBd9gzLbvyNv2CaeHbl7mZLdGeaGqiVCI8FfYJH8
+　　% YrFfeuY-Hhbbf9v8qqaqFr0xc9pk0xbba9q8WqFfeaY-biLkVcLq-J
+　　% Hqpepeea0-as0Fb9pgeaYRXxe9vr0-vr0-vqpWqaaeaabiGaciaaca
+　　% qabeaadaqaaqaafaGcbaaeaaaaaaaaa8qacaWGnbWdamaaCaaaleqa
+　　% baWdbmaabmaapaqaa8qacaaIWaaacaGLOaGaayzkaaaaaaaa!42BA!
+　　${M^{\left( 0 \right)}}$% MathType!End!2!1!
+　　，其输出记为 % MathType!Translator!2!1!LaTeX.tdl!LaTeX 2.09 and later!
+　　% MathType!MTEF!2!1!+-
+　　% feaahOart1ev3aqatCvAUfeBSjuyZL2yd9gzLbvyNv2CaerbuLwBLn
+　　% hiov2DGi1BTfMBaeXatLxBI9gBaerbd9wDYLwzYbItLDharqqtubsr
+　　% 4rNCHbWexLMBbXgBd9gzLbvyNv2CaeHbl7mZLdGeaGqiVCI8FfYJH8
+　　% YrFfeuY-Hhbbf9v8qqaqFr0xc9pk0xbba9q8WqFfeaY-biLkVcLq-J
+　　% Hqpepeea0-as0Fb9pgeaYRXxe9vr0-vr0-vqpWqaaeaabiGaciaaca
+　　% qabeaadaqaaqaafaGcbaaeaaaaaaaaa8qacaWGAbWdamaaBaaaleaa
+　　% peGaam4BaiaadkhacaWGPbGaam4zaaWdaeqaaOWdbiabg2da9iaadQ
+　　% fapaWaaWbaaSqabeaapeWaaeWaa8aabaWdbiaaicdaaiaawIcacaGL
+　　% Paaaaaaaaa!48E5!
+　　${Z_{orig}} = {Z^{\left( 0 \right)}}$% MathType!End!2!1!
+　　。
+　　
+　　构造一致性正则化损失：
+	% MathType!Translator!2!1!LaTeX.tdl!LaTeX 2.09 and later!
+% MathType!MTEF!2!1!+-
+% feaahOart1ev3aqatCvAUfeBSjuyZL2yd9gzLbvyNv2CaerbuLwBLn
+% hiov2DGi1BTfMBaeXatLxBI9gBaerbd9wDYLwzYbItLDharqqtubsr
+% 4rNCHbWexLMBbXgBd9gzLbvyNv2CaeHbl7mZLdGeaGqiVCI8FfYJH8
+% YrFfeuY-Hhbbf9v8qqaqFr0xc9pk0xbba9q8WqFfeaY-biLkVcLq-J
+% Hqpepeea0-as0Fb9pgeaYRXxe9vr0-vr0-vqpWqaaeaabiGaciaaca
+% qabeaadaqaaqaafaGcbaaeaaaaaaaaa8qacaWGmbWdamaaBaaaleaa
+% peGaam4yaiaad+gacaWGUbGaam4CaiaadMgacaWGZbGaamiDaaWdae
+% qaaOWdbiabg2da9maalaaapaqaa8qacaaIXaaapaqaa8qacaWGrbaa
+% amaawahabeWcpaqaa8qacaWGXbGaeyypa0JaaGymaaWdaeaapeGaam
+% yuaaqdpaqaa8qacqGHris5aaGccaWG3bWdamaaCaaaleqabaWdbmaa
+% bmaapaqaa8qacaWGXbaacaGLOaGaayzkaaaaaOGaeSyjIaLaamOwa8
+% aadaahaaWcbeqaa8qadaqadaWdaeaapeGaamyCaaGaayjkaiaawMca
+% aaaakiabgkHiTiaadQfapaWaaSbaaSqaa8qacaWGVbGaamOCaiaadM
+% gacaWGNbaapaqabaGcpeGaeSyjIa1damaaDaaaleaapeGaamOraaWd
+% aeaapeGaaGOmaaaakiaacYcaaaa!630C!
+${L_{consist}} = \frac{1}{Q}\mathop \sum \limits_{q = 1}^Q {w^{\left( q \right)}}\parallel {Z^{\left( q \right)}} - {Z_{orig}}\parallel _F^2,$% MathType!End!2!1!
+
+　　其中，% MathType!Translator!2!1!LaTeX.tdl!LaTeX 2.09 and later!
+　　% MathType!MTEF!2!1!+-
+　　% feaahOart1ev3aqatCvAUfeBSjuyZL2yd9gzLbvyNv2CaerbuLwBLn
+　　% hiov2DGi1BTfMBaeXatLxBI9gBaerbd9wDYLwzYbItLDharqqtubsr
+　　% 4rNCHbWexLMBbXgBd9gzLbvyNv2CaeHbl7mZLdGeaGqiVCI8FfYJH8
+　　% YrFfeuY-Hhbbf9v8qqaqFr0xc9pk0xbba9q8WqFfeaY-biLkVcLq-J
+　　% Hqpepeea0-as0Fb9pgeaYRXxe9vr0-vr0-vqpWqaaeaabiGaciaaca
+　　% qabeaadaqaaqaafaGcbaaeaaaaaaaaa8qacaWGXbGaeyypa0JaaGym
+　　% aiaacYcacaaIYaGaaiilaiabgAci8kaacYcacaWGrbaaaa!4721!
+　　$q = 1,2, \ldots ,Q$% MathType!End!2!1!
+　　 为增强掩码编号，% MathType!Translator!2!1!LaTeX.tdl!LaTeX 2.09 and later!
+　　% MathType!MTEF!2!1!+-
+　　% feaahOart1ev3aqatCvAUfeBSjuyZL2yd9gzLbvyNv2CaerbuLwBLn
+　　% hiov2DGi1BTfMBaeXatLxBI9gBaerbd9wDYLwzYbItLDharqqtubsr
+　　% 4rNCHbWexLMBbXgBd9gzLbvyNv2CaeHbl7mZLdGeaGqiVCI8FfYJH8
+　　% YrFfeuY-Hhbbf9v8qqaqFr0xc9pk0xbba9q8WqFfeaY-biLkVcLq-J
+　　% Hqpepeea0-as0Fb9pgeaYRXxe9vr0-vr0-vqpWqaaeaabiGaciaaca
+　　% qabeaadaqaaqaafaGcbaaeaaaaaaaaa8qacaWGAbWdamaaBaaaleaa
+　　% peGaam4BaiaadkhacaWGPbGaam4zaaWdaeqaaOWdbmaabmaapaqaa8
+　　% qacaWHAbWdamaaCaaaleqabaWdbmaabmaapaqaa8qacaaIWaaacaGL
+　　% OaGaayzkaaaaaaGccaGLOaGaayzkaaaaaa!4995!
+　　${Z_{orig}}\left( {{{\bf{Z}}^{\left( 0 \right)}}} \right)$% MathType!End!2!1!
+　　 为原始潜在表示.
+　　% MathType!Translator!2!1!LaTeX.tdl!LaTeX 2.09 and later!
+　　% MathType!MTEF!2!1!+-
+　　% feaahOart1ev3aqatCvAUfeBSjuyZL2yd9gzLbvyNv2CaerbuLwBLn
+　　% hiov2DGi1BTfMBaeXatLxBI9gBaerbd9wDYLwzYbItLDharqqtubsr
+　　% 4rNCHbWexLMBbXgBd9gzLbvyNv2CaeHbl7mZLdGeaGqiVCI8FfYJH8
+　　% YrFfeuY-Hhbbf9v8qqaqFr0xc9pk0xbba9q8WqFfeaY-biLkVcLq-J
+　　% Hqpepeea0-as0Fb9pgeaYRXxe9vr0-vr0-vqpWqaaeaabiGaciaaca
+　　% qabeaadaqaaqaafaGcbaaeaaaaaaaaa8qacaWG3bWdamaaCaaaleqa
+　　% baWdbmaabmaapaqaa8qacaWGXbaacaGLOaGaayzkaaaaaaaa!4320!
+　　${w^{\left( q \right)}}$% MathType!End!2!1!
+　　 为基于损坏严重程度的权重，且随 % MathType!Translator!2!1!LaTeX.tdl!LaTeX 2.09 and later!
+　　% MathType!MTEF!2!1!+-
+　　% feaahOart1ev3aqatCvAUfeBSjuyZL2yd9gzLbvyNv2CaerbuLwBLn
+　　% hiov2DGi1BTfMBaeXatLxBI9gBaerbd9wDYLwzYbItLDharqqtubsr
+　　% 4rNCHbWexLMBbXgBd9gzLbvyNv2CaeHbl7mZLdGeaGqiVCI8FfYJH8
+　　% YrFfeuY-Hhbbf9v8qqaqFr0xc9pk0xbba9q8WqFfeaY-biLkVcLq-J
+　　% Hqpepeea0-as0Fb9pgeaYRXxe9vr0-vr0-vqpWqaaeaabiGaciaaca
+　　% qabeaadaqaaqaafaGcbaaeaaaaaaaaa8qacqWILicucaWHnbWdamaa
+　　% CaaaleqabaWdbmaabmaapaqaa8qacaWGXbaacaGLOaGaayzkaaaaaO
+　　% GaeyOeI0IaaCyta8aadaahaaWcbeqaa8qadaqadaWdaeaapeGaaGim
+　　% aaGaayjkaiaawMcaaaaakiablwIiq9aadaWgaaWcbaWdbiaaigdaa8
+　　% aabeaaaaa!4AE4!
+　　$\parallel {{\bf{M}}^{\left( q \right)}} - {{\bf{M}}^{\left( 0 \right)}}{\parallel _1}$% MathType!End!2!1!
+　　增大而减小；优选地，
+	
+　　进一步地，所述 % MathType!Translator!2!1!LaTeX.tdl!LaTeX 2.09 and later!
+　　% MathType!MTEF!2!1!+-
+　　% feaahOart1ev3aqatCvAUfeBSjuyZL2yd9gzLbvyNv2CaerbuLwBLn
+　　% hiov2DGi1BTfMBaeXatLxBI9gBaerbd9wDYLwzYbItLDharqqtubsr
+　　% 4rNCHbWexLMBbXgBd9gzLbvyNv2CaeHbl7mZLdGeaGqiVCI8FfYJH8
+　　% YrFfeuY-Hhbbf9v8qqaqFr0xc9pk0xbba9q8WqFfeaY-biLkVcLq-J
+　　% Hqpepeea0-as0Fb9pgeaYRXxe9vr0-vr0-vqpWqaaeaabiGaciaaca
+　　% qabeaadaqaaqaafaGcbaaeaaaaaaaaa8qacaWGWbWdamaaBaaaleaa
+　　% peGaamizaiaadkhacaWGVbGaamiCaaWdaeqaaaaa!4452!
+　　${p_{drop}}$% MathType!End!2!1!
+　　可设置为 % MathType!Translator!2!1!LaTeX.tdl!LaTeX 2.09 and later!
+　　% MathType!MTEF!2!1!+-
+　　% feaahOart1ev3aqatCvAUfeBSjuyZL2yd9gzLbvyNv2CaerbuLwBLn
+　　% hiov2DGi1BTfMBaeXatLxBI9gBaerbd9wDYLwzYbItLDharqqtubsr
+　　% 4rNCHbWexLMBbXgBd9gzLbvyNv2CaeHbl7mZLdGeaGqiVCI8FfYJH8
+　　% YrFfeuY-Hhbbf9v8qqaqFr0xc9pk0xbba9q8WqFfeaY-biLkVcLq-J
+　　% Hqpepeea0-as0Fb9pgeaYRXxe9vr0-vr0-vqpWqaaeaabiGaciaaca
+　　% qabeaadaqaaqaafaGcbaaeaaaaaaaaa8qacaaIWaGaaiOlaiaaicda
+　　% caaI1aGaeyipI4NaaGimaiaac6cacaaI1aaaaa!45B2!
+　　$0.05 \sim 0.5$% MathType!End!2!1!
+　　，% MathType!Translator!2!1!LaTeX.tdl!LaTeX 2.09 and later!
+　　% MathType!MTEF!2!1!+-
+　　% feaahOart1ev3aqatCvAUfeBSjuyZL2yd9gzLbvyNv2CaerbuLwBLn
+　　% hiov2DGi1BTfMBaeXatLxBI9gBaerbd9wDYLwzYbItLDharqqtubsr
+　　% 4rNCHbWexLMBbXgBd9gzLbvyNv2CaeHbl7mZLdGeaGqiVCI8FfYJH8
+　　% YrFfeuY-Hhbbf9v8qqaqFr0xc9pk0xbba9q8WqFfeaY-biLkVcLq-J
+　　% Hqpepeea0-as0Fb9pgeaYRXxe9vr0-vr0-vqpWqaaeaabiGaciaaca
+　　% qabeaadaqaaqaafaGcbaaeaaaaaaaaa8qacaWGrbaaaa!4010!
+　　$Q$% MathType!End!2!1!
+　　 可设置为 % MathType!Translator!2!1!LaTeX.tdl!LaTeX 2.09 and later!
+　　% MathType!MTEF!2!1!+-
+　　% feaahOart1ev3aqatCvAUfeBSjuyZL2yd9gzLbvyNv2CaerbuLwBLn
+　　% hiov2DGi1BTfMBaeXatLxBI9gBaerbd9wDYLwzYbItLDharqqtubsr
+　　% 4rNCHbWexLMBbXgBd9gzLbvyNv2CaeHbl7mZLdGeaGqiVCI8FfYJH8
+　　% YrFfeuY-Hhbbf9v8qqaqFr0xc9pk0xbba9q8WqFfeaY-biLkVcLq-J
+　　% Hqpepeea0-as0Fb9pgeaYRXxe9vr0-vr0-vqpWqaaeaabiGaciaaca
+　　% qabeaadaqaaqaafaGcbaaeaaaaaaaaa8qacaaIYaGaeyipI4NaaGym
+　　% aiaaicdaaaa!42D3!
+　　$2 \sim 10$% MathType!End!2!1!
+　　，以在鲁棒性与训练开销之间折中。
+（二） 空间流形模块：基于观测子集的相似度 + kNN邻域 + 核权重归一化聚合
+　　该模块旨在保持不同时间步（样本）之间的几何结构，使得相似工况的时间步在潜在空间中保持邻近。
+首先，需要为每个锚点时间步% MathType!Translator!2!1!LaTeX.tdl!LaTeX 2.09 and later!
+　　% MathType!MTEF!2!1!+-
+　　% feaahOart1ev3aqatCvAUfeBSjuyZL2yd9gzLbvyNv2CaerbuLwBLn
+　　% hiov2DGi1BTfMBaeXatLxBI9gBaerbd9wDYLwzYbItLDharqqtubsr
+　　% 4rNCHbWexLMBbXgBd9gzLbvyNv2CaeHbl7mZLdGeaGqiVCI8FfYJH8
+　　% YrFfeuY-Hhbbf9v8qqaqFr0xc9pk0xbba9q8WqFfeaY-biLkVcLq-J
+　　% Hqpepeea0-as0Fb9pgeaYRXxe9vr0-vr0-vqpWqaaeaabiGaciaaca
+　　% qabeaadaqaaqaafaGcbaaeaaaaaaaaa8qacaWGRbaaaa!402A!
+　　$k$% MathType!End!2!1!
+　　
+　　（% MathType!Translator!2!1!LaTeX.tdl!LaTeX 2.09 and later!
+　　% MathType!MTEF!2!1!+-
+　　% feaahOart1ev3aqatCvAUfeBSjuyZL2yd9gzLbvyNv2CaerbuLwBLn
+　　% hiov2DGi1BTfMBaeXatLxBI9gBaerbd9wDYLwzYbItLDharqqtubsr
+　　% 4rNCHbWexLMBbXgBd9gzLbvyNv2CaeHbl7mZLdGeaGqiVCI8FfYJH8
+　　% YrFfeuY-Hhbbf9v8qqaqFr0xc9pk0xbba9q8WqFfeaY-biLkVcLq-J
+　　% Hqpepeea0-as0Fb9pgeaYRXxe9vr0-vr0-vqpWqaaeaabiGaciaaca
+　　% qabeaadaqaaqaafaGcbaaeaaaaaaaaa8qacaWGRbGaeyypa0JaaGym
+　　% aiaacYcacqGHMacVcaGGSaGaamivaaaa!45B2!
+　　$k = 1, \ldots ,T$% MathType!End!2!1!
+　　）确定其空间邻域集合% MathType!Translator!2!1!LaTeX.tdl!LaTeX 2.09 and later!
+　　% MathType!MTEF!2!1!+-
+　　% feaahOart1ev3aqatCvAUfeBSjuyZL2yd9gzLbvyNv2CaerbuLwBLn
+　　% hiov2DGi1BTfMBaeXatLxBI9gBaerbd9wDYLwzYbItLDharqqtubsr
+　　% 4rNCHbWexLMBbXgBd9gzLbvyNv2CaeHbl7mZLdGeaGqiVCI8FfYJH8
+　　% YrFfeuY-Hhbbf9v8qqaqFr0xc9pk0xbba9q8WqFfeaY-biLkVcLq-J
+　　% Hqpepeea0-as0Fb9pgeaYRXxe9vr0-vr0-vqpWqaaeaabiGaciaaca
+　　% qabeaadaqaaqaafaGcbaWefv3ySLgznfgDOfdarCqr1ngBPrginfgD
+　　% ObYtUvgaiyaaqaaaaaaaaaWdbiab-1q8o9aadaqhaaWcbaWdbiaadU
+　　% gaa8aabaWdbiaadohacaWGWbGaamyyaiaadogacaWGLbaaaaaa!5097!
+　　${\cal N}_k^{space}$% MathType!End!2!1!
+　　。具体地，采用K近邻算法进行搜索。尽管工业多变量时间序列数据的维度% MathType!Translator!2!1!LaTeX.tdl!LaTeX 2.09 and later!
+　　% MathType!MTEF!2!1!+-
+　　% feaahOart1ev3aqatCvAUfeBSjuyZL2yd9gzLbvyNv2CaerbuLwBLn
+　　% hiov2DGi1BTfMBaeXatLxBI9gBaerbd9wDYLwzYbItLDharqqtubsr
+　　% 4rNCHbWexLMBbXgBd9gzLbvyNv2CaeHbl7mZLdGeaGqiVCI8FfYJH8
+　　% YrFfeuY-Hhbbf9v8qqaqFr0xc9pk0xbba9q8WqFfeaY-biLkVcLq-J
+　　% Hqpepeea0-as0Fb9pgeaYRXxe9vr0-vr0-vqpWqaaeaabiGaciaaca
+　　% qabeaadaqaaqaafaGcbaaeaaaaaaaaa8qacaWGobaaaa!400D!
+　　$N$% MathType!End!2!1!
+　　可能较高，但受限于物理约束，数据实际分布在低维流形上，因此基于欧氏距离的KNN搜索在捕捉工况相似性方面依然有效。
+为保证缺失数据下距离计算的可行性与准确性，本实施例定义如下：
+对任意时间步 % MathType!Translator!2!1!LaTeX.tdl!LaTeX 2.09 and later!
+　　% MathType!MTEF!2!1!+-
+　　% feaahOart1ev3aqatCvAUfeBSjuyZL2yd9gzLbvyNv2CaerbuLwBLn
+　　% hiov2DGi1BTfMBaeXatLxBI9gBaerbd9wDYLwzYbItLDharqqtubsr
+　　% 4rNCHbWexLMBbXgBd9gzLbvyNv2CaeHbl7mZLdGeaGqiVCI8FfYJH8
+　　% YrFfeuY-Hhbbf9v8qqaqFr0xc9pk0xbba9q8WqFfeaY-biLkVcLq-J
+　　% Hqpepeea0-as0Fb9pgeaYRXxe9vr0-vr0-vqpWqaaeaabiGaciaaca
+　　% qabeaadaqaaqaafaGcbaaeaaaaaaaaa8qacaWGRbaaaa!402A!
+　　$k$% MathType!End!2!1!
+　　，其观测变量集合为 % MathType!Translator!2!1!LaTeX.tdl!LaTeX 2.09 and later!
+　　% MathType!MTEF!2!1!+-
+　　% feaahOart1ev3aqatCvAUfeBSjuyZL2yd9gzLbvyNv2CaerbuLwBLn
+　　% hiov2DGi1BTfMBaeXatLxBI9gBaerbd9wDYLwzYbItLDharqqtubsr
+　　% 4rNCHbWexLMBbXgBd9gzLbvyNv2CaeHbl7mZLdGeaGqiVCI8FfYJH8
+　　% YrFfeuY-Hhbbf9v8qqaqFr0xc9pk0xbba9q8WqFfeaY-biLkVcLq-J
+　　% Hqpepeea0-as0Fb9pgeaYRXxe9vr0-vr0-vqpWqaaeaabiGaciaaca
+　　% qabeaadaqaaqaafaGcbaaeaaaaaaaaa8qacaqGPoWdamaaBaaaleaa
+　　% peGaam4AaaWdaeqaaOWdbiabg2da9iaacUhacaWGUbGaaiiFaiaad2
+　　% gapaWaaSbaaSqaa8qacaWGRbGaaiilaiaad6gaa8aabeaak8qacqGH
+　　% 9aqpcaaIXaGaaiyFaaaa!4C80!
+　　${{\rm{\Omega }}_k} = \{ n|{m_{k,n}} = 1\} $% MathType!End!2!1!
+　　。
+对任意两个时间步 % MathType!Translator!2!1!LaTeX.tdl!LaTeX 2.09 and later!
+　　% MathType!MTEF!2!1!+-
+　　% feaahOart1ev3aqatCvAUfeBSjuyZL2yd9gzLbvyNv2CaerbuLwBLn
+　　% hiov2DGi1BTfMBaeXatLxBI9gBaerbd9wDYLwzYbItLDharqqtubsr
+　　% 4rNCHbWexLMBbXgBd9gzLbvyNv2CaeHbl7mZLdGeaGqiVCI8FfYJH8
+　　% YrFfeuY-Hhbbf9v8qqaqFr0xc9pk0xbba9q8WqFfeaY-biLkVcLq-J
+　　% Hqpepeea0-as0Fb9pgeaYRXxe9vr0-vr0-vqpWqaaeaabiGaciaaca
+　　% qabeaadaqaaqaafaGcbaaeaaaaaaaaa8qacaWGRbGaaiilaiaadoha
+　　% aaa!41D2!
+　　$k,s$% MathType!End!2!1!
+　　，其共同观测集合为 % MathType!Translator!2!1!LaTeX.tdl!LaTeX 2.09 and later!
+　　% MathType!MTEF!2!1!+-
+　　% feaahOart1ev3aqatCvAUfeBSjuyZL2yd9gzLbvyNv2CaerbuLwBLn
+　　% hiov2DGi1BTfMBaeXatLxBI9gBaerbd9wDYLwzYbItLDharqqtubsr
+　　% 4rNCHbWexLMBbXgBd9gzLbvyNv2CaeHbl7mZLdGeaGqiVCI8FfYJH8
+　　% YrFfeuY-Hhbbf9v8qqaqFr0xc9pk0xbba9q8WqFfeaY-biLkVcLq-J
+　　% Hqpepeea0-as0Fb9pgeaYRXxe9vr0-vr0-vqpWqaaeaabiGaciaaca
+　　% qabeaadaqaaqaafaGcbaaeaaaaaaaaa8qacaqGPoWdamaaBaaaleaa
+　　% peGaam4AaiaacYcacaWGZbaapaqabaGcpeGaeyypa0JaaeyQd8aada
+　　% WgaaWcbaWdbiaadUgaa8aabeaak8qacqGHPiYXcaqGPoWdamaaBaaa
+　　% leaapeGaam4CaaWdaeqaaaaa!4B2D!
+　　${{\rm{\Omega }}_{k,s}} = {{\rm{\Omega }}_k} \cap {{\rm{\Omega }}_s}$% MathType!End!2!1!
+　　。
+　　具体的，基于共同观测集合定义归一化距离：
+	% MathType!Translator!2!1!LaTeX.tdl!LaTeX 2.09 and later!
+% MathType!MTEF!2!1!+-
+% feaahOart1ev3aqatCvAUfeBSjuyZL2yd9gzLbvyNv2CaerbuLwBLn
+% hiov2DGi1BTfMBaeXatLxBI9gBaerbd9wDYLwzYbItLDharqqtubsr
+% 4rNCHbWexLMBbXgBd9gzLbvyNv2CaeHbl7mZLdGeaGqiVCI8FfYJH8
+% YrFfeuY-Hhbbf9v8qqaqFr0xc9pk0xbba9q8WqFfeaY-biLkVcLq-J
+% Hqpepeea0-as0Fb9pgeaYRXxe9vr0-vr0-vqpWqaaeaabiGaciaaca
+% qabeaadaqaaqaafaGcbaaeaaaaaaaaa8qacaWGKbWdamaaBaaaleaa
+% peGaam4CaiaadchacaWGHbGaam4yaiaadwgaa8aabeaak8qadaqada
+% WdaeaapeGaam4AaiaacYcacaWGZbaacaGLOaGaayzkaaGaeyypa0Ja
+% ai4Ea8aafaqabeGacaaabaWdbmaalaaapaqaa8qacaaIXaaapaqaa8
+% qacaaJJiIaaeyQd8aadaWgaaWcbaWdbiaadUgacaGGSaGaam4CaaWd
+% aeqaaOWdbiaamoIiaaWaaubeaeqal8aabaWdbiaad6gacqGHiiIZca
+% qGPoWdamaaBaaameaapeGaam4AaiaacYcacaWGZbaapaqabaaal8qa
+% beqdpaqaa8qacqGHris5aaGccaGGOaGaamiEa8aadaWgaaWcbaWdbi
+% aadUgacaGGSaGaamOBaaWdaeqaaOWdbiabgkHiTiaadIhapaWaaSba
+% aSqaa8qacaWGZbGaaiilaiaad6gaa8aabeaak8qacaGGPaWdamaaCa
+% aaleqabaWdbiaaikdaaaGccaGGSaaapaqaa8qacaaJJiIaaeyQd8aa
+% daWgaaWcbaWdbiaadUgacaGGSaGaam4CaaWdaeqaaOWdbiaamoIicq
+% GH+aGpcaaIWaGaaiilaaWdaeaapeGaey4kaSIaeqOhIuQaaiilaaWd
+% aeaapeGaaW4iIiaabM6apaWaaSbaaSqaa8qacaWGRbGaaiilaiaado
+% haa8aabeaak8qacaaJJiIaeyypa0JaaGimaiaacYcaaaaaaa!7B9A!
+${d_{space}}\left( {k,s} \right) = \{ \begin{array}{*{20}{c}}
+{\frac{1}{{\mid {{\rm{\Omega }}_{k,s}}\mid }}\mathop \sum \nolimits_{n \in {{\rm{\Omega }}_{k,s}}} {{({x_{k,n}} - {x_{s,n}})}^2},}&{\mid {{\rm{\Omega }}_{k,s}}\mid  > 0,}\\
+{ + \infty ,}&{\mid {{\rm{\Omega }}_{k,s}}\mid  = 0,}
+\end{array}$% MathType!End!2!1!
+
+　　并由高斯核计算亲和权重：
+	% MathType!Translator!2!1!LaTeX.tdl!LaTeX 2.09 and later!
+% MathType!MTEF!2!1!+-
+% feaahOart1ev3aqatCvAUfeBSjuyZL2yd9gzLbvyNv2CaerbuLwBLn
+% hiov2DGi1BTfMBaeXatLxBI9gBaerbd9wDYLwzYbItLDharqqtubsr
+% 4rNCHbWexLMBbXgBd9gzLbvyNv2CaeHbl7mZLdGeaGqiVCI8FfYJH8
+% YrFfeuY-Hhbbf9v8qqaqFr0xc9pk0xbba9q8WqFfeaY-biLkVcLq-J
+% Hqpepeea0-as0Fb9pgeaYRXxe9vr0-vr0-vqpWqaaeaabiGaciaaca
+% qabeaadaqaaqaafaGcbaaeaaaaaaaaa8qacaWG3bWdamaaDaaaleaa
+% peGaam4AaiaacYcacaWGZbaapaqaa8qacaWGZbGaamiCaiaadggaca
+% WGJbGaamyzaaaakiabg2da9iaadwgacaWG4bGaamiCamaabmaapaqa
+% a8qacqGHsisldaWcaaWdaeaapeGaeSyjIaLaamiEa8aadaWgaaWcba
+% WdbiaadUgaa8aabeaak8qacqGHsislcaWG4bWdamaaBaaaleaapeGa
+% am4AaiaacYcacaWGZbaapaqabaGcpeGaeSyjIa1damaaDaaaleaape
+% GaaGOmaaWdaeaapeGaaGOmaaaaaOWdaeaapeGaeq4Wdm3damaaDaaa
+% leaapeGaam4CaaWdaeaapeGaaGOmaaaaaaaakiaawIcacaGLPaaaaa
+% a!5E2D!
+$w_{k,s}^{space} = exp\left( { - \frac{{\parallel {x_k} - {x_{k,s}}\parallel _2^2}}{{\sigma _s^2}}} \right)$% MathType!End!2!1!
+
+　　其中% MathType!Translator!2!1!LaTeX.tdl!LaTeX 2.09 and later!
+　　% MathType!MTEF!2!1!+-
+　　% feaahOart1ev3aqatCvAUfeBSjuyZL2yd9gzLbvyNv2CaerbuLwBLn
+　　% hiov2DGi1BTfMBaeXatLxBI9gBaerbd9wDYLwzYbItLDharqqtubsr
+　　% 4rNCHbWexLMBbXgBd9gzLbvyNv2CaeHbl7mZLdGeaGqiVCI8FfYJH8
+　　% YrFfeuY-Hhbbf9v8qqaqFr0xc9pk0xbba9q8WqFfeaY-biLkVcLq-J
+　　% Hqpepeea0-as0Fb9pgeaYRXxe9vr0-vr0-vqpWqaaeaabiGaciaaca
+　　% qabeaadaqaaqaafaGcbaaeaaaaaaaaa8qacqaHdpWCpaWaaSbaaSqa
+　　% a8qacaWGZbaapaqabaaaaa!424F!
+　　${\sigma _s}$% MathType!End!2!1!
+　　为空间核带宽参数，用于控制权重的衰减速度。
+然后，采用k近邻策略，从所有% MathType!Translator!2!1!LaTeX.tdl!LaTeX 2.09 and later!
+　　% MathType!MTEF!2!1!+-
+　　% feaahOart1ev3aqatCvAUfeBSjuyZL2yd9gzLbvyNv2CaerbuLwBLn
+　　% hiov2DGi1BTfMBaeXatLxBI9gBaerbd9wDYLwzYbItLDharqqtubsr
+　　% 4rNCHbWexLMBbXgBd9gzLbvyNv2CaeHbl7mZLdGeaGqiVCI8FfYJH8
+　　% YrFfeuY-Hhbbf9v8qqaqFr0xc9pk0xbba9q8WqFfeaY-biLkVcLq-J
+　　% Hqpepeea0-as0Fb9pgeaYRXxe9vr0-vr0-vqpWqaaeaabiGaciaaca
+　　% qabeaadaqaaqaafaGcbaaeaaaaaaaaa8qacaWGZbGaeyiyIKRaam4A
+　　% aaaa!42E9!
+　　$s \ne k$% MathType!End!2!1!
+　　的时间步中，选取空间亲和权重% MathType!Translator!2!1!LaTeX.tdl!LaTeX 2.09 and later!
+　　% MathType!MTEF!2!1!+-
+　　% feaahOart1ev3aqatCvAUfeBSjuyZL2yd9gzLbvyNv2CaerbuLwBLn
+　　% hiov2DGi1BTfMBaeXatLxBI9gBaerbd9wDYLwzYbItLDharqqtubsr
+　　% 4rNCHbWexLMBbXgBd9gzLbvyNv2CaeHbl7mZLdGeaGqiVCI8FfYJH8
+　　% YrFfeuY-Hhbbf9v8qqaqFr0xc9pk0xbba9q8WqFfeaY-biLkVcLq-J
+　　% Hqpepeea0-as0Fb9pgeaYRXxe9vr0-vr0-vqpWqaaeaabiGaciaaca
+　　% qabeaadaqaaqaafaGcbaaeaaaaaaaaa8qacaWG3bWdamaaDaaaleaa
+　　% peGaam4AaiaacYcacaWGZbaapaqaa8qacaWGZbGaamiCaiaadggaca
+　　% WGJbGaamyzaaaaaaa!47DE!
+　　$w_{k,s}^{space}$% MathType!End!2!1!
+　　（对应最小距离% MathType!Translator!2!1!LaTeX.tdl!LaTeX 2.09 and later!
+　　% MathType!MTEF!2!1!+-
+　　% feaahOart1ev3aqatCvAUfeBSjuyZL2yd9gzLbvyNv2CaerbuLwBLn
+　　% hiov2DGi1BTfMBaeXatLxBI9gBaerbd9wDYLwzYbItLDharqqtubsr
+　　% 4rNCHbWexLMBbXgBd9gzLbvyNv2CaeHbl7mZLdGeaGqiVCI8FfYJH8
+　　% YrFfeuY-Hhbbf9v8qqaqFr0xc9pk0xbba9q8WqFfeaY-biLkVcLq-J
+　　% Hqpepeea0-as0Fb9pgeaYRXxe9vr0-vr0-vqpWqaaeaabiGaciaaca
+　　% qabeaadaqaaqaafaGcbaaeaaaaaaaaa8qacaWGKbWdamaaBaaaleaa
+　　% peGaam4CaiaadchacaWGHbGaam4yaiaadwgaa8aabeaak8qadaqada
+　　% WdaeaapeGaam4AaiaacYcacaWGZbaacaGLOaGaayzkaaaaaa!497C!
+　　${d_{space}}\left( {k,s} \right)$% MathType!End!2!1!
+　　）最大的% MathType!Translator!2!1!LaTeX.tdl!LaTeX 2.09 and later!
+　　% MathType!MTEF!2!1!+-
+　　% feaahOart1ev3aqatCvAUfeBSjuyZL2yd9gzLbvyNv2CaerbuLwBLn
+　　% hiov2DGi1BTfMBaeXatLxBI9gBaerbd9wDYLwzYbItLDharqqtubsr
+　　% 4rNCHbWexLMBbXgBd9gzLbvyNv2CaeHbl7mZLdGeaGqiVCI8FfYJH8
+　　% YrFfeuY-Hhbbf9v8qqaqFr0xc9pk0xbba9q8WqFfeaY-biLkVcLq-J
+　　% Hqpepeea0-as0Fb9pgeaYRXxe9vr0-vr0-vqpWqaaeaabiGaciaaca
+　　% qabeaadaqaaqaafaGcbaaeaaaaaaaaa8qacaWGlbaaaa!400A!
+　　$K$% MathType!End!2!1!
+　　个索引作为锚点时间步% MathType!Translator!2!1!LaTeX.tdl!LaTeX 2.09 and later!
+　　% MathType!MTEF!2!1!+-
+　　% feaahOart1ev3aqatCvAUfeBSjuyZL2yd9gzLbvyNv2CaerbuLwBLn
+　　% hiov2DGi1BTfMBaeXatLxBI9gBaerbd9wDYLwzYbItLDharqqtubsr
+　　% 4rNCHbWexLMBbXgBd9gzLbvyNv2CaeHbl7mZLdGeaGqiVCI8FfYJH8
+　　% YrFfeuY-Hhbbf9v8qqaqFr0xc9pk0xbba9q8WqFfeaY-biLkVcLq-J
+　　% Hqpepeea0-as0Fb9pgeaYRXxe9vr0-vr0-vqpWqaaeaabiGaciaaca
+　　% qabeaadaqaaqaafaGcbaaeaaaaaaaaa8qacaWGRbaaaa!402A!
+　　$k$% MathType!End!2!1!
+　　的空间邻域集合% MathType!Translator!2!1!LaTeX.tdl!LaTeX 2.09 and later!
+　　% MathType!MTEF!2!1!+-
+　　% feaahOart1ev3aqatCvAUfeBSjuyZL2yd9gzLbvyNv2CaerbuLwBLn
+　　% hiov2DGi1BTfMBaeXatLxBI9gBaerbd9wDYLwzYbItLDharqqtubsr
+　　% 4rNCHbWexLMBbXgBd9gzLbvyNv2CaeHbl7mZLdGeaGqiVCI8FfYJH8
+　　% YrFfeuY-Hhbbf9v8qqaqFr0xc9pk0xbba9q8WqFfeaY-biLkVcLq-J
+　　% Hqpepeea0-as0Fb9pgeaYRXxe9vr0-vr0-vqpWqaaeaabiGaciaaca
+　　% qabeaadaqaaqaafaGcbaWefv3ySLgznfgDOfdarCqr1ngBPrginfgD
+　　% ObYtUvgaiyaaqaaaaaaaaaWdbiab-1q8o9aadaqhaaWcbaWdbiaadU
+　　% gaa8aabaWdbiaadohacaWGWbGaamyyaiaadogacaWGLbaaaaaa!5097!
+　　${\cal N}_k^{space}$% MathType!End!2!1!
+　　。
+最后，利用选定的邻域权重，对邻居的原始潜在表示% MathType!Translator!2!1!LaTeX.tdl!LaTeX 2.09 and later!
+　　% MathType!MTEF!2!1!+-
+　　% feaahOart1ev3aqatCvAUfeBSjuyZL2yd9gzLbvyNv2CaerbuLwBLn
+　　% hiov2DGi1BTfMBaeXatLxBI9gBaerbd9wDYLwzYbItLDharqqtubsr
+　　% 4rNCHbWexLMBbXgBd9gzLbvyNv2CaeHbl7mZLdGeaGqiVCI8FfYJH8
+　　% YrFfeuY-Hhbbf9v8qqaqFr0xc9pk0xbba9q8WqFfeaY-biLkVcLq-J
+　　% Hqpepeea0-as0Fb9pgeaYRXxe9vr0-vr0-vqpWqaaeaabiGaciaaca
+　　% qabeaadaqaaqaafaGcbaaeaaaaaaaaa8qacaWH6bWdamaaDaaaleaa
+　　% peGaam4CaaWdaeaapeGaam4BaiaadkhacaWGPbGaam4zaaaaaaa!4565!
+　　${\bf{z}}_s^{orig}$% MathType!End!2!1!
+　　进行加权聚合，得到空间流形嵌入% MathType!Translator!2!1!LaTeX.tdl!LaTeX 2.09 and later!
+　　% MathType!MTEF!2!1!+-
+　　% feaahOart1ev3aqatCvAUfeBSjuyZL2yd9gzLbvyNv2CaerbuLwBLn
+　　% hiov2DGi1BTfMBaeXatLxBI9gBaerbd9wDYLwzYbItLDharqqtubsr
+　　% 4rNCHbWexLMBbXgBd9gzLbvyNv2CaeHbl7mZLdGeaGqiVCI8FfYJH8
+　　% YrFfeuY-Hhbbf9v8qqaqFr0xc9pk0xbba9q8WqFfeaY-biLkVcLq-J
+　　% Hqpepeea0-as0Fb9pgeaYRXxe9vr0-vr0-vqpWqaaeaabiGaciaaca
+　　% qabeaadaqaaqaafaGcbaaeaaaaaaaaa8qacaWGAbWdamaaBaaaleaa
+　　% peGaam4CaiaadchacaWGHbGaam4yaiaadwgaa8aabeaaaaa!4518!
+　　${Z_{space}}$% MathType!End!2!1!
+　　：
+	% MathType!Translator!2!1!LaTeX.tdl!LaTeX 2.09 and later!
+% MathType!MTEF!2!1!+-
+% feaahOart1ev3aqatCvAUfeBSjuyZL2yd9gzLbvyNv2CaerbuLwBLn
+% hiov2DGi1BTfMBaeXatLxBI9gBaerbd9wDYLwzYbItLDharqqtubsr
+% 4rNCHbWexLMBbXgBd9gzLbvyNv2CaeHbl7mZLdGeaGqiVCI8FfYJH8
+% YrFfeuY-Hhbbf9v8qqaqFr0xc9pk0xbba9q8WqFfeaY-biLkVcLq-J
+% Hqpepeea0-as0Fb9pgeaYRXxe9vr0-vr0-vqpWqaaeaabiGaciaaca
+% qabeaadaqaaqaafaGcbaaeaaaaaaaaa8qacaWG6bWdamaaDaaaleaa
+% peGaam4AaaWdaeaapeGaam4CaiaadchacaWGHbGaam4yaiaadwgaaa
+% GccqGH9aqpdaWcaaWdaeaapeWaaubeaeqal8aabaWdbiaadohacqGH
+% iiIZcaWGobWdamaaDaaameaapeGaam4AaaWdaeaapeGaam4Caiaadc
+% hacaWGHbGaam4yaiaadwgaaaaaleqan8aabaWdbiabggHiLdaakiaa
+% dEhapaWaa0baaSqaa8qacaWGRbGaaiilaiaadohaa8aabaWdbiaado
+% hacaWGWbGaamyyaiaadogacaWGLbaaaOGaamOEa8aadaqhaaWcbaWd
+% biaadohaa8aabaWdbiaad+gacaWGYbGaamyAaiaadEgaaaaak8aaba
+% WdbmaavababeWcpaqaa8qacaWGZbGaeyicI4SaamOta8aadaqhaaad
+% baWdbiaadUgaa8aabaWdbiaadohacaWGWbGaamyyaiaadogacaWGLb
+% aaaaWcbeqdpaqaa8qacqGHris5aaGccaWG3bWdamaaDaaaleaapeGa
+% am4AaiaacYcacaWGZbaapaqaa8qacaWGZbGaamiCaiaadggacaWGJb
+% GaamyzaaaaaaGccaGGSaaaaa!76EE!
+$z_k^{space} = \frac{{\mathop \sum \nolimits_{s \in N_k^{space}} w_{k,s}^{space}z_s^{orig}}}{{\mathop \sum \nolimits_{s \in N_k^{space}} w_{k,s}^{space}}},$% MathType!End!2!1!
+
+　　由此得到 % MathType!Translator!2!1!LaTeX.tdl!LaTeX 2.09 and later!
+　　% MathType!MTEF!2!1!+-
+　　% feaahOart1ev3aqatCvAUfeBSjuyZL2yd9gzLbvyNv2CaerbuLwBLn
+　　% hiov2DGi1BTfMBaeXatLxBI9gBaerbd9wDYLwzYbItLDharqqtubsr
+　　% 4rNCHbWexLMBbXgBd9gzLbvyNv2CaeHbl7mZLdGeaGqiVCI8FfYJH8
+　　% YrFfeuY-Hhbbf9v8qqaqFr0xc9pk0xbba9q8WqFfeaY-biLkVcLq-J
+　　% Hqpepeea0-as0Fb9pgeaYRXxe9vr0-vr0-vqpWqaaeaabiGaciaaca
+　　% qabeaadaqaaqaafaGcbaaeaaaaaaaaa8qacaWGAbWdamaaBaaaleaa
+　　% peGaam4CaiaadchacaWGHbGaam4yaiaadwgaa8aabeaak8qacqGH9a
+　　% qpcaGGBbGaamOEa8aadaqhaaWcbaWdbiaaigdaa8aabaWdbiaadoha
+　　% caWGWbGaamyyaiaadogacaWGLbaaaOGaaiilaiabgAci8kaacYcaca
+　　% WG6bWdamaaDaaaleaapeGaamivaaWdaeaapeGaam4CaiaadchacaWG
+　　% HbGaam4yaiaadwgaaaGccaGGDbWdamaaCaaaleqabaWefv3ySLgznf
+　　% gDOfdarCqr1ngBPrginfgDObYtUvgaiyaapeGae8hPIujaaaaa!6464!
+　　${Z_{space}} = {[z_1^{space}, \ldots ,z_T^{space}]^ \top }$% MathType!End!2!1!
+　　。
+　　进一步地，% MathType!Translator!2!1!LaTeX.tdl!LaTeX 2.09 and later!
+　　% MathType!MTEF!2!1!+-
+　　% feaahOart1ev3aqatCvAUfeBSjuyZL2yd9gzLbvyNv2CaerbuLwBLn
+　　% hiov2DGi1BTfMBaeXatLxBI9gBaerbd9wDYLwzYbItLDharqqtubsr
+　　% 4rNCHbWexLMBbXgBd9gzLbvyNv2CaeHbl7mZLdGeaGqiVCI8FfYJH8
+　　% YrFfeuY-Hhbbf9v8qqaqFr0xc9pk0xbba9q8WqFfeaY-biLkVcLq-J
+　　% Hqpepeea0-as0Fb9pgeaYRXxe9vr0-vr0-vqpWqaaeaabiGaciaaca
+　　% qabeaadaqaaqaafaGcbaaeaaaaaaaaa8qacaWGRbaaaa!402A!
+　　$k$% MathType!End!2!1!
+　　 可设置为 % MathType!Translator!2!1!LaTeX.tdl!LaTeX 2.09 and later!
+　　% MathType!MTEF!2!1!+-
+　　% feaahOart1ev3aqatCvAUfeBSjuyZL2yd9gzLbvyNv2CaerbuLwBLn
+　　% hiov2DGi1BTfMBaeXatLxBI9gBaerbd9wDYLwzYbItLDharqqtubsr
+　　% 4rNCHbWexLMBbXgBd9gzLbvyNv2CaeHbl7mZLdGeaGqiVCI8FfYJH8
+　　% YrFfeuY-Hhbbf9v8qqaqFr0xc9pk0xbba9q8WqFfeaY-biLkVcLq-J
+　　% Hqpepeea0-as0Fb9pgeaYRXxe9vr0-vr0-vqpWqaaeaabiGaciaaca
+　　% qabeaadaqaaqaafaGcbaaeaaaaaaaaa8qacaaI1aGaeyipI4NaaGOm
+　　% aiaaicdaaaa!42D7!
+　　$5 \sim 20$% MathType!End!2!1!
+　　，% MathType!Translator!2!1!LaTeX.tdl!LaTeX 2.09 and later!
+　　% MathType!MTEF!2!1!+-
+　　% feaahOart1ev3aqatCvAUfeBSjuyZL2yd9gzLbvyNv2CaerbuLwBLn
+　　% hiov2DGi1BTfMBaeXatLxBI9gBaerbd9wDYLwzYbItLDharqqtubsr
+　　% 4rNCHbWexLMBbXgBd9gzLbvyNv2CaeHbl7mZLdGeaGqiVCI8FfYJH8
+　　% YrFfeuY-Hhbbf9v8qqaqFr0xc9pk0xbba9q8WqFfeaY-biLkVcLq-J
+　　% Hqpepeea0-as0Fb9pgeaYRXxe9vr0-vr0-vqpWqaaeaabiGaciaaca
+　　% qabeaadaqaaqaafaGcbaaeaaaaaaaaa8qacqaHdpWCpaWaaSbaaSqa
+　　% a8qacaWGZbaapaqabaaaaa!424F!
+　　${\sigma _s}$% MathType!End!2!1!
+　　 可由距离的中位数或经验值确定。
+　　（三）时间流形模块：跨变量的相似度 + kNN邻域 + 聚合，并映射为时间特征矩阵
+　　本实施例旨在捕捉不同变量（传感器）之间随时间演化的相似性。基于流形假设，工业系统中不同传感器之间往往存在物理耦合或冗余关系（例如，反应釜内部温度与夹套温度在时间轴上的波动趋势高度一致）。
+特别说明：在本模块的公式表述中，角标含义发生转换，% MathType!Translator!2!1!LaTeX.tdl!LaTeX 2.09 and later!
+　　% MathType!MTEF!2!1!+-
+　　% feaahOart1ev3aqatCvAUfeBSjuyZL2yd9gzLbvyNv2CaerbuLwBLn
+　　% hiov2DGi1BTfMBaeXatLxBI9gBaerbd9wDYLwzYbItLDharqqtubsr
+　　% 4rNCHbWexLMBbXgBd9gzLbvyNv2CaeHbl7mZLdGeaGqiVCI8FfYJH8
+　　% YrFfeuY-Hhbbf9v8qqaqFr0xc9pk0xbba9q8WqFfeaY-biLkVcLq-J
+　　% Hqpepeea0-as0Fb9pgeaYRXxe9vr0-vr0-vqpWqaaeaabiGaciaaca
+　　% qabeaadaqaaqaafaGcbaaeaaaaaaaaa8qacaWGRbaaaa!402A!
+　　$k$% MathType!End!2!1!
+　　指代当前锚点变量（列索引），% MathType!Translator!2!1!LaTeX.tdl!LaTeX 2.09 and later!
+　　% MathType!MTEF!2!1!+-
+　　% feaahOart1ev3aqatCvAUfeBSjuyZL2yd9gzLbvyNv2CaerbuLwBLn
+　　% hiov2DGi1BTfMBaeXatLxBI9gBaerbd9wDYLwzYbItLDharqqtubsr
+　　% 4rNCHbWexLMBbXgBd9gzLbvyNv2CaeHbl7mZLdGeaGqiVCI8FfYJH8
+　　% YrFfeuY-Hhbbf9v8qqaqFr0xc9pk0xbba9q8WqFfeaY-biLkVcLq-J
+　　% Hqpepeea0-as0Fb9pgeaYRXxe9vr0-vr0-vqpWqaaeaabiGaciaaca
+　　% qabeaadaqaaqaafaGcbaaeaaaaaaaaa8qacaWG0baaaa!4033!
+　　$t$% MathType!End!2!1!
+　　指代邻居变量（列索引）。
+　　第一步：基于观测子集的变量间相似度计算
+为了解决缺失值对相关性计算的干扰，采用部分距离策略。
+定义每个变量% MathType!Translator!2!1!LaTeX.tdl!LaTeX 2.09 and later!
+　　% MathType!MTEF!2!1!+-
+　　% feaahOart1ev3aqatCvAUfeBSjuyZL2yd9gzLbvyNv2CaerbuLwBLn
+　　% hiov2DGi1BTfMBaeXatLxBI9gBaerbd9wDYLwzYbItLDharqqtubsr
+　　% 4rNCHbWexLMBbXgBd9gzLbvyNv2CaeHbl7mZLdGeaGqiVCI8FfYJH8
+　　% YrFfeuY-Hhbbf9v8qqaqFr0xc9pk0xbba9q8WqFfeaY-biLkVcLq-J
+　　% Hqpepeea0-as0Fb9pgeaYRXxe9vr0-vr0-vqpWqaaeaabiGaciaaca
+　　% qabeaadaqaaqaafaGcbaaeaaaaaaaaa8qacaWGRbaaaa!402A!
+　　$k$% MathType!End!2!1!
+　　的有效观测时间集合% MathType!Translator!2!1!LaTeX.tdl!LaTeX 2.09 and later!
+　　% MathType!MTEF!2!1!+-
+　　% feaahOart1ev3aqatCvAUfeBSjuyZL2yd9gzLbvyNv2CaerbuLwBLn
+　　% hiov2DGi1BTfMBaeXatLxBI9gBaerbd9wDYLwzYbItLDharqqtubsr
+　　% 4rNCHbWexLMBbXgBd9gzLbvyNv2CaeHbl7mZLdGeaGqiVCI8FfYJH8
+　　% YrFfeuY-Hhbbf9v8qqaqFr0xc9pk0xbba9q8WqFfeaY-biLkVcLq-J
+　　% Hqpepeea0-as0Fb9pgeaYRXxe9vr0-vr0-vqpWqaaeaabiGaciaaca
+　　% qabeaadaqaaqaafaGcbaaeaaaaaaaaa8qacaqGOoWdamaaBaaaleaa
+　　% peGaam4AaaWdaeqaaaaa!41B2!
+　　${{\rm{\Psi }}_k}$% MathType!End!2!1!
+　　：
+	% MathType!Translator!2!1!LaTeX.tdl!LaTeX 2.09 and later!
+% MathType!MTEF!2!1!+-
+% feaahOart1ev3aqatCvAUfeBSjuyZL2yd9gzLbvyNv2CaerbuLwBLn
+% hiov2DGi1BTfMBaeXatLxBI9gBaerbd9wDYLwzYbItLDharqqtubsr
+% 4rNCHbWexLMBbXgBd9gzLbvyNv2CaeHbl7mZLdGeaGqiVCI8FfYJH8
+% YrFfeuY-Hhbbf9v8qqaqFr0xc9pk0xbba9q8WqFfeaY-biLkVcLq-J
+% Hqpepeea0-as0Fb9pgeaYRXxe9vr0-vr0-vqpWqaaeaabiGaciaaca
+% qabeaadaqaaqaafaGcbaaeaaaaaaaaa8qacaqGOoWdamaaBaaaleaa
+% peGaam4AaaWdaeqaaOWdbiabg2da9iaacUhacqaHepaDcaGG8bGaam
+% yBa8aadaqhaaWcbaWdbiabes8a0jaacYcacaWGRbaapaqaa8qadaqa
+% daWdaeaapeGaaGimaaGaayjkaiaawMcaaaaakiabg2da9iaaigdaca
+% GG9baaaa!5086!
+${{\rm{\Psi }}_k} = \{ \tau |m_{\tau ,k}^{\left( 0 \right)} = 1\} $% MathType!End!2!1!
+
+　　定义任意两个变量% MathType!Translator!2!1!LaTeX.tdl!LaTeX 2.09 and later!
+　　% MathType!MTEF!2!1!+-
+　　% feaahOart1ev3aqatCvAUfeBSjuyZL2yd9gzLbvyNv2CaerbuLwBLn
+　　% hiov2DGi1BTfMBaeXatLxBI9gBaerbd9wDYLwzYbItLDharqqtubsr
+　　% 4rNCHbWexLMBbXgBd9gzLbvyNv2CaeHbl7mZLdGeaGqiVCI8FfYJH8
+　　% YrFfeuY-Hhbbf9v8qqaqFr0xc9pk0xbba9q8WqFfeaY-biLkVcLq-J
+　　% Hqpepeea0-as0Fb9pgeaYRXxe9vr0-vr0-vqpWqaaeaabiGaciaaca
+　　% qabeaadaqaaqaafaGcbaaeaaaaaaaaa8qacaWGRbaaaa!402A!
+　　$k$% MathType!End!2!1!
+　　和% MathType!Translator!2!1!LaTeX.tdl!LaTeX 2.09 and later!
+　　% MathType!MTEF!2!1!+-
+　　% feaahOart1ev3aqatCvAUfeBSjuyZL2yd9gzLbvyNv2CaerbuLwBLn
+　　% hiov2DGi1BTfMBaeXatLxBI9gBaerbd9wDYLwzYbItLDharqqtubsr
+　　% 4rNCHbWexLMBbXgBd9gzLbvyNv2CaeHbl7mZLdGeaGqiVCI8FfYJH8
+　　% YrFfeuY-Hhbbf9v8qqaqFr0xc9pk0xbba9q8WqFfeaY-biLkVcLq-J
+　　% Hqpepeea0-as0Fb9pgeaYRXxe9vr0-vr0-vqpWqaaeaabiGaciaaca
+　　% qabeaadaqaaqaafaGcbaaeaaaaaaaaa8qacaWG0baaaa!4033!
+　　$t$% MathType!End!2!1!
+　　的共同观测时间集合% MathType!Translator!2!1!LaTeX.tdl!LaTeX 2.09 and later!
+　　% MathType!MTEF!2!1!+-
+　　% feaahOart1ev3aqatCvAUfeBSjuyZL2yd9gzLbvyNv2CaerbuLwBLn
+　　% hiov2DGi1BTfMBaeXatLxBI9gBaerbd9wDYLwzYbItLDharqqtubsr
+　　% 4rNCHbWexLMBbXgBd9gzLbvyNv2CaeHbl7mZLdGeaGqiVCI8FfYJH8
+　　% YrFfeuY-Hhbbf9v8qqaqFr0xc9pk0xbba9q8WqFfeaY-biLkVcLq-J
+　　% Hqpepeea0-as0Fb9pgeaYRXxe9vr0-vr0-vqpWqaaeaabiGaciaaca
+　　% qabeaadaqaaqaafaGcbaaeaaaaaaaaa8qacaqGOoWdamaaBaaaleaa
+　　% peGaam4AaiaacYcacaWG0baapaqabaaaaa!435B!
+　　${{\rm{\Psi }}_{k,t}}$% MathType!End!2!1!
+　　：
+	% MathType!Translator!2!1!LaTeX.tdl!LaTeX 2.09 and later!
+% MathType!MTEF!2!1!+-
+% feaahOart1ev3aqatCvAUfeBSjuyZL2yd9gzLbvyNv2CaerbuLwBLn
+% hiov2DGi1BTfMBaeXatLxBI9gBaerbd9wDYLwzYbItLDharqqtubsr
+% 4rNCHbWexLMBbXgBd9gzLbvyNv2CaeHbl7mZLdGeaGqiVCI8FfYJH8
+% YrFfeuY-Hhbbf9v8qqaqFr0xc9pk0xbba9q8WqFfeaY-biLkVcLq-J
+% Hqpepeea0-as0Fb9pgeaYRXxe9vr0-vr0-vqpWqaaeaabiGaciaaca
+% qabeaadaqaaqaafaGcbaaeaaaaaaaaa8qacaqGOoWdamaaBaaaleaa
+% peGaam4AaiaacYcacaWG0baapaqabaGcpeGaeyypa0JaaeiQd8aada
+% WgaaWcbaWdbiaadUgaa8aabeaak8qacqGHPiYXcaqGOoWdamaaBaaa
+% leaapeGaamiDaaWdaeqaaaaa!4B2C!
+${{\rm{\Psi }}_{k,t}} = {{\rm{\Psi }}_k} \cap {{\rm{\Psi }}_t}$% MathType!End!2!1!
+
+　　
+基于共同观测时间点，计算锚点变量% MathType!Translator!2!1!LaTeX.tdl!LaTeX 2.09 and later!
+　　% MathType!MTEF!2!1!+-
+　　% feaahOart1ev3aqatCvAUfeBSjuyZL2yd9gzLbvyNv2CaerbuLwBLn
+　　% hiov2DGi1BTfMBaeXatLxBI9gBaerbd9wDYLwzYbItLDharqqtubsr
+　　% 4rNCHbWexLMBbXgBd9gzLbvyNv2CaeHbl7mZLdGeaGqiVCI8FfYJH8
+　　% YrFfeuY-Hhbbf9v8qqaqFr0xc9pk0xbba9q8WqFfeaY-biLkVcLq-J
+　　% Hqpepeea0-as0Fb9pgeaYRXxe9vr0-vr0-vqpWqaaeaabiGaciaaca
+　　% qabeaadaqaaqaafaGcbaaeaaaaaaaaa8qacaWGRbaaaa!402A!
+　　$k$% MathType!End!2!1!
+　　与目标变量% MathType!Translator!2!1!LaTeX.tdl!LaTeX 2.09 and later!
+　　% MathType!MTEF!2!1!+-
+　　% feaahOart1ev3aqatCvAUfeBSjuyZL2yd9gzLbvyNv2CaerbuLwBLn
+　　% hiov2DGi1BTfMBaeXatLxBI9gBaerbd9wDYLwzYbItLDharqqtubsr
+　　% 4rNCHbWexLMBbXgBd9gzLbvyNv2CaeHbl7mZLdGeaGqiVCI8FfYJH8
+　　% YrFfeuY-Hhbbf9v8qqaqFr0xc9pk0xbba9q8WqFfeaY-biLkVcLq-J
+　　% Hqpepeea0-as0Fb9pgeaYRXxe9vr0-vr0-vqpWqaaeaabiGaciaaca
+　　% qabeaadaqaaqaafaGcbaaeaaaaaaaaa8qacaWG0baaaa!4033!
+　　$t$% MathType!End!2!1!
+　　之间的归一化欧氏距离% MathType!Translator!2!1!LaTeX.tdl!LaTeX 2.09 and later!
+　　% MathType!MTEF!2!1!+-
+　　% feaahOart1ev3aqatCvAUfeBSjuyZL2yd9gzLbvyNv2CaerbuLwBLn
+　　% hiov2DGi1BTfMBaeXatLxBI9gBaerbd9wDYLwzYbItLDharqqtubsr
+　　% 4rNCHbWexLMBbXgBd9gzLbvyNv2CaeHbl7mZLdGeaGqiVCI8FfYJH8
+　　% YrFfeuY-Hhbbf9v8qqaqFr0xc9pk0xbba9q8WqFfeaY-biLkVcLq-J
+　　% Hqpepeea0-as0Fb9pgeaYRXxe9vr0-vr0-vqpWqaaeaabiGaciaaca
+　　% qabeaadaqaaqaafaGcbaaeaaaaaaaaa8qacaWGKbWdamaaBaaaleaa
+　　% peGaamiDaiaadMgacaWGTbGaamyzaaWdaeqaaOWdbmaabmaapaqaa8
+　　% qacaWGRbGaaiilaiaadshaaiaawIcacaGLPaaaaaa!489B!
+　　${d_{time}}\left( {k,t} \right)$% MathType!End!2!1!
+　　：
+
+	
+　　
+(注：公式中% MathType!Translator!2!1!LaTeX.tdl!LaTeX 2.09 and later!
+　　% MathType!MTEF!2!1!+-
+　　% feaahOart1ev3aqatCvAUfeBSjuyZL2yd9gzLbvyNv2CaerbuLwBLn
+　　% hiov2DGi1BTfMBaeXatLxBI9gBaerbd9wDYLwzYbItLDharqqtubsr
+　　% 4rNCHbWexLMBbXgBd9gzLbvyNv2CaeHbl7mZLdGeaGqiVCI8FfYJH8
+　　% YrFfeuY-Hhbbf9v8qqaqFr0xc9pk0xbba9q8WqFfeaY-biLkVcLq-J
+　　% Hqpepeea0-as0Fb9pgeaYRXxe9vr0-vr0-vqpWqaaeaabiGaciaaca
+　　% qabeaadaqaaqaafaGcbaaeaaaaaaaaa8qacaWG4bWdamaaBaaaleaa
+　　% peGaeqiXdqNaaiilaiaadUgaa8aabeaaaaa!43F6!
+　　${x_{\tau ,k}}$% MathType!End!2!1!
+　　表示时间步 % MathType!Translator!2!1!LaTeX.tdl!LaTeX 2.09 and later!
+　　% MathType!MTEF!2!1!+-
+　　% feaahOart1ev3aqatCvAUfeBSjuyZL2yd9gzLbvyNv2CaerbuLwBLn
+　　% hiov2DGi1BTfMBaeXatLxBI9gBaerbd9wDYLwzYbItLDharqqtubsr
+　　% 4rNCHbWexLMBbXgBd9gzLbvyNv2CaeHbl7mZLdGeaGqiVCI8FfYJH8
+　　% YrFfeuY-Hhbbf9v8qqaqFr0xc9pk0xbba9q8WqFfeaY-biLkVcLq-J
+　　% Hqpepeea0-as0Fb9pgeaYRXxe9vr0-vr0-vqpWqaaeaabiGaciaaca
+　　% qabeaadaqaaqaafaGcbaaeaaaaaaaaa8qacqaHepaDaaa!40FF!
+　　$\tau $% MathType!End!2!1!
+　　第% MathType!Translator!2!1!LaTeX.tdl!LaTeX 2.09 and later!
+　　% MathType!MTEF!2!1!+-
+　　% feaahOart1ev3aqatCvAUfeBSjuyZL2yd9gzLbvyNv2CaerbuLwBLn
+　　% hiov2DGi1BTfMBaeXatLxBI9gBaerbd9wDYLwzYbItLDharqqtubsr
+　　% 4rNCHbWexLMBbXgBd9gzLbvyNv2CaeHbl7mZLdGeaGqiVCI8FfYJH8
+　　% YrFfeuY-Hhbbf9v8qqaqFr0xc9pk0xbba9q8WqFfeaY-biLkVcLq-J
+　　% Hqpepeea0-as0Fb9pgeaYRXxe9vr0-vr0-vqpWqaaeaabiGaciaaca
+　　% qabeaadaqaaqaafaGcbaaeaaaaaaaaa8qacaWGRbaaaa!402A!
+　　$k$% MathType!End!2!1!
+　　个变量的观测值)
+　　第二步：确定时间邻域与亲和权重
+基于上述距离，利用高斯核函数计算变量% MathType!Translator!2!1!LaTeX.tdl!LaTeX 2.09 and later!
+　　% MathType!MTEF!2!1!+-
+　　% feaahOart1ev3aqatCvAUfeBSjuyZL2yd9gzLbvyNv2CaerbuLwBLn
+　　% hiov2DGi1BTfMBaeXatLxBI9gBaerbd9wDYLwzYbItLDharqqtubsr
+　　% 4rNCHbWexLMBbXgBd9gzLbvyNv2CaeHbl7mZLdGeaGqiVCI8FfYJH8
+　　% YrFfeuY-Hhbbf9v8qqaqFr0xc9pk0xbba9q8WqFfeaY-biLkVcLq-J
+　　% Hqpepeea0-as0Fb9pgeaYRXxe9vr0-vr0-vqpWqaaeaabiGaciaaca
+　　% qabeaadaqaaqaafaGcbaaeaaaaaaaaa8qacaWGRbaaaa!402A!
+　　$k$% MathType!End!2!1!
+　　与% MathType!Translator!2!1!LaTeX.tdl!LaTeX 2.09 and later!
+　　% MathType!MTEF!2!1!+-
+　　% feaahOart1ev3aqatCvAUfeBSjuyZL2yd9gzLbvyNv2CaerbuLwBLn
+　　% hiov2DGi1BTfMBaeXatLxBI9gBaerbd9wDYLwzYbItLDharqqtubsr
+　　% 4rNCHbWexLMBbXgBd9gzLbvyNv2CaeHbl7mZLdGeaGqiVCI8FfYJH8
+　　% YrFfeuY-Hhbbf9v8qqaqFr0xc9pk0xbba9q8WqFfeaY-biLkVcLq-J
+　　% Hqpepeea0-as0Fb9pgeaYRXxe9vr0-vr0-vqpWqaaeaabiGaciaaca
+　　% qabeaadaqaaqaafaGcbaaeaaaaaaaaa8qacaWG0baaaa!4033!
+　　$t$% MathType!End!2!1!
+　　之间的特定时间亲和权重% MathType!Translator!2!1!LaTeX.tdl!LaTeX 2.09 and later!
+　　% MathType!MTEF!2!1!+-
+　　% feaahOart1ev3aqatCvAUfeBSjuyZL2yd9gzLbvyNv2CaerbuLwBLn
+　　% hiov2DGi1BTfMBaeXatLxBI9gBaerbd9wDYLwzYbItLDharqqtubsr
+　　% 4rNCHbWexLMBbXgBd9gzLbvyNv2CaeHbl7mZLdGeaGqiVCI8FfYJH8
+　　% YrFfeuY-Hhbbf9v8qqaqFr0xc9pk0xbba9q8WqFfeaY-biLkVcLq-J
+　　% Hqpepeea0-as0Fb9pgeaYRXxe9vr0-vr0-vqpWqaaeaabiGaciaaca
+　　% qabeaadaqaaqaafaGcbaaeaaaaaaaaa8qacaWG3bWdamaaDaaaleaa
+　　% peGaam4AaiaacYcacaWG0baapaqaa8qacaWG0bGaamyAaiaad2gaca
+　　% WGLbaaaaaa!46FD!
+　　$w_{k,t}^{time}$% MathType!End!2!1!
+　　：
+	% MathType!Translator!2!1!LaTeX.tdl!LaTeX 2.09 and later!
+% MathType!MTEF!2!1!+-
+% feaahOart1ev3aqatCvAUfeBSjuyZL2yd9gzLbvyNv2CaerbuLwBLn
+% hiov2DGi1BTfMBaeXatLxBI9gBaerbd9wDYLwzYbItLDharqqtubsr
+% 4rNCHbWexLMBbXgBd9gzLbvyNv2CaeHbl7mZLdGeaGqiVCI8FfYJH8
+% YrFfeuY-Hhbbf9v8qqaqFr0xc9pk0xbba9q8WqFfeaY-biLkVcLq-J
+% Hqpepeea0-as0Fb9pgeaYRXxe9vr0-vr0-vqpWqaaeaabiGaciaaca
+% qabeaadaqaaqaafaGcbaaeaaaaaaaaa8qacaWG3bWdamaaDaaaleaa
+% peGaam4AaiaacYcacaWG0baapaqaa8qacaWG0bGaamyAaiaad2gaca
+% WGLbaaaOGaeyypa0JaamyzaiaadIhacaWGWbWaaeWaa8aabaWdbiab
+% gkHiTmaalaaapaqaa8qacqWILicucaWG4bWdamaaBaaaleaapeGaam
+% 4AaaWdaeqaaOWdbiabgkHiTiaadIhapaWaaSbaaSqaa8qacaWGRbGa
+% aiilaiaadshaa8aabeaak8qacqWILicupaWaa0baaSqaa8qacaaIYa
+% aapaqaa8qacaaIYaaaaaGcpaqaa8qacqaHdpWCpaWaa0baaSqaa8qa
+% caWG0baapaqaa8qacaaIYaaaaaaaaOGaayjkaiaawMcaaiabgIKi7k
+% aadwgacaWG4bGaamiCamaabmaapaqaa8qacqGHsisldaWcaaWdaeaa
+% peGaamiza8aadaWgaaWcbaWdbiaadshacaWGPbGaamyBaiaadwgaa8
+% aabeaak8qadaqadaWdaeaapeGaam4AaiaacYcacaWG0baacaGLOaGa
+% ayzkaaaapaqaa8qacqaHdpWCpaWaa0baaSqaa8qacaWG0baapaqaa8
+% qacaaIYaaaaaaaaOGaayjkaiaawMcaaaaa!720C!
+$w_{k,t}^{time} = exp\left( { - \frac{{\parallel {x_k} - {x_{k,t}}\parallel _2^2}}{{\sigma _t^2}}} \right) \approx exp\left( { - \frac{{{d_{time}}\left( {k,t} \right)}}{{\sigma _t^2}}} \right)$% MathType!End!2!1!
+
+　　其中% MathType!Translator!2!1!LaTeX.tdl!LaTeX 2.09 and later!
+　　% MathType!MTEF!2!1!+-
+　　% feaahOart1ev3aqatCvAUfeBSjuyZL2yd9gzLbvyNv2CaerbuLwBLn
+　　% hiov2DGi1BTfMBaeXatLxBI9gBaerbd9wDYLwzYbItLDharqqtubsr
+　　% 4rNCHbWexLMBbXgBd9gzLbvyNv2CaeHbl7mZLdGeaGqiVCI8FfYJH8
+　　% YrFfeuY-Hhbbf9v8qqaqFr0xc9pk0xbba9q8WqFfeaY-biLkVcLq-J
+　　% Hqpepeea0-as0Fb9pgeaYRXxe9vr0-vr0-vqpWqaaeaabiGaciaaca
+　　% qabeaadaqaaqaafaGcbaaeaaaaaaaaa8qacqaHdpWCpaWaaSbaaSqa
+　　% a8qacaWG0baapaqabaaaaa!4250!
+　　${\sigma _t}$% MathType!End!2!1!
+　　为时间核带宽参数。采用K近邻策略，选取权重最大的% MathType!Translator!2!1!LaTeX.tdl!LaTeX 2.09 and later!
+　　% MathType!MTEF!2!1!+-
+　　% feaahOart1ev3aqatCvAUfeBSjuyZL2yd9gzLbvyNv2CaerbuLwBLn
+　　% hiov2DGi1BTfMBaeXatLxBI9gBaerbd9wDYLwzYbItLDharqqtubsr
+　　% 4rNCHbWexLMBbXgBd9gzLbvyNv2CaeHbl7mZLdGeaGqiVCI8FfYJH8
+　　% YrFfeuY-Hhbbf9v8qqaqFr0xc9pk0xbba9q8WqFfeaY-biLkVcLq-J
+　　% Hqpepeea0-as0Fb9pgeaYRXxe9vr0-vr0-vqpWqaaeaabiGaciaaca
+　　% qabeaadaqaaqaafaGcbaaeaaaaaaaaa8qacaWGlbaaaa!400A!
+　　$K$% MathType!End!2!1!
+　　个变量作为锚点变量% MathType!Translator!2!1!LaTeX.tdl!LaTeX 2.09 and later!
+　　% MathType!MTEF!2!1!+-
+　　% feaahOart1ev3aqatCvAUfeBSjuyZL2yd9gzLbvyNv2CaerbuLwBLn
+　　% hiov2DGi1BTfMBaeXatLxBI9gBaerbd9wDYLwzYbItLDharqqtubsr
+　　% 4rNCHbWexLMBbXgBd9gzLbvyNv2CaeHbl7mZLdGeaGqiVCI8FfYJH8
+　　% YrFfeuY-Hhbbf9v8qqaqFr0xc9pk0xbba9q8WqFfeaY-biLkVcLq-J
+　　% Hqpepeea0-as0Fb9pgeaYRXxe9vr0-vr0-vqpWqaaeaabiGaciaaca
+　　% qabeaadaqaaqaafaGcbaaeaaaaaaaaa8qacaWGRbaaaa!402A!
+　　$k$% MathType!End!2!1!
+　　的时间邻域集合% MathType!Translator!2!1!LaTeX.tdl!LaTeX 2.09 and later!
+　　% MathType!MTEF!2!1!+-
+　　% feaahOart1ev3aqatCvAUfeBSjuyZL2yd9gzLbvyNv2CaerbuLwBLn
+　　% hiov2DGi1BTfMBaeXatLxBI9gBaerbd9wDYLwzYbItLDharqqtubsr
+　　% 4rNCHbWexLMBbXgBd9gzLbvyNv2CaeHbl7mZLdGeaGqiVCI8FfYJH8
+　　% YrFfeuY-Hhbbf9v8qqaqFr0xc9pk0xbba9q8WqFfeaY-biLkVcLq-J
+　　% Hqpepeea0-as0Fb9pgeaYRXxe9vr0-vr0-vqpWqaaeaabiGaciaaca
+　　% qabeaadaqaaqaafaGcbaWefv3ySLgznfgDOfdarCqr1ngBPrginfgD
+　　% ObYtUvgaiyaaqaaaaaaaaaWdbiab-1q8o9aadaqhaaWcbaWdbiaadU
+　　% gaa8aabaWdbiaadshacaWGPbGaamyBaiaadwgaaaaaaa!4FB5!
+　　${\cal N}_k^{time}$% MathType!End!2!1!
+　　。
+　　第三步：变量级嵌入映射
+由于编码器输出的原始潜在表示% MathType!Translator!2!1!LaTeX.tdl!LaTeX 2.09 and later!
+　　% MathType!MTEF!2!1!+-
+　　% feaahOart1ev3aqatCvAUfeBSjuyZL2yd9gzLbvyNv2CaerbuLwBLn
+　　% hiov2DGi1BTfMBaeXatLxBI9gBaerbd9wDYLwzYbItLDharqqtubsr
+　　% 4rNCHbWexLMBbXgBd9gzLbvyNv2CaeHbl7mZLdGeaGqiVCI8FfYJH8
+　　% YrFfeuY-Hhbbf9v8qqaqFr0xc9pk0xbba9q8WqFfeaY-biLkVcLq-J
+　　% Hqpepeea0-as0Fb9pgeaYRXxe9vr0-vr0-vqpWqaaeaabiGaciaaca
+　　% qabeaadaqaaqaafaGcbaaeaaaaaaaaa8qacaWHAbWdamaaCaaaleqa
+　　% baWdbiaad+gacaWGYbGaamyAaiaadEgaaaaaaa!442E!
+　　${{\bf{Z}}^{orig}}$% MathType!End!2!1!
+　　是针对时间步的行向量（% MathType!Translator!2!1!LaTeX.tdl!LaTeX 2.09 and later!
+　　% MathType!MTEF!2!1!+-
+　　% feaahOart1ev3aqatCvAUfeBSjuyZL2yd9gzLbvyNv2CaerbuLwBLn
+　　% hiov2DGi1BTfMBaeXatLxBI9gBaerbd9wDYLwzYbItLDharqqtubsr
+　　% 4rNCHbWexLMBbXgBd9gzLbvyNv2CaeHbl7mZLdGeaGqiVCI8FfYJH8
+　　% YrFfeuY-Hhbbf9v8qqaqFr0xc9pk0xbba9q8WqFfeaY-biLkVcLq-J
+　　% Hqpepeea0-as0Fb9pgeaYRXxe9vr0-vr0-vqpWqaaeaabiGaciaaca
+　　% qabeaadaqaaqaafaGcbaaeaaaaaaaaa8qacaWGubGaey41aqRaamiz
+　　% aaaa!4313!
+　　$T \times d$% MathType!End!2!1!
+　　），而上述计算得到的是变量间的列相关性（% MathType!Translator!2!1!LaTeX.tdl!LaTeX 2.09 and later!
+　　% MathType!MTEF!2!1!+-
+　　% feaahOart1ev3aqatCvAUfeBSjuyZL2yd9gzLbvyNv2CaerbuLwBLn
+　　% hiov2DGi1BTfMBaeXatLxBI9gBaerbd9wDYLwzYbItLDharqqtubsr
+　　% 4rNCHbWexLMBbXgBd9gzLbvyNv2CaeHbl7mZLdGeaGqiVCI8FfYJH8
+　　% YrFfeuY-Hhbbf9v8qqaqFr0xc9pk0xbba9q8WqFfeaY-biLkVcLq-J
+　　% Hqpepeea0-as0Fb9pgeaYRXxe9vr0-vr0-vqpWqaaeaabiGaciaaca
+　　% qabeaadaqaaqaafaGcbaaeaaaaaaaaa8qacaWGobGaey41aqRaamOt
+　　% aaaa!42F7!
+　　$N \times N$% MathType!End!2!1!
+　　），存在维度失配问题。为了将变量间的耦合关系融入到时间步特征中，本实施例设计了如下“变量级→时间级”映射过程：
+　　1. 构造变量级潜在表示：
+首先，将原始潜在表示% MathType!Translator!2!1!LaTeX.tdl!LaTeX 2.09 and later!
+% MathType!MTEF!2!1!+-
+% feaahOart1ev3aqatCvAUfeBSjuyZL2yd9gzLbvyNv2CaerbuLwBLn
+% hiov2DGi1BTfMBaeXatLxBI9gBaerbd9wDYLwzYbItLDharqqtubsr
+% 4rNCHbWexLMBbXgBd9gzLbvyNv2CaeHbl7mZLdGeaGqiVCI8FfYJH8
+% YrFfeuY-Hhbbf9v8qqaqFr0xc9pk0xbba9q8WqFfeaY-biLkVcLq-J
+% Hqpepeea0-as0Fb9pgeaYRXxe9vr0-vr0-vqpWqaaeaabiGaciaaca
+% qabeaadaqaaqaafaGcbaaeaaaaaaaaa8qacaWG6bWdamaaDaaaleaa
+% peGaamiDaaWdaeaapeGaam4BaiaadkhacaWGPbGaam4zaaaaaaa!4562!
+$z_t^{orig}$% MathType!End!2!1!
+从时间维度聚合到变量维度。对于每个变量% MathType!Translator!2!1!LaTeX.tdl!LaTeX 2.09 and later!
+% MathType!MTEF!2!1!+-
+% feaahOart1ev3aqatCvAUfeBSjuyZL2yd9gzLbvyNv2CaerbuLwBLn
+% hiov2DGi1BTfMBaeXatLxBI9gBaerbd9wDYLwzYbItLDharqqtubsr
+% 4rNCHbWexLMBbXgBd9gzLbvyNv2CaeHbl7mZLdGeaGqiVCI8FfYJH8
+% YrFfeuY-Hhbbf9v8qqaqFr0xc9pk0xbba9q8WqFfeaY-biLkVcLq-J
+% Hqpepeea0-as0Fb9pgeaYRXxe9vr0-vr0-vqpWqaaeaabiGaciaaca
+% qabeaadaqaaqaafaGcbaaeaaaaaaaaa8qacaWGUbaaaa!402D!
+$n$% MathType!End!2!1!
+，计算其所有有效观测时间步的特征均值，得到该变量的独立特征表示% MathType!Translator!2!1!LaTeX.tdl!LaTeX 2.09 and later!
+% MathType!MTEF!2!1!+-
+% feaahOart1ev3aqatCvAUfeBSjuyZL2yd9gzLbvyNv2CaerbuLwBLn
+% hiov2DGi1BTfMBaeXatLxBI9gBaerbd9wDYLwzYbItLDharqqtubsr
+% 4rNCHbWexLMBbXgBd9gzLbvyNv2CaeHbl7mZLdGeaGqiVCI8FfYJH8
+% YrFfeuY-Hhbbf9v8qqaqFr0xc9pk0xbba9q8WqFfeaY-biLkVcLq-J
+% Hqpepeea0-as0Fb9pgeaYRXxe9vr0-vr0-vqpWqaaeaabiGaciaaca
+% qabeaadaqaaqaafaGcbaaeaaaaaaaaa8qacaWG6bWdamaaDaaaleaa
+% peGaamOBaaWdaeaapeWaaeWaa8aabaWdbiaad+gacaWGYbGaamyAai
+% aadEgacaGGSaGaamODaiaadggacaWGYbaacaGLOaGaayzkaaaaaaaa
+% !4A8C!
+$z_n^{\left( {orig,var} \right)}$% MathType!End!2!1!
+：
+	% MathType!Translator!2!1!LaTeX.tdl!LaTeX 2.09 and later!
+% MathType!MTEF!2!1!+-
+% feaahOart1ev3aqatCvAUfeBSjuyZL2yd9gzLbvyNv2CaerbuLwBLn
+% hiov2DGi1BTfMBaeXatLxBI9gBaerbd9wDYLwzYbItLDharqqtubsr
+% 4rNCHbWexLMBbXgBd9gzLbvyNv2CaeHbl7mZLdGeaGqiVCI8FfYJH8
+% YrFfeuY-Hhbbf9v8qqaqFr0xc9pk0xbba9q8WqFfeaY-biLkVcLq-J
+% Hqpepeea0-as0Fb9pgeaYRXxe9vr0-vr0-vqpWqaaeaabiGaciaaca
+% qabeaadaqaaqaafaGcbaaeaaaaaaaaa8qacaWG6bWdamaaDaaaleaa
+% peGaamOBaaWdaeaapeWaaeWaa8aabaWdbiaad+gacaWGYbGaamyAai
+% aadEgacaGGSaGaamODaiaadggacaWGYbaacaGLOaGaayzkaaaaaOGa
+% eyypa0ZaaSaaa8aabaWdbiaaigdaa8aabaWdbmaaemaapaqaa8qacq
+% qHOoqwpaWaaSbaaSqaa8qacaWGUbaapaqabaaak8qacaGLhWUaayjc
+% SdaaamaawafabeWcpaqaa8qacaWG0bGaeyicI4SaeuiQdK1damaaBa
+% aameaapeGaamOBaaWdaeqaaaWcpeqab0WdaeaapeGaeyyeIuoaaOGa
+% amOEa8aadaqhaaWcbaWdbiaadshaa8aabaWdbiaad+gacaWGYbGaam
+% yAaiaadEgaaaaaaa!60EC!
+$z_n^{\left( {orig,var} \right)} = \frac{1}{{\left| {{\Psi _n}} \right|}}\mathop \sum \limits_{t \in {\Psi _n}} z_t^{orig}$% MathType!End!2!1!
+
+　　
+　　2. 变量级邻域聚合：
+利用第二步计算得到的亲和权重% MathType!Translator!2!1!LaTeX.tdl!LaTeX 2.09 and later!
+　　3. % MathType!MTEF!2!1!+-
+　　4. % feaahOart1ev3aqatCvAUfeBSjuyZL2yd9gzLbvyNv2CaerbuLwBLn
+　　5. % hiov2DGi1BTfMBaeXatLxBI9gBaerbd9wDYLwzYbItLDharqqtubsr
+　　6. % 4rNCHbWexLMBbXgBd9gzLbvyNv2CaeHbl7mZLdGeaGqiVCI8FfYJH8
+　　7. % YrFfeuY-Hhbbf9v8qqaqFr0xc9pk0xbba9q8WqFfeaY-biLkVcLq-J
+　　8. % Hqpepeea0-as0Fb9pgeaYRXxe9vr0-vr0-vqpWqaaeaabiGaciaaca
+　　9. % qabeaadaqaaqaafaGcbaaeaaaaaaaaa8qacaWG3bWdamaaDaaaleaa
+　　10. % peGaam4AaiaacYcacaWG0baapaqaa8qacaWG0bGaamyAaiaad2gaca
+　　11. % WGLbaaaaaa!46FD!
+　　12. $w_{k,t}^{time}$% MathType!End!2!1!
+　　13. ，在变量特征空间中进行加权聚合，利用邻居传感器（如夹套温度）的信息来增强锚点传感器（如反应釜温度）的表示，得到变量级时间流形嵌入% MathType!Translator!2!1!LaTeX.tdl!LaTeX 2.09 and later!
+　　14. % MathType!MTEF!2!1!+-
+　　15. % feaahOart1ev3aqatCvAUfeBSjuyZL2yd9gzLbvyNv2CaerbuLwBLn
+　　16. % hiov2DGi1BTfMBaeXatLxBI9gBaerbd9wDYLwzYbItLDharqqtubsr
+　　17. % 4rNCHbWexLMBbXgBd9gzLbvyNv2CaeHbl7mZLdGeaGqiVCI8FfYJH8
+　　18. % YrFfeuY-Hhbbf9v8qqaqFr0xc9pk0xbba9q8WqFfeaY-biLkVcLq-J
+　　19. % Hqpepeea0-as0Fb9pgeaYRXxe9vr0-vr0-vqpWqaaeaabiGaciaaca
+　　20. % qabeaadaqaaqaafaGcbaaeaaaaaaaaa8qacaWH6bWdamaaDaaaleaa
+　　21. % peGaam4AaaWdaeaapeGaaiikaiaadshacaWGPbGaamyBaiaadwgaca
+　　22. % GG8bGaamODaiaadggacaWGYbGaaiykaaaaaaa!4A8C!
+　　23. ${\bf{z}}_k^{(time|var)}$% MathType!End!2!1!
+　　24. ：
+
+	% MathType!Translator!2!1!LaTeX.tdl!LaTeX 2.09 and later!
+% MathType!MTEF!2!1!+-
+% feaahOart1ev3aqatCvAUfeBSjuyZL2yd9gzLbvyNv2CaerbuLwBLn
+% hiov2DGi1BTfMBaeXatLxBI9gBaerbd9wDYLwzYbItLDharqqtubsr
+% 4rNCHbWexLMBbXgBd9gzLbvyNv2CaeHbl7mZLdGeaGqiVCI8FfYJH8
+% YrFfeuY-Hhbbf9v8qqaqFr0xc9pk0xbba9q8WqFfeaY-biLkVcLq-J
+% Hqpepeea0-as0Fb9pgeaYRXxe9vr0-vr0-vqpWqaaeaabiGaciaaca
+% qabeaadaqaaqaafaGcbaaeaaaaaaaaa8qacaWH6bWdamaaDaaaleaa
+% peGaam4AaaWdaeaapeGaaiikaiaadshacaWGPbGaamyBaiaadwgaca
+% GG8bGaamODaiaadggacaWGYbGaaiykaaaakiabg2da9maalaaapaqa
+% a8qadaqfqaqabSWdaeaapeGaamiDaiabgIGioprr1ngBPrwtHrhAXa
+% qehuuDJXwAKbstHrhAG8KBLbacgaGae8xdX70damaaDaaameaapeGa
+% am4AaaWdaeaapeGaamiDaiaadMgacaWGTbGaamyzaaaaaSqab0Wdae
+% aapeGaeyyeIuoaaOGaam4Da8aadaqhaaWcbaWdbiaadUgacaGGSaGa
+% amiDaaWdaeaapeGaamiDaiaadMgacaWGTbGaamyzaaaakiaahQhapa
+% Waa0baaSqaa8qacaWG0baapaqaa8qacaGGOaGaam4BaiaadkhacaWG
+% PbGaam4zaiaacYhacaWG2bGaamyyaiaadkhacaGGPaaaaaGcpaqaa8
+% qadaqfqaqabSWdaeaapeGaamiDaiabgIGiolab-1q8o9aadaqhaaad
+% baWdbiaadUgaa8aabaWdbiaadshacaWGPbGaamyBaiaadwgaaaaale
+% qan8aabaWdbiabggHiLdaakiaadEhapaWaa0baaSqaa8qacaWGRbGa
+% aiilaiaadshaa8aabaWdbiaadshacaWGPbGaamyBaiaadwgaaaaaaa
+% aa!87C1!
+${\bf{z}}_k^{(time|var)} = \frac{{\mathop \sum \nolimits_{t \in {\cal N}_k^{time}} w_{k,t}^{time}{\bf{z}}_t^{(orig|var)}}}{{\mathop \sum \nolimits_{t \in {\cal N}_k^{time}} w_{k,t}^{time}}}$% MathType!End!2!1!
+
+　　25. 映射回时间步特征矩阵：
+最后，将聚合后的变量级特征重新映射回每个时间步，以生成可与% MathType!Translator!2!1!LaTeX.tdl!LaTeX 2.09 and later!
+　　26. % MathType!MTEF!2!1!+-
+　　27. % feaahOart1ev3aqatCvAUfeBSjuyZL2yd9gzLbvyNv2CaerbuLwBLn
+　　28. % hiov2DGi1BTfMBaeXatLxBI9gBaerbd9wDYLwzYbItLDharqqtubsr
+　　29. % 4rNCHbWexLMBbXgBd9gzLbvyNv2CaeHbl7mZLdGeaGqiVCI8FfYJH8
+　　30. % YrFfeuY-Hhbbf9v8qqaqFr0xc9pk0xbba9q8WqFfeaY-biLkVcLq-J
+　　31. % Hqpepeea0-as0Fb9pgeaYRXxe9vr0-vr0-vqpWqaaeaabiGaciaaca
+　　32. % qabeaadaqaaqaafaGcbaaeaaaaaaaaa8qacaWHAbWdamaaCaaaleqa
+　　33. % baWdbiaadohacaWGWbGaamyyaiaadogacaWGLbaaaaaa!450E!
+　　34. ${{\bf{Z}}^{space}}$% MathType!End!2!1!
+　　35. 
+　　?融合的时间特征矩阵% MathType!Translator!2!1!LaTeX.tdl!LaTeX 2.09 and later!
+　　% MathType!MTEF!2!1!+-
+　　% feaahOart1ev3aqatCvAUfeBSjuyZL2yd9gzLbvyNv2CaerbuLwBLn
+　　% hiov2DGi1BTfMBaeXatLxBI9gBaerbd9wDYLwzYbItLDharqqtubsr
+　　% 4rNCHbWexLMBbXgBd9gzLbvyNv2CaeHbl7mZLdGeaGqiVCI8FfYJH8
+　　% YrFfeuY-Hhbbf9v8qqaqFr0xc9pk0xbba9q8WqFfeaY-biLkVcLq-J
+　　% Hqpepeea0-as0Fb9pgeaYRXxe9vr0-vr0-vqpWqaaeaabiGaciaaca
+　　% qabeaadaqaaqaafaGcbaaeaaaaaaaaa8qacaWHAbWdamaaCaaaleqa
+　　% baWdbiaadshacaWGPbGaamyBaiaadwgaaaaaaa!442C!
+　　${{\bf{Z}}^{time}}$% MathType!End!2!1!
+　　。对于任意时间步% MathType!Translator!2!1!LaTeX.tdl!LaTeX 2.09 and later!
+　　% MathType!MTEF!2!1!+-
+　　% feaahOart1ev3aqatCvAUfeBSjuyZL2yd9gzLbvyNv2CaerbuLwBLn
+　　% hiov2DGi1BTfMBaeXatLxBI9gBaerbd9wDYLwzYbItLDharqqtubsr
+　　% 4rNCHbWexLMBbXgBd9gzLbvyNv2CaeHbl7mZLdGeaGqiVCI8FfYJH8
+　　% YrFfeuY-Hhbbf9v8qqaqFr0xc9pk0xbba9q8WqFfeaY-biLkVcLq-J
+　　% Hqpepeea0-as0Fb9pgeaYRXxe9vr0-vr0-vqpWqaaeaabiGaciaaca
+　　% qabeaadaqaaqaafaGcbaaeaaaaaaaaa8qacaWG0baaaa!4033!
+　　$t$% MathType!End!2!1!
+　　，其时间特征% MathType!Translator!2!1!LaTeX.tdl!LaTeX 2.09 and later!
+　　% MathType!MTEF!2!1!+-
+　　% feaahOart1ev3aqatCvAUfeBSjuyZL2yd9gzLbvyNv2CaerbuLwBLn
+　　% hiov2DGi1BTfMBaeXatLxBI9gBaerbd9wDYLwzYbItLDharqqtubsr
+　　% 4rNCHbWexLMBbXgBd9gzLbvyNv2CaeHbl7mZLdGeaGqiVCI8FfYJH8
+　　% YrFfeuY-Hhbbf9v8qqaqFr0xc9pk0xbba9q8WqFfeaY-biLkVcLq-J
+　　% Hqpepeea0-as0Fb9pgeaYRXxe9vr0-vr0-vqpWqaaeaabiGaciaaca
+　　% qabeaadaqaaqaafaGcbaaeaaaaaaaaa8qacaWH6bWdamaaDaaaleaa
+　　% peGaamiDaaWdaeaapeGaamiDaiaadMgacaWGTbGaamyzaaaaaaa!4564!
+　　${\bf{z}}_t^{time}$% MathType!End!2!1!
+　　由该时刻所有有效观测变量的变量级嵌入均值构成：
+　　% MathType!Translator!2!1!LaTeX.tdl!LaTeX 2.09 and later!
+　　% MathType!MTEF!2!1!+-
+　　% feaahOart1ev3aqatCvAUfeBSjuyZL2yd9gzLbvyNv2CaerbuLwBLn
+　　% hiov2DGi1BTfMBaeXatLxBI9gBaerbd9wDYLwzYbItLDharqqtubsr
+　　% 4rNCHbWexLMBbXgBd9gzLbvyNv2CaeHbl7mZLdGeaGqiVCI8FfYJH8
+　　% YrFfeuY-Hhbbf9v8qqaqFr0xc9pk0xbba9q8WqFfeaY-biLkVcLq-J
+　　% Hqpepeea0-as0Fb9pgeaYRXxe9vr0-vr0-vqpWqaaeaabiGaciaaca
+　　% qabeaadaqaaqaafaGcbaaeaaaaaaaaa8qacaWH6bWdamaaDaaaleaa
+　　% peGaamiDaaWdaeaapeGaamiDaiaadMgacaWGTbGaamyzaaaakiabg2
+　　% da9maalaaapaqaa8qacaaIXaaapaqaa8qacaaJJiIaaeyQd8aadaWg
+　　% aaWcbaWdbiaadshaa8aabeaak8qacaaJJicaamaawafabeWcpaqaa8
+　　% qacaWGUbGaeyicI4SaaeyQd8aadaWgaaadbaWdbiaadshaa8aabeaa
+　　% aSWdbeqan8aabaWdbiabggHiLdaakiaahQhapaWaa0baaSqaa8qaca
+　　% WGUbaapaqaa8qacaGGOaGaamiDaiaadMgacaWGTbGaamyzaiaacYha
+　　% caWG2bGaamyyaiaadkhacaGGPaaaaaaa!5E9C!
+　　${\bf{z}}_t^{time} = \frac{1}{{\mid {{\rm{\Omega }}_t}\mid }}\mathop \sum \limits_{n \in {{\rm{\Omega }}_t}} {\bf{z}}_n^{(time|var)}$% MathType!End!2!1!
+　　最终得到对齐后的时间流形特征矩阵?% MathType!Translator!2!1!LaTeX.tdl!LaTeX 2.09 and later!
+　　% MathType!MTEF!2!1!+-
+　　% feaahOart1ev3aqatCvAUfeBSjuyZL2yd9gzLbvyNv2CaerbuLwBLn
+　　% hiov2DGi1BTfMBaeXatLxBI9gBaerbd9wDYLwzYbItLDharqqtubsr
+　　% 4rNCHbWexLMBbXgBd9gzLbvyNv2CaeHbl7mZLdGeaGqiVCI8FfYJH8
+　　% YrFfeuY-Hhbbf9v8qqaqFr0xc9pk0xbba9q8WqFfeaY-biLkVcLq-J
+　　% Hqpepeea0-as0Fb9pgeaYRXxe9vr0-vr0-vqpWqaaeaabiGaciaaca
+　　% qabeaadaqaaqaafaGcbaaeaaaaaaaaa8qacaWHAbWdamaaCaaaleqa
+　　% baWdbiaadshacaWGPbGaamyBaiaadwgaaaGccqGH9aqpcaGGBbGaaC
+　　% OEa8aadaqhaaWcbaWdbiaaigdaa8aabaWdbiaadshacaWGPbGaamyB
+　　% aiaadwgaaaGccaGGSaGaeyOjGWRaaiilaiaahQhapaWaa0baaSqaa8
+　　% qacaWGubaapaqaa8qacaWG0bGaamyAaiaad2gacaWGLbaaaOGaaiyx
+　　% a8aadaahaaWcbeqaamrr1ngBPrwtHrhAXaqehuuDJXwAKbstHrhAG8
+　　% KBLbacgaWdbiab-rQivcaaaaa!61AC!
+　　${{\bf{Z}}^{time}} = {[{\bf{z}}_1^{time}, \ldots ,{\bf{z}}_T^{time}]^ \top }$% MathType!End!2!1!
+　　。
+　　S5：自适应融合模块（网络输出权重，softmax归一化）
+　　S5：本步骤旨在建立一个自适应融合机制，根据数据的整体稀疏程度和特征的全局分布，动态调整原始特征、空间流形特征和时间流形特征在最终填补中的贡献比例。
+　　1. 特征压缩与全局上下文提取
+首先，对步骤S3得到的原始潜在表示% MathType!Translator!2!1!LaTeX.tdl!LaTeX 2.09 and later!
+　　% MathType!MTEF!2!1!+-
+　　% feaahOart1ev3aqatCvAUfeBSjuyZL2yd9gzLbvyNv2CaerbuLwBLn
+　　% hiov2DGi1BTfMBaeXatLxBI9gBaerbd9wDYLwzYbItLDharqqtubsr
+　　% 4rNCHbWexLMBbXgBd9gzLbvyNv2CaeHbl7mZLdGeaGqiVCI8FfYJH8
+　　% YrFfeuY-Hhbbf9v8qqaqFr0xc9pk0xbba9q8WqFfeaY-biLkVcLq-J
+　　% Hqpepeea0-as0Fb9pgeaYRXxe9vr0-vr0-vqpWqaaeaabiGaciaaca
+　　% qabeaadaqaaqaafaGcbaaeaaaaaaaaa8qacaWGAbWdamaaBaaaleaa
+　　% peGaam4BaiaadkhacaWGPbGaam4zaaWdaeqaaaaa!4438!
+　　${Z_{orig}}$% MathType!End!2!1!
+　　、步骤S4得到的空间流形特征% MathType!Translator!2!1!LaTeX.tdl!LaTeX 2.09 and later!
+　　% MathType!MTEF!2!1!+-
+　　% feaahOart1ev3aqatCvAUfeBSjuyZL2yd9gzLbvyNv2CaerbuLwBLn
+　　% hiov2DGi1BTfMBaeXatLxBI9gBaerbd9wDYLwzYbItLDharqqtubsr
+　　% 4rNCHbWexLMBbXgBd9gzLbvyNv2CaeHbl7mZLdGeaGqiVCI8FfYJH8
+　　% YrFfeuY-Hhbbf9v8qqaqFr0xc9pk0xbba9q8WqFfeaY-biLkVcLq-J
+　　% Hqpepeea0-as0Fb9pgeaYRXxe9vr0-vr0-vqpWqaaeaabiGaciaaca
+　　% qabeaadaqaaqaafaGcbaaeaaaaaaaaa8qacaWGAbWdamaaBaaaleaa
+　　% peGaam4CaiaadchacaWGHbGaam4yaiaadwgaa8aabeaaaaa!4518!
+　　${Z_{space}}$% MathType!End!2!1!
+　　和时间流形特征% MathType!Translator!2!1!LaTeX.tdl!LaTeX 2.09 and later!
+　　% MathType!MTEF!2!1!+-
+　　% feaahOart1ev3aqatCvAUfeBSjuyZL2yd9gzLbvyNv2CaerbuLwBLn
+　　% hiov2DGi1BTfMBaeXatLxBI9gBaerbd9wDYLwzYbItLDharqqtubsr
+　　% 4rNCHbWexLMBbXgBd9gzLbvyNv2CaeHbl7mZLdGeaGqiVCI8FfYJH8
+　　% YrFfeuY-Hhbbf9v8qqaqFr0xc9pk0xbba9q8WqFfeaY-biLkVcLq-J
+　　% Hqpepeea0-as0Fb9pgeaYRXxe9vr0-vr0-vqpWqaaeaabiGaciaaca
+　　% qabeaadaqaaqaafaGcbaaeaaaaaaaaa8qacaWGAbWdamaaBaaaleaa
+　　% peGaamiDaiaadMgacaWGTbGaamyzaaWdaeqaaaaa!4436!
+　　${Z_{time}}$% MathType!End!2!1!
+　　分别进行全局平均池化（GAP），以压缩时间维度信息，获得反映全局特征分布的上下文向量：
+	
+　　2. 自适应权重网络生成融合权重
+构建一个可学习的自适应权重生成网络，其输入不仅包含上述三个上下文向量，还显式地拼接了步骤S1中计算得到的整体缺失率% MathType!Translator!2!1!LaTeX.tdl!LaTeX 2.09 and later!
+　　% MathType!MTEF!2!1!+-
+　　% feaahOart1ev3aqatCvAUfeBSjuyZL2yd9gzLbvyNv2CaerbuLwBLn
+　　% hiov2DGi1BTfMBaeXatLxBI9gBaerbd9wDYLwzYbItLDharqqtubsr
+　　% 4rNCHbWexLMBbXgBd9gzLbvyNv2CaeHbl7mZLdGeaGqiVCI8FfYJH8
+　　% YrFfeuY-Hhbbf9v8qqaqFr0xc9pk0xbba9q8WqFfeaY-biLkVcLq-J
+　　% Hqpepeea0-as0Fb9pgeaYRXxe9vr0-vr0-vqpWqaaeaabiGaciaaca
+　　% qabeaadaqaaqaafaGcbaaeaaaaaaaaa8qacqaHbpGCaaa!40FA!
+　　$\rho $% MathType!End!2!1!
+　　。这是为了使网络能够感知当前数据的“可信度”。
+通过线性变换与% MathType!Translator!2!1!LaTeX.tdl!LaTeX 2.09 and later!
+　　% MathType!MTEF!2!1!+-
+　　% feaahOart1ev3aqatCvAUfeBSjuyZL2yd9gzLbvyNv2CaerbuLwBLn
+　　% hiov2DGi1BTfMBaeXatLxBI9gBaerbd9wDYLwzYbItLDharqqtubsr
+　　% 4rNCHbWexLMBbXgBd9gzLbvyNv2CaeHbl7mZLdGeaGqiVCI8FfYJH8
+　　% YrFfeuY-Hhbbf9v8qqaqFr0xc9pk0xbba9q8WqFfeaY-biLkVcLq-J
+　　% Hqpepeea0-as0Fb9pgeaYRXxe9vr0-vr0-vqpWqaaeaabiGaciaaca
+　　% qabeaadaqaaqaafaGcbaaeaaaaaaaaa8qacaWGZbGaam4BaiaadAga
+　　% caWG0bGaamyBaiaadggacaWG4baaaa!45DF!
+　　$softmax$% MathType!End!2!1!
+　　激活函数，计算三路特征的归一化融合系数向量% MathType!Translator!2!1!LaTeX.tdl!LaTeX 2.09 and later!
+　　% MathType!MTEF!2!1!+-
+　　% feaahOart1ev3aqatCvAUfeBSjuyZL2yd9gzLbvyNv2CaerbuLwBLn
+　　% hiov2DGi1BTfMBaeXatLxBI9gBaerbd9wDYLwzYbItLDharqqtubsr
+　　% 4rNCHbWexLMBbXgBd9gzLbvyNv2CaeHbl7mZLdGeaGqiVCI8FfYJH8
+　　% YrFfeuY-Hhbbf9v8qqaqFr0xc9pk0xbba9q8WqFfeaY-biLkVcLq-J
+　　% Hqpepeea0-as0Fb9pgeaYRXxe9vr0-vr0-vqpWqaaeaabiGaciaaca
+　　% qabeaadaqaaqaafaGcbaaeaaaaaaaaa8qacqaHXoqycqGH9aqpdaWa
+　　% daWdaeaapeGaeqySde2damaaBaaaleaapeGaaGymaaWdaeqaaOWdbi
+　　% aacYcacqaHXoqypaWaaSbaaSqaa8qacaaIYaaapaqabaGcpeGaaiil
+　　% aiabeg7aH9aadaWgaaWcbaWdbiaaiodaa8aabeaaaOWdbiaawUfaca
+　　% GLDbaaaaa!4DBD!
+　　$\alpha  = \left[ {{\alpha _1},{\alpha _2},{\alpha _3}} \right]$% MathType!End!2!1!
+　　：
+其中：% MathType!Translator!2!1!LaTeX.tdl!LaTeX 2.09 and later!
+% MathType!MTEF!2!1!+-
+% feaahOart1ev3aqatCvAUfeBSjuyZL2yd9gzLbvyNv2CaerbuLwBLn
+% hiov2DGi1BTfMBaeXatLxBI9gBaerbd9wDYLwzYbItLDharqqtubsr
+% 4rNCHbWexLMBbXgBd9gzLbvyNv2CaeHbl7mZLdGeaGqiVCI8FfYJH8
+% YrFfeuY-Hhbbf9v8qqaqFr0xc9pk0xbba9q8WqFfeaY-biLkVcLq-J
+% Hqpepeea0-as0Fb9pgeaYRXxe9vr0-vr0-vqpWqaaeaabiGaciaaca
+% qabeaadaqaaqaafaGcbaaeaaaaaaaaa8qadaWadaWdaeaapeGaeyyX
+% ICTaeSyjIaLaeyyXICnacaGLBbGaayzxaaaaaa!4707!
+$\left[ { \cdot \parallel  \cdot } \right]$% MathType!End!2!1!
+表示特征拼接操作；% MathType!Translator!2!1!LaTeX.tdl!LaTeX 2.09 and later!
+% MathType!MTEF!2!1!+-
+% feaahOart1ev3aqatCvAUfeBSjuyZL2yd9gzLbvyNv2CaerbuLwBLn
+% hiov2DGi1BTfMBaeXatLxBI9gBaerbd9wDYLwzYbItLDharqqtubsr
+% 4rNCHbWexLMBbXgBd9gzLbvyNv2CaeHbl7mZLdGeaGqiVCI8FfYJH8
+% YrFfeuY-Hhbbf9v8qqaqFr0xc9pk0xbba9q8WqFfeaY-biLkVcLq-J
+% Hqpepeea0-as0Fb9pgeaYRXxe9vr0-vr0-vqpWqaaeaabiGaciaaca
+% qabeaadaqaaqaafaGcbaaeaaaaaaaaa8qacaWGxbWdamaaBaaaleaa
+% peGaamyyaaWdaeqaaaaa!4156!
+${W_a}$% MathType!End!2!1!
+和% MathType!Translator!2!1!LaTeX.tdl!LaTeX 2.09 and later!
+% MathType!MTEF!2!1!+-
+% feaahOart1ev3aqatCvAUfeBSjuyZL2yd9gzLbvyNv2CaerbuLwBLn
+% hiov2DGi1BTfMBaeXatLxBI9gBaerbd9wDYLwzYbItLDharqqtubsr
+% 4rNCHbWexLMBbXgBd9gzLbvyNv2CaeHbl7mZLdGeaGqiVCI8FfYJH8
+% YrFfeuY-Hhbbf9v8qqaqFr0xc9pk0xbba9q8WqFfeaY-biLkVcLq-J
+% Hqpepeea0-as0Fb9pgeaYRXxe9vr0-vr0-vqpWqaaeaabiGaciaaca
+% qabeaadaqaaqaafaGcbaaeaaaaaaaaa8qacaWGIbWdamaaBaaaleaa
+% peGaamyyaaWdaeqaaaaa!4161!
+${b_a}$% MathType!End!2!1!
+分别为网络的权重矩阵和偏置向量，是训练过程中可学习的参数；% MathType!Translator!2!1!LaTeX.tdl!LaTeX 2.09 and later!
+% MathType!MTEF!2!1!+-
+% feaahOart1ev3aqatCvAUfeBSjuyZL2yd9gzLbvyNv2CaerbuLwBLn
+% hiov2DGi1BTfMBaeXatLxBI9gBaerbd9wDYLwzYbItLDharqqtubsr
+% 4rNCHbWexLMBbXgBd9gzLbvyNv2CaeHbl7mZLdGeaGqiVCI8FfYJH8
+% YrFfeuY-Hhbbf9v8qqaqFr0xc9pk0xbba9q8WqFfeaY-biLkVcLq-J
+% Hqpepeea0-as0Fb9pgeaYRXxe9vr0-vr0-vqpWqaaeaabiGaciaaca
+% qabeaadaqaaqaafaGcbaaeaaaaaaaaa8qacaWGZbGaam4BaiaadAga
+% caWG0bGaamyBaiaadggacaWG4bWaaeWaa8aabaWdbiabgwSixdGaay
+% jkaiaawMcaaaaa!49D1!
+$softmax\left(  \cdot  \right)$% MathType!End!2!1!
+函数确保了% MathType!Translator!2!1!LaTeX.tdl!LaTeX 2.09 and later!
+% MathType!MTEF!2!1!+-
+% feaahOart1ev3aqatCvAUfeBSjuyZL2yd9gzLbvyNv2CaerbuLwBLn
+% hiov2DGi1BTfMBaeXatLxBI9gBaerbd9wDYLwzYbItLDharqqtubsr
+% 4rNCHbWexLMBbXgBd9gzLbvyNv2CaeHbl7mZLdGeaGqiVCI8FfYJH8
+% YrFfeuY-Hhbbf9v8qqaqFr0xc9pk0xbba9q8WqFfeaY-biLkVcLq-J
+% Hqpepeea0-as0Fb9pgeaYRXxe9vr0-vr0-vqpWqaaeaabiGaciaaca
+% qabeaadaqaaqaafaGcbaaeaaaaaaaaa8qacqaHXoqypaWaaSbaaSqa
+% a8qacaaIXaaapaqabaGcpeGaey4kaSIaeqySde2damaaBaaaleaape
+% GaaGOmaaWdaeqaaOWdbiabgUcaRiabeg7aH9aadaWgaaWcbaWdbiaa
+% iodaa8aabeaak8qacqGH9aqpcaaIXaaaaa!4B2C!
+${\alpha _1} + {\alpha _2} + {\alpha _3} = 1$% MathType!End!2!1!
+。
+　　3. 加权融合与动态调节机制
+基于计算得到的权重，对三路特征矩阵进行逐元素加权求和，得到最终的融合特征% MathType!Translator!2!1!LaTeX.tdl!LaTeX 2.09 and later!
+　　% MathType!MTEF!2!1!+-
+　　% feaahOart1ev3aqatCvAUfeBSjuyZL2yd9gzLbvyNv2CaerbuLwBLn
+　　% hiov2DGi1BTfMBaeXatLxBI9gBaerbd9wDYLwzYbItLDharqqtubsr
+　　% 4rNCHbWexLMBbXgBd9gzLbvyNv2CaeHbl7mZLdGeaGqiVCI8FfYJH8
+　　% YrFfeuY-Hhbbf9v8qqaqFr0xc9pk0xbba9q8WqFfeaY-biLkVcLq-J
+　　% Hqpepeea0-as0Fb9pgeaYRXxe9vr0-vr0-vqpWqaaeaabiGaciaaca
+　　% qabeaadaqaaqaafaGcbaaeaaaaaaaaa8qacaWGAbWdamaaBaaaleaa
+　　% peGaamOzaiaadwhacaWGZbGaamyzaiaadsgaa8aabeaaaaa!4523!
+　　${Z_{fused}}$% MathType!End!2!1!
+　　：
+	% MathType!Translator!2!1!LaTeX.tdl!LaTeX 2.09 and later!
+% MathType!MTEF!2!1!+-
+% feaahOart1ev3aqatCvAUfeBSjuyZL2yd9gzLbvyNv2CaerbuLwBLn
+% hiov2DGi1BTfMBaeXatLxBI9gBaerbd9wDYLwzYbItLDharqqtubsr
+% 4rNCHbWexLMBbXgBd9gzLbvyNv2CaeHbl7mZLdGeaGqiVCI8FfYJH8
+% YrFfeuY-Hhbbf9v8qqaqFr0xc9pk0xbba9q8WqFfeaY-biLkVcLq-J
+% Hqpepeea0-as0Fb9pgeaYRXxe9vr0-vr0-vqpWqaaeaabiGaciaaca
+% qabeaadaqaaqaafaGcbaaeaaaaaaaaa8qacaWGAbWdamaaBaaaleaa
+% peGaamOzaiaadwhacaWGZbGaamyzaiaadsgaa8aabeaak8qacqGH9a
+% qpcqaHXoqypaWaaSbaaSqaa8qacaaIXaaapaqabaGcpeGaamOwa8aa
+% daWgaaWcbaWdbiaad+gacaWGYbGaamyAaiaadEgaa8aabeaak8qacq
+% GHRaWkcqaHXoqypaWaaSbaaSqaa8qacaaIYaaapaqabaGcpeGaamOw
+% a8aadaWgaaWcbaWdbiaadohacaWGWbGaamyyaiaadogacaWGLbaapa
+% qabaGcpeGaey4kaSIaeqySde2damaaBaaaleaapeGaaG4maaWdaeqa
+% aOWdbiaadQfapaWaaSbaaSqaa8qacaWG0bGaamyAaiaad2gacaWGLb
+% aapaqabaaaaa!6080!
+${Z_{fused}} = {\alpha _1}{Z_{orig}} + {\alpha _2}{Z_{space}} + {\alpha _3}{Z_{time}}$% MathType!End!2!1!
+
+　　本实施例引入缺失率% MathType!Translator!2!1!LaTeX.tdl!LaTeX 2.09 and later!
+　　% MathType!MTEF!2!1!+-
+　　% feaahOart1ev3aqatCvAUfeBSjuyZL2yd9gzLbvyNv2CaerbuLwBLn
+　　% hiov2DGi1BTfMBaeXatLxBI9gBaerbd9wDYLwzYbItLDharqqtubsr
+　　% 4rNCHbWexLMBbXgBd9gzLbvyNv2CaeHbl7mZLdGeaGqiVCI8FfYJH8
+　　% YrFfeuY-Hhbbf9v8qqaqFr0xc9pk0xbba9q8WqFfeaY-biLkVcLq-J
+　　% Hqpepeea0-as0Fb9pgeaYRXxe9vr0-vr0-vqpWqaaeaabiGaciaaca
+　　% qabeaadaqaaqaafaGcbaaeaaaaaaaaa8qacqaHbpGCaaa!40FA!
+　　$\rho $% MathType!End!2!1!
+　　参与权重计算的技术原理在于实现了如下动态调节逻辑：
+　　* 当数据较为完整时（% MathType!Translator!2!1!LaTeX.tdl!LaTeX 2.09 and later!
+　　* % MathType!MTEF!2!1!+-
+　　* % feaahOart1ev3aqatCvAUfeBSjuyZL2yd9gzLbvyNv2CaerbuLwBLn
+　　* % hiov2DGi1BTfMBaeXatLxBI9gBaerbd9wDYLwzYbItLDharqqtubsr
+　　* % 4rNCHbWexLMBbXgBd9gzLbvyNv2CaeHbl7mZLdGeaGqiVCI8FfYJH8
+　　* % YrFfeuY-Hhbbf9v8qqaqFr0xc9pk0xbba9q8WqFfeaY-biLkVcLq-J
+　　* % Hqpepeea0-as0Fb9pgeaYRXxe9vr0-vr0-vqpWqaaeaabiGaciaaca
+　　* % qabeaadaqaaqaafaGcbaaeaaaaaaaaa8qacqaHbpGCaaa!40FA!
+　　* $\rho $% MathType!End!2!1!
+　　* 较小）：% MathType!Translator!2!1!LaTeX.tdl!LaTeX 2.09 and later!
+　　* % MathType!MTEF!2!1!+-
+　　* % feaahOart1ev3aqatCvAUfeBSjuyZL2yd9gzLbvyNv2CaerbuLwBLn
+　　* % hiov2DGi1BTfMBaeXatLxBI9gBaerbd9wDYLwzYbItLDharqqtubsr
+　　* % 4rNCHbWexLMBbXgBd9gzLbvyNv2CaeHbl7mZLdGeaGqiVCI8FfYJH8
+　　* % YrFfeuY-Hhbbf9v8qqaqFr0xc9pk0xbba9q8WqFfeaY-biLkVcLq-J
+　　* % Hqpepeea0-as0Fb9pgeaYRXxe9vr0-vr0-vqpWqaaeaabiGaciaaca
+　　* % qabeaadaqaaqaafaGcbaaeaaaaaaaaa8qacaWGAbWdamaaBaaaleaa
+　　* % peGaam4BaiaadkhacaWGPbGaam4zaaWdaeqaaaaa!4438!
+　　* ${Z_{orig}}$% MathType!End!2!1!
+　　* 包含丰富且准确的原始信息，网络通过学习倾向于输出较大的% MathType!Translator!2!1!LaTeX.tdl!LaTeX 2.09 and later!
+　　* % MathType!MTEF!2!1!+-
+　　* % feaahOart1ev3aqatCvAUfeBSjuyZL2yd9gzLbvyNv2CaerbuLwBLn
+　　* % hiov2DGi1BTfMBaeXatLxBI9gBaerbd9wDYLwzYbItLDharqqtubsr
+　　* % 4rNCHbWexLMBbXgBd9gzLbvyNv2CaeHbl7mZLdGeaGqiVCI8FfYJH8
+　　* % YrFfeuY-Hhbbf9v8qqaqFr0xc9pk0xbba9q8WqFfeaY-biLkVcLq-J
+　　* % Hqpepeea0-as0Fb9pgeaYRXxe9vr0-vr0-vqpWqaaeaabiGaciaaca
+　　* % qabeaadaqaaqaafaGcbaaeaaaaaaaaa8qacqaHXoqypaWaaSbaaSqa
+　　* % a8qacaaIXaaapaqabaaaaa!41EE!
+　　* ${\alpha _1}$% MathType!End!2!1!
+　　* ，使模型优先保留原始数据的细节特征；
+　　* 当数据极度稀疏时（% MathType!Translator!2!1!LaTeX.tdl!LaTeX 2.09 and later!
+　　* % MathType!MTEF!2!1!+-
+　　* % feaahOart1ev3aqatCvAUfeBSjuyZL2yd9gzLbvyNv2CaerbuLwBLn
+　　* % hiov2DGi1BTfMBaeXatLxBI9gBaerbd9wDYLwzYbItLDharqqtubsr
+　　* % 4rNCHbWexLMBbXgBd9gzLbvyNv2CaeHbl7mZLdGeaGqiVCI8FfYJH8
+　　* % YrFfeuY-Hhbbf9v8qqaqFr0xc9pk0xbba9q8WqFfeaY-biLkVcLq-J
+　　* % Hqpepeea0-as0Fb9pgeaYRXxe9vr0-vr0-vqpWqaaeaabiGaciaaca
+　　* % qabeaadaqaaqaafaGcbaaeaaaaaaaaa8qacqaHbpGCaaa!40FA!
+　　* $\rho $% MathType!End!2!1!
+　　* 较大，例如% MathType!Translator!2!1!LaTeX.tdl!LaTeX 2.09 and later!
+　　* % MathType!MTEF!2!1!+-
+　　* % feaahOart1ev3aqatCvAUfeBSjuyZL2yd9gzLbvyNv2CaerbuLwBLn
+　　* % hiov2DGi1BTfMBaeXatLxBI9gBaerbd9wDYLwzYbItLDharqqtubsr
+　　* % 4rNCHbWexLMBbXgBd9gzLbvyNv2CaeHbl7mZLdGeaGqiVCI8FfYJH8
+　　* % YrFfeuY-Hhbbf9v8qqaqFr0xc9pk0xbba9q8WqFfeaY-biLkVcLq-J
+　　* % Hqpepeea0-as0Fb9pgeaYRXxe9vr0-vr0-vqpWqaaeaabiGaciaaca
+　　* % qabeaadaqaaqaafaGcbaaeaaaaaaaaa8qacqGH+aGpcaaI4aGaaGim
+　　* % aiaabwcaaaa!4266!
+　　* $ > 80{\rm{\% }}$% MathType!End!2!1!
+　　* ）：此时% MathType!Translator!2!1!LaTeX.tdl!LaTeX 2.09 and later!
+　　* % MathType!MTEF!2!1!+-
+　　* % feaahOart1ev3aqatCvAUfeBSjuyZL2yd9gzLbvyNv2CaerbuLwBLn
+　　* % hiov2DGi1BTfMBaeXatLxBI9gBaerbd9wDYLwzYbItLDharqqtubsr
+　　* % 4rNCHbWexLMBbXgBd9gzLbvyNv2CaeHbl7mZLdGeaGqiVCI8FfYJH8
+　　* % YrFfeuY-Hhbbf9v8qqaqFr0xc9pk0xbba9q8WqFfeaY-biLkVcLq-J
+　　* % Hqpepeea0-as0Fb9pgeaYRXxe9vr0-vr0-vqpWqaaeaabiGaciaaca
+　　* % qabeaadaqaaqaafaGcbaaeaaaaaaaaa8qacaWGAbWdamaaBaaaleaa
+　　* % peGaam4BaiaadkhacaWGPbGaam4zaaWdaeqaaaaa!4438!
+　　* ${Z_{orig}}$% MathType!End!2!1!
+　　* 中包含大量填充的零值或噪声，信息量极低。自适应权重生成网络会自动增大% MathType!Translator!2!1!LaTeX.tdl!LaTeX 2.09 and later!
+　　* % MathType!MTEF!2!1!+-
+　　* % feaahOart1ev3aqatCvAUfeBSjuyZL2yd9gzLbvyNv2CaerbuLwBLn
+　　* % hiov2DGi1BTfMBaeXatLxBI9gBaerbd9wDYLwzYbItLDharqqtubsr
+　　* % 4rNCHbWexLMBbXgBd9gzLbvyNv2CaeHbl7mZLdGeaGqiVCI8FfYJH8
+　　* % YrFfeuY-Hhbbf9v8qqaqFr0xc9pk0xbba9q8WqFfeaY-biLkVcLq-J
+　　* % Hqpepeea0-as0Fb9pgeaYRXxe9vr0-vr0-vqpWqaaeaabiGaciaaca
+　　* % qabeaadaqaaqaafaGcbaaeaaaaaaaaa8qacqaHXoqypaWaaSbaaSqa
+　　* % a8qacaaIYaaapaqabaaaaa!41EF!
+　　* ${\alpha _2}$% MathType!End!2!1!
+　　* 和% MathType!Translator!2!1!LaTeX.tdl!LaTeX 2.09 and later!
+　　* % MathType!MTEF!2!1!+-
+　　* % feaahOart1ev3aqatCvAUfeBSjuyZL2yd9gzLbvyNv2CaerbuLwBLn
+　　* % hiov2DGi1BTfMBaeXatLxBI9gBaerbd9wDYLwzYbItLDharqqtubsr
+　　* % 4rNCHbWexLMBbXgBd9gzLbvyNv2CaeHbl7mZLdGeaGqiVCI8FfYJH8
+　　* % YrFfeuY-Hhbbf9v8qqaqFr0xc9pk0xbba9q8WqFfeaY-biLkVcLq-J
+　　* % Hqpepeea0-as0Fb9pgeaYRXxe9vr0-vr0-vqpWqaaeaabiGaciaaca
+　　* % qabeaadaqaaqaafaGcbaaeaaaaaaaaa8qacqaHXoqypaWaaSbaaSqa
+　　* % a8qacaaIZaaapaqabaaaaa!41F0!
+　　* ${\alpha _3}$% MathType!End!2!1!
+　　* 的值，迫使模型利用依赖% MathType!Translator!2!1!LaTeX.tdl!LaTeX 2.09 and later!
+　　* % MathType!MTEF!2!1!+-
+　　* % feaahOart1ev3aqatCvAUfeBSjuyZL2yd9gzLbvyNv2CaerbuLwBLn
+　　* % hiov2DGi1BTfMBaeXatLxBI9gBaerbd9wDYLwzYbItLDharqqtubsr
+　　* % 4rNCHbWexLMBbXgBd9gzLbvyNv2CaeHbl7mZLdGeaGqiVCI8FfYJH8
+　　* % YrFfeuY-Hhbbf9v8qqaqFr0xc9pk0xbba9q8WqFfeaY-biLkVcLq-J
+　　* % Hqpepeea0-as0Fb9pgeaYRXxe9vr0-vr0-vqpWqaaeaabiGaciaaca
+　　* % qabeaadaqaaqaafaGcbaaeaaaaaaaaa8qacaWGAbWdamaaBaaaleaa
+　　* % peGaam4CaiaadchacaWGHbGaam4yaiaadwgaa8aabeaaaaa!4518!
+　　* ${Z_{space}}$% MathType!End!2!1!
+　　* 
+　　（历史时刻的相似工况）和% MathType!Translator!2!1!LaTeX.tdl!LaTeX 2.09 and later!
+　　% MathType!MTEF!2!1!+-
+　　% feaahOart1ev3aqatCvAUfeBSjuyZL2yd9gzLbvyNv2CaerbuLwBLn
+　　% hiov2DGi1BTfMBaeXatLxBI9gBaerbd9wDYLwzYbItLDharqqtubsr
+　　% 4rNCHbWexLMBbXgBd9gzLbvyNv2CaeHbl7mZLdGeaGqiVCI8FfYJH8
+　　% YrFfeuY-Hhbbf9v8qqaqFr0xc9pk0xbba9q8WqFfeaY-biLkVcLq-J
+　　% Hqpepeea0-as0Fb9pgeaYRXxe9vr0-vr0-vqpWqaaeaabiGaciaaca
+　　% qabeaadaqaaqaafaGcbaaeaaaaaaaaa8qacaWGAbWdamaaBaaaleaa
+　　% peGaamiDaiaadMgacaWGTbGaamyzaaWdaeqaaaaa!4436!
+　　${Z_{time}}$% MathType!End!2!1!
+　　（相关变量的耦合关系）来推断缺失值，从而保证填补结果在极端缺失下的可靠性。
+　　S6：解码重构、输出填补结果与联合损失优化
+　　S6：解码器输出重构矩阵：
+	% MathType!Translator!2!1!LaTeX.tdl!LaTeX 2.09 and later!
+% MathType!MTEF!2!1!+-
+% feaahOart1ev3aqatCvAUfeBSjuyZL2yd9gzLbvyNv2CaerbuLwBLn
+% hiov2DGi1BTfMBaeXatLxBI9gBaerbd9wDYLwzYbItLDharqqtubsr
+% 4rNCHbWexLMBbXgBd9gzLbvyNv2CaeHbl7mZLdGeaGqiVCI8FfYJH8
+% YrFfeuY-Hhbbf9v8qqaqFr0xc9pk0xbba9q8WqFfeaY-biLkVcLq-J
+% Hqpepeea0-as0Fb9pgeaYRXxe9vr0-vr0-vqpWqaaeaabiGaciaaca
+% qabeaadaqaaqaafaGcbaaeaaaaaaaaa8qaceWGybWdayaajaWdbiab
+% g2da9iaadEgapaWaaSbaaSqaa8qacqaHvpGza8aabeaak8qadaqada
+% WdaeaapeGaamOwa8aadaWgaaWcbaWdbiaadAgacaWG1bGaam4Caiaa
+% dwgacaWGKbaapaqabaaak8qacaGLOaGaayzkaaGaaiOlaaaa!4CD1!
+$\hat X = {g_\phi }\left( {{Z_{fused}}} \right).$% MathType!End!2!1!
+
+　　进一步地，为了确保原始观测数据的真实性不被模型的近似误差改变，最终的填补结果% MathType!Translator!2!1!LaTeX.tdl!LaTeX 2.09 and later!
+　　% MathType!MTEF!2!1!+-
+　　% feaahOart1ev3aqatCvAUfeBSjuyZL2yd9gzLbvyNv2CaerbuLwBLn
+　　% hiov2DGi1BTfMBaeXatLxBI9gBaerbd9wDYLwzYbItLDharqqtubsr
+　　% 4rNCHbWexLMBbXgBd9gzLbvyNv2CaeHbl7mZLdGeaGqiVCI8FfYJH8
+　　% YrFfeuY-Hhbbf9v8qqaqFr0xc9pk0xbba9q8WqFfeaY-biLkVcLq-J
+　　% Hqpepeea0-as0Fb9pgeaYRXxe9vr0-vr0-vqpWqaaeaabiGaciaaca
+　　% qabeaadaqaaqaafaGcbaaeaaaaaaaaa8qacaWHybWdamaaBaaaleaa
+　　% peGaamyAaiaad2gacaWGWbaapaqabaaaaa!434A!
+　　${{\bf{X}}_{imp}}$% MathType!End!2!1!
+　　采用掩码融合策略：
+	% MathType!Translator!2!1!LaTeX.tdl!LaTeX 2.09 and later!
+% MathType!MTEF!2!1!+-
+% feaahOart1ev3aqatCvAUfeBSjuyZL2yd9gzLbvyNv2CaerbuLwBLn
+% hiov2DGi1BTfMBaeXatLxBI9gBaerbd9wDYLwzYbItLDharqqtubsr
+% 4rNCHbWexLMBbXgBd9gzLbvyNv2CaeHbl7mZLdGeaGqiVCI8FfYJH8
+% YrFfeuY-Hhbbf9v8qqaqFr0xc9pk0xbba9q8WqFfeaY-biLkVcLq-J
+% Hqpepeea0-as0Fb9pgeaYRXxe9vr0-vr0-vqpWqaaeaabiGaciaaca
+% qabeaadaqaaqaafaGcbaaeaaaaaaaaa8qacaWGybWdamaaBaaaleaa
+% peGaamyAaiaad2gacaWGWbaapaqabaGcpeGaeyypa0JaamiwaiablM
+% PiLjaad2eacqGHRaWkceWGybWdayaajaWdbiablMPiLnaabmaapaqa
+% a8qacaaIXaGaeyOeI0IaamytaaGaayjkaiaawMcaaiaac6caaaa!5039!
+${X_{imp}} = X \odot M + \hat X \odot \left( {1 - M} \right).$% MathType!End!2!1!
+
+　　即：对于掩码为1的位置保留原始观测值，仅在掩码为0的缺失位置填充模型的预测值。
+　　构建重构损失（仅在观测条目上计算），迫使潜在空间包含尽可能多的细节以恢复原始值：
+	% MathType!Translator!2!1!LaTeX.tdl!LaTeX 2.09 and later!
+% MathType!MTEF!2!1!+-
+% feaahOart1ev3aqatCvAUfeBSjuyZL2yd9gzLbvyNv2CaerbuLwBLn
+% hiov2DGi1BTfMBaeXatLxBI9gBaerbd9wDYLwzYbItLDharqqtubsr
+% 4rNCHbWexLMBbXgBd9gzLbvyNv2CaeHbl7mZLdGeaGqiVCI8FfYJH8
+% YrFfeuY-Hhbbf9v8qqaqFr0xc9pk0xbba9q8WqFfeaY-biLkVcLq-J
+% Hqpepeea0-as0Fb9pgeaYRXxe9vr0-vr0-vqpWqaaeaabiGaciaaca
+% qabeaadaqaaqaafaGcbaaeaaaaaaaaa8qacaWGmbWdamaaBaaaleaa
+% peGaamOCaiaadwgacaWGJbGaam4Baiaad6gaa8aabeaak8qacqGH9a
+% qpdaWcaaWdaeaapeGaaGymaaWdaeaapeWaaubeaeqal8aabaWdbiaa
+% dshacaGGSaGaamOBaaqab0WdaeaapeGaeyyeIuoaaOGaamyBa8aada
+% WgaaWcbaWdbiaadshacaGGSaGaamOBaaWdaeqaaaaak8qacqWILicu
+% daqadaWdaeaapeGaamiwaiabgkHiTiqadIfapaGbaKaaa8qacaGLOa
+% GaayzkaaGaeSyMIuMaamytaiablwIiq9aadaqhaaWcbaWdbiaadAea
+% a8aabaWdbiaaikdaaaGccaGGUaaaaa!5C0D!
+${L_{recon}} = \frac{1}{{\mathop \sum \nolimits_{t,n} {m_{t,n}}}}\parallel \left( {X - \hat X} \right) \odot M\parallel _F^2.$% MathType!End!2!1!
+
+　　构建空间保持损失与时间保持损失：
+空间保持损失：
+　　利用步骤S4（2）中计算的空间亲和权重% MathType!Translator!2!1!LaTeX.tdl!LaTeX 2.09 and later!
+　　% MathType!MTEF!2!1!+-
+　　% feaahOart1ev3aqatCvAUfeBSjuyZL2yd9gzLbvyNv2CaerbuLwBLn
+　　% hiov2DGi1BTfMBaeXatLxBI9gBaerbd9wDYLwzYbItLDharqqtubsr
+　　% 4rNCHbWexLMBbXgBd9gzLbvyNv2CaeHbl7mZLdGeaGqiVCI8FfYJH8
+　　% YrFfeuY-Hhbbf9v8qqaqFr0xc9pk0xbba9q8WqFfeaY-biLkVcLq-J
+　　% Hqpepeea0-as0Fb9pgeaYRXxe9vr0-vr0-vqpWqaaeaabiGaciaaca
+　　% qabeaadaqaaqaafaGcbaaeaaaaaaaaa8qacaWG3bWdamaaDaaaleaa
+　　% peGaam4AaiaacYcacaWGZbaapaqaa8qacaWGZbGaamiCaiaadggaca
+　　% WGJbGaamyzaaaaaaa!47DE!
+　　$w_{k,s}^{space}$% MathType!End!2!1!
+　　，约束原始潜在表示% MathType!Translator!2!1!LaTeX.tdl!LaTeX 2.09 and later!
+　　% MathType!MTEF!2!1!+-
+　　% feaahOart1ev3aqatCvAUfeBSjuyZL2yd9gzLbvyNv2CaerbuLwBLn
+　　% hiov2DGi1BTfMBaeXatLxBI9gBaerbd9wDYLwzYbItLDharqqtubsr
+　　% 4rNCHbWexLMBbXgBd9gzLbvyNv2CaeHbl7mZLdGeaGqiVCI8FfYJH8
+　　% YrFfeuY-Hhbbf9v8qqaqFr0xc9pk0xbba9q8WqFfeaY-biLkVcLq-J
+　　% Hqpepeea0-as0Fb9pgeaYRXxe9vr0-vr0-vqpWqaaeaabiGaciaaca
+　　% qabeaadaqaaqaafaGcbaaeaaaaaaaaa8qacaWHAbWdamaaCaaaleqa
+　　% baWdbiaad+gacaWGYbGaamyAaiaadEgaaaaaaa!442E!
+　　${{\bf{Z}}^{orig}}$% MathType!End!2!1!
+　　在时间维度上的局部几何结构：
+　　% MathType!Translator!2!1!LaTeX.tdl!LaTeX 2.09 and later!
+　　% MathType!MTEF!2!1!+-
+　　% feaahOart1ev3aqatCvAUfeBSjuyZL2yd9gzLbvyNv2CaerbuLwBLn
+　　% hiov2DGi1BTfMBaeXatLxBI9gBaerbd9wDYLwzYbItLDharqqtubsr
+　　% 4rNCHbWexLMBbXgBd9gzLbvyNv2CaeHbl7mZLdGeaGqiVCI8FfYJH8
+　　% YrFfeuY-Hhbbf9v8qqaqFr0xc9pk0xbba9q8WqFfeaY-biLkVcLq-J
+　　% Hqpepeea0-as0Fb9pgeaYRXxe9vr0-vr0-vqpWqaaeaabiGaciaaca
+　　% qabeaadaqaaqaafaGcbaaeaaaaaaaaa8qacaWGmbWdamaaBaaaleaa
+　　% peGaam4CaiaadchacaWGHbGaam4yaiaadwgaa8aabeaak8qacqGH9a
+　　% qpdaGfWbqabSWdaeaapeGaam4Aaiabg2da9iaaigdaa8aabaWdbiaa
+　　% dsfaa0WdaeaapeGaeyyeIuoaaOWaaybuaeqal8aabaWdbiaadohacq
+　　% GHiiIZcaWGobWdamaaDaaameaapeGaam4AaaWdaeaapeGaam4Caiaa
+　　% dchacaWGHbGaam4yaiaadwgaaaaaleqan8aabaWdbiabggHiLdaaki
+　　% aadEhapaWaa0baaSqaa8qacaWGRbGaaiilaiaadohaa8aabaWdbiaa
+　　% dohacaWGWbGaamyyaiaadogacaWGLbaaaOGaeSyjIaLaamOEa8aada
+　　% qhaaWcbaWdbiaadUgaa8aabaWdbiaad+gacaWGYbGaamyAaiaadEga
+　　% aaGccqGHsislcaWG6bWdamaaDaaaleaapeGaam4CaaWdaeaapeGaam
+　　% 4BaiaadkhacaWGPbGaam4zaaaakiablwIiq9aadaqhaaWcbaWdbiaa
+　　% ikdaa8aabaWdbiaaikdaaaGccaGG7aaaaa!7324!
+　　${L_{space}} = \mathop \sum \limits_{k = 1}^T \mathop \sum \limits_{s \in N_k^{space}} w_{k,s}^{space}\parallel z_k^{orig} - z_s^{orig}\parallel _2^2;$% MathType!End!2!1!
+　　该损失项作为正则化项，试图让相似工况的潜在表示在空间上更加平滑、聚集。
+　　时间保持损失：
+　　利用步骤S4（3）中计算的时间亲和权重% MathType!Translator!2!1!LaTeX.tdl!LaTeX 2.09 and later!
+　　% MathType!MTEF!2!1!+-
+　　% feaahOart1ev3aqatCvAUfeBSjuyZL2yd9gzLbvyNv2CaerbuLwBLn
+　　% hiov2DGi1BTfMBaeXatLxBI9gBaerbd9wDYLwzYbItLDharqqtubsr
+　　% 4rNCHbWexLMBbXgBd9gzLbvyNv2CaeHbl7mZLdGeaGqiVCI8FfYJH8
+　　% YrFfeuY-Hhbbf9v8qqaqFr0xc9pk0xbba9q8WqFfeaY-biLkVcLq-J
+　　% Hqpepeea0-as0Fb9pgeaYRXxe9vr0-vr0-vqpWqaaeaabiGaciaaca
+　　% qabeaadaqaaqaafaGcbaaeaaaaaaaaa8qacaWG3bWdamaaDaaaleaa
+　　% peGaam4AaiaacYcacaWG0baapaqaa8qacaWG0bGaamyAaiaad2gaca
+　　% WGLbaaaaaa!46FD!
+　　$w_{k,t}^{time}$% MathType!End!2!1!
+　　，约束变量级潜在表示的耦合关系：
+　　% MathType!Translator!2!1!LaTeX.tdl!LaTeX 2.09 and later!
+　　% MathType!MTEF!2!1!+-
+　　% feaahOart1ev3aqatCvAUfeBSjuyZL2yd9gzLbvyNv2CaerbuLwBLn
+　　% hiov2DGi1BTfMBaeXatLxBI9gBaerbd9wDYLwzYbItLDharqqtubsr
+　　% 4rNCHbWexLMBbXgBd9gzLbvyNv2CaeHbl7mZLdGeaGqiVCI8FfYJH8
+　　% YrFfeuY-Hhbbf9v8qqaqFr0xc9pk0xbba9q8WqFfeaY-biLkVcLq-J
+　　% Hqpepeea0-as0Fb9pgeaYRXxe9vr0-vr0-vqpWqaaeaabiGaciaaca
+　　% qabeaadaqaaqaafaGcbaaeaaaaaaaaa8qacaWGmbWdamaaBaaaleaa
+　　% peGaamiDaiaadMgacaWGTbGaamyzaaWdaeqaaOWdbiabg2da9maawa
+　　% habeWcpaqaa8qacaWGRbGaeyypa0JaaGymaaWdaeaapeGaamOtaaqd
+　　% paqaa8qacqGHris5aaGcdaGfqbqabSWdaeaapeGaamiDaiabgIGiol
+　　% aad6eapaWaa0baaWqaa8qacaWGRbaapaqaa8qacaWG0bGaamyAaiaa
+　　% d2gacaWGLbaaaaWcbeqdpaqaa8qacqGHris5aaGccaWG3bWdamaaDa
+　　% aaleaapeGaam4AaiaacYcacaWG0baapaqaa8qacaWG0bGaamyAaiaa
+　　% d2gacaWGLbaaaOGaeSyjIaLaamOEa8aadaqhaaWcbaWdbiaadUgaa8
+　　% aabaWdbiaad+gacaWGYbGaamyAaiaadEgacaGGSaGaamODaiaadgga
+　　% caWGYbaaaOGaeyOeI0IaamOEa8aadaqhaaWcbaWdbiaadshaa8aaba
+　　% Wdbiaad+gacaWGYbGaamyAaiaadEgacaGGSaGaamODaiaadggacaWG
+　　% YbaaaOGaeSyjIa1damaaDaaaleaapeGaaGOmaaWdaeaapeGaaGOmaa
+　　% aakiaac6caaaa!777E!
+　　${L_{time}} = \mathop \sum \limits_{k = 1}^N \mathop \sum \limits_{t \in N_k^{time}} w_{k,t}^{time}\parallel z_k^{orig,var} - z_t^{orig,var}\parallel _2^2.$% MathType!End!2!1!
+　　其中% MathType!Translator!2!1!LaTeX.tdl!LaTeX 2.09 and later!
+　　% MathType!MTEF!2!1!+-
+　　% feaahOart1ev3aqatCvAUfeBSjuyZL2yd9gzLbvyNv2CaerbuLwBLn
+　　% hiov2DGi1BTfMBaeXatLxBI9gBaerbd9wDYLwzYbItLDharqqtubsr
+　　% 4rNCHbWexLMBbXgBd9gzLbvyNv2CaeHbl7mZLdGeaGqiVCI8FfYJH8
+　　% YrFfeuY-Hhbbf9v8qqaqFr0xc9pk0xbba9q8WqFfeaY-biLkVcLq-J
+　　% Hqpepeea0-as0Fb9pgeaYRXxe9vr0-vr0-vqpWqaaeaabiGaciaaca
+　　% qabeaadaqaaqaafaGcbaaeaaaaaaaaa8qacaWH6bWdamaaDaaaleaa
+　　% peGaam4AaaWdaeaapeGaaiikaiaad+gacaWGYbGaamyAaiaadEgaca
+　　% GG8bGaamODaiaadggacaWGYbGaaiykaaaaaaa!4A8E!
+　　${\bf{z}}_k^{(orig|var)}$% MathType!End!2!1!
+　　为步骤S4中定义的变量级潜在表示。该损失项迫使具有强相关性的传感器（如互为冗余的测点）在潜在空间中保持接近。
+　　联合损失函数：
+　　% MathType!Translator!2!1!LaTeX.tdl!LaTeX 2.09 and later!
+　　% MathType!MTEF!2!1!+-
+　　% feaahOart1ev3aqatCvAUfeBSjuyZL2yd9gzLbvyNv2CaerbuLwBLn
+　　% hiov2DGi1BTfMBaeXatLxBI9gBaerbd9wDYLwzYbItLDharqqtubsr
+　　% 4rNCHbWexLMBbXgBd9gzLbvyNv2CaeHbl7mZLdGeaGqiVCI8FfYJH8
+　　% YrFfeuY-Hhbbf9v8qqaqFr0xc9pk0xbba9q8WqFfeaY-biLkVcLq-J
+　　% Hqpepeea0-as0Fb9pgeaYRXxe9vr0-vr0-vqpWqaaeaabiGaciaaca
+　　% qabeaadaqaaqaafaGcbaaeaaaaaaaaa8qacaWGmbWdamaaBaaaleaa
+　　% peGaamiDaiaad+gacaWG0bGaamyyaiaadYgaa8aabeaak8qacqGH9a
+　　% qpcaWGmbWdamaaBaaaleaapeGaamOCaiaadwgacaWGJbGaam4Baiaa
+　　% d6gaa8aabeaak8qacqGHRaWkcqaH7oaBpaWaaSbaaSqaa8qacaaIXa
+　　% aapaqabaGcpeGaamita8aadaWgaaWcbaWdbiaadogacaWGVbGaamOB
+　　% aiaadohacaWGPbGaam4Caiaadshaa8aabeaak8qacqGHRaWkcqaH7o
+　　% aBpaWaaSbaaSqaa8qacaaIYaaapaqabaGcpeGaamita8aadaWgaaWc
+　　% baWdbiaadohacaWGWbGaamyyaiaadogacaWGLbaapaqabaGcpeGaey
+　　% 4kaSIaeq4UdW2damaaBaaaleaapeGaaG4maaWdaeqaaOWdbiaadYea
+　　% paWaaSbaaSqaa8qacaWG0bGaamyAaiaad2gacaWGLbaapaqabaGcpe
+　　% GaaiOlaaaa!6B18!
+　　${L_{total}} = {L_{recon}} + {\lambda _1}{L_{consist}} + {\lambda _2}{L_{space}} + {\lambda _3}{L_{time}}.$% MathType!End!2!1!
+　　其中% MathType!Translator!2!1!LaTeX.tdl!LaTeX 2.09 and later!
+　　% MathType!MTEF!2!1!+-
+　　% feaahOart1ev3aqatCvAUfeBSjuyZL2yd9gzLbvyNv2CaerbuLwBLn
+　　% hiov2DGi1BTfMBaeXatLxBI9gBaerbd9wDYLwzYbItLDharqqtubsr
+　　% 4rNCHbWexLMBbXgBd9gzLbvyNv2CaeHbl7mZLdGeaGqiVCI8FfYJH8
+　　% YrFfeuY-Hhbbf9v8qqaqFr0xc9pk0xbba9q8WqFfeaY-biLkVcLq-J
+　　% Hqpepeea0-as0Fb9pgeaYRXxe9vr0-vr0-vqpWqaaeaabiGaciaaca
+　　% qabeaadaqaaqaafaGcbaaeaaaaaaaaa8qacqaH7oaBpaWaaSbaaSqa
+　　% a8qacaaIXaaapaqabaGcpeGaaiilaiabeU7aS9aadaWgaaWcbaWdbi
+　　% aaikdaa8aabeaak8qacaGGSaGaeq4UdW2damaaBaaaleaapeGaaG4m
+　　% aaWdaeqaaaaa!492C!
+　　${\lambda _1},{\lambda _2},{\lambda _3}$% MathType!End!2!1!
+　　为超参数。
+本实施例设置上述超参数的策略基于以下梯度流博弈分析：
+　　* 重构损失试图最小化误差，倾向于保留所有高频细节，但可能导致对噪声的过拟合；
+　　* 流形损失（% MathType!Translator!2!1!LaTeX.tdl!LaTeX 2.09 and later!
+　　* % MathType!MTEF!2!1!+-
+　　* % feaahOart1ev3aqatCvAUfeBSjuyZL2yd9gzLbvyNv2CaerbuLwBLn
+　　* % hiov2DGi1BTfMBaeXatLxBI9gBaerbd9wDYLwzYbItLDharqqtubsr
+　　* % 4rNCHbWexLMBbXgBd9gzLbvyNv2CaeHbl7mZLdGeaGqiVCI8FfYJH8
+　　* % YrFfeuY-Hhbbf9v8qqaqFr0xc9pk0xbba9q8WqFfeaY-biLkVcLq-J
+　　* % Hqpepeea0-as0Fb9pgeaYRXxe9vr0-vr0-vqpWqaaeaabiGaciaaca
+　　* % qabeaadaqaaqaafaGcbaWefv3ySLgznfgDOfdarCqr1ngBPrginfgD
+　　* % ObYtUvgaiyaaqaaaaaaaaaWdbiab-jrim9aadaWgaaWcbaWdbiaado
+　　* % hacaWGWbGaamyyaiaadogacaWGLbaapaqabaGcpeGaaiilaiab-jri
+　　* % m9aadaWgaaWcbaWdbiaadshacaWGPbGaamyBaiaadwgaa8aabeaaaa
+　　* % a!54B4!
+　　* ${{\cal L}_{space}},{{\cal L}_{time}}$% MathType!End!2!1!
+　　* ）试图拉近邻居距离，倾向于使潜在空间变得平滑，但过度的平滑会导致所有嵌入趋同，失去样本间的区分度。
+　　* 因此，通过调节% MathType!Translator!2!1!LaTeX.tdl!LaTeX 2.09 and later!
+　　* % MathType!MTEF!2!1!+-
+　　* % feaahOart1ev3aqatCvAUfeBSjuyZL2yd9gzLbvyNv2CaerbuLwBLn
+　　* % hiov2DGi1BTfMBaeXatLxBI9gBaerbd9wDYLwzYbItLDharqqtubsr
+　　* % 4rNCHbWexLMBbXgBd9gzLbvyNv2CaeHbl7mZLdGeaGqiVCI8FfYJH8
+　　* % YrFfeuY-Hhbbf9v8qqaqFr0xc9pk0xbba9q8WqFfeaY-biLkVcLq-J
+　　* % Hqpepeea0-as0Fb9pgeaYRXxe9vr0-vr0-vqpWqaaeaabiGaciaaca
+　　* % qabeaadaqaaqaafaGcbaaeaaaaaaaaa8qacqaH7oaBpaWaaSbaaSqa
+　　* % a8qacaaIYaaapaqabaGcpeGaaiilaiabeU7aS9aadaWgaaWcbaWdbi
+　　* % aaiodaa8aabeaaaaa!4599!
+　　* ${\lambda _2},{\lambda _3}$% MathType!End!2!1!
+　　* ，在“重构保真度”与“流形平滑度”之间寻找纳什均衡点，既保证填补准确性，又维持数据的物理拓扑结构。
+　　
+　　通过梯度下降或Adam等优化算法对参数 % MathType!Translator!2!1!LaTeX.tdl!LaTeX 2.09 and later!
+　　% MathType!MTEF!2!1!+-
+　　% feaahOart1ev3aqatCvAUfeBSjuyZL2yd9gzLbvyNv2CaerbuLwBLn
+　　% hiov2DGi1BTfMBaeXatLxBI9gBaerbd9wDYLwzYbItLDharqqtubsr
+　　% 4rNCHbWexLMBbXgBd9gzLbvyNv2CaeHbl7mZLdGeaGqiVCI8FfYJH8
+　　% YrFfeuY-Hhbbf9v8qqaqFr0xc9pk0xbba9q8WqFfeaY-biLkVcLq-J
+　　% Hqpepeea0-as0Fb9pgeaYRXxe9vr0-vr0-vqpWqaaeaabiGaciaaca
+　　% qabeaadaqaaqaafaGcbaaeaaaaaaaaa8qacqaH4oqCcaGGSaGaeqy1
+　　% dygaaa!4368!
+　　$\theta ,\phi $% MathType!End!2!1!
+　　进行更新，直至 % MathType!Translator!2!1!LaTeX.tdl!LaTeX 2.09 and later!
+　　% MathType!MTEF!2!1!+-
+　　% feaahOart1ev3aqatCvAUfeBSjuyZL2yd9gzLbvyNv2CaerbuLwBLn
+　　% hiov2DGi1BTfMBaeXatLxBI9gBaerbd9wDYLwzYbItLDharqqtubsr
+　　% 4rNCHbWexLMBbXgBd9gzLbvyNv2CaeHbl7mZLdGeaGqiVCI8FfYJH8
+　　% YrFfeuY-Hhbbf9v8qqaqFr0xc9pk0xbba9q8WqFfeaY-biLkVcLq-J
+　　% Hqpepeea0-as0Fb9pgeaYRXxe9vr0-vr0-vqpWqaaeaabiGaciaaca
+　　% qabeaadaqaaqaafaGcbaaeaaaaaaaaa8qacaWGmbWdamaaBaaaleaa
+　　% peGaamiDaiaad+gacaWG0bGaamyyaiaadYgaa8aabeaaaaa!4522!
+　　${L_{total}}$% MathType!End!2!1!
+　　收敛。
+训练过程：具体的，模型训练过程包括：
+步骤1：初始化编码器、解码器、自适应网络及相关参数；
+步骤2：按批次输入训练数据，执行步骤S3~S6计算 % MathType!Translator!2!1!LaTeX.tdl!LaTeX 2.09 and later!
+% MathType!MTEF!2!1!+-
+% feaahOart1ev3aqatCvAUfeBSjuyZL2yd9gzLbvyNv2CaerbuLwBLn
+% hiov2DGi1BTfMBaeXatLxBI9gBaerbd9wDYLwzYbItLDharqqtubsr
+% 4rNCHbWexLMBbXgBd9gzLbvyNv2CaeHbl7mZLdGeaGqiVCI8FfYJH8
+% YrFfeuY-Hhbbf9v8qqaqFr0xc9pk0xbba9q8WqFfeaY-biLkVcLq-J
+% Hqpepeea0-as0Fb9pgeaYRXxe9vr0-vr0-vqpWqaaeaabiGaciaaca
+% qabeaadaqaaqaafaGcbaaeaaaaaaaaa8qaceWGybWdayaajaaaaa!4036!
+$\hat X$% MathType!End!2!1!
+与各损失项；
+步骤3：对网络进行反向传播计算梯度；
+步骤4：采用优化算法更新网络参数，直至验证集损失不再下降或达到预设迭代次数，训练结束，得到训练完成的缺失数据填补模型。
+　　推理过程：在推理阶段，为提高运行效率，不执行伯努利随机损坏生成增强掩码及一致性损失计算，仅执行一次前向传播：输入 % MathType!Translator!2!1!LaTeX.tdl!LaTeX 2.09 and later!
+　　% MathType!MTEF!2!1!+-
+　　% feaahOart1ev3aqatCvAUfeBSjuyZL2yd9gzLbvyNv2CaerbuLwBLn
+　　% hiov2DGi1BTfMBaeXatLxBI9gBaerbd9wDYLwzYbItLDharqqtubsr
+　　% 4rNCHbWexLMBbXgBd9gzLbvyNv2CaeHbl7mZLdGeaGqiVCI8FfYJH8
+　　% YrFfeuY-Hhbbf9v8qqaqFr0xc9pk0xbba9q8WqFfeaY-biLkVcLq-J
+　　% Hqpepeea0-as0Fb9pgeaYRXxe9vr0-vr0-vqpWqaaeaabiGaciaaca
+　　% qabeaadaqaaqaafaGcbaaeaaaaaaaaa8qacaWGybGaaiilaiaad2ea
+　　% aaa!4199!
+　　$X,M$% MathType!End!2!1!
+　　→ 编码得到 % MathType!Translator!2!1!LaTeX.tdl!LaTeX 2.09 and later!
+　　% MathType!MTEF!2!1!+-
+　　% feaahOart1ev3aqatCvAUfeBSjuyZL2yd9gzLbvyNv2CaerbuLwBLn
+　　% hiov2DGi1BTfMBaeXatLxBI9gBaerbd9wDYLwzYbItLDharqqtubsr
+　　% 4rNCHbWexLMBbXgBd9gzLbvyNv2CaeHbl7mZLdGeaGqiVCI8FfYJH8
+　　% YrFfeuY-Hhbbf9v8qqaqFr0xc9pk0xbba9q8WqFfeaY-biLkVcLq-J
+　　% Hqpepeea0-as0Fb9pgeaYRXxe9vr0-vr0-vqpWqaaeaabiGaciaaca
+　　% qabeaadaqaaqaafaGcbaaeaaaaaaaaa8qacaWGAbWdamaaBaaaleaa
+　　% peGaam4BaiaadkhacaWGPbGaam4zaaWdaeqaaaaa!4438!
+　　${Z_{orig}}$% MathType!End!2!1!
+　　→ 计算 % MathType!Translator!2!1!LaTeX.tdl!LaTeX 2.09 and later!
+　　% MathType!MTEF!2!1!+-
+　　% feaahOart1ev3aqatCvAUfeBSjuyZL2yd9gzLbvyNv2CaerbuLwBLn
+　　% hiov2DGi1BTfMBaeXatLxBI9gBaerbd9wDYLwzYbItLDharqqtubsr
+　　% 4rNCHbWexLMBbXgBd9gzLbvyNv2CaeHbl7mZLdGeaGqiVCI8FfYJH8
+　　% YrFfeuY-Hhbbf9v8qqaqFr0xc9pk0xbba9q8WqFfeaY-biLkVcLq-J
+　　% Hqpepeea0-as0Fb9pgeaYRXxe9vr0-vr0-vqpWqaaeaabiGaciaaca
+　　% qabeaadaqaaqaafaGcbaaeaaaaaaaaa8qacaWGAbWdamaaBaaaleaa
+　　% peGaam4CaiaadchacaWGHbGaam4yaiaadwgaa8aabeaak8qacaGGSa
+　　% GaamOwa8aadaWgaaWcbaWdbiaadshacaWGPbGaamyBaiaadwgaa8aa
+　　% beaaaaa!4ADE!
+　　${Z_{space}},{Z_{time}}$% MathType!End!2!1!
+　　→ 融合得到 % MathType!Translator!2!1!LaTeX.tdl!LaTeX 2.09 and later!
+　　% MathType!MTEF!2!1!+-
+　　% feaahOart1ev3aqatCvAUfeBSjuyZL2yd9gzLbvyNv2CaerbuLwBLn
+　　% hiov2DGi1BTfMBaeXatLxBI9gBaerbd9wDYLwzYbItLDharqqtubsr
+　　% 4rNCHbWexLMBbXgBd9gzLbvyNv2CaeHbl7mZLdGeaGqiVCI8FfYJH8
+　　% YrFfeuY-Hhbbf9v8qqaqFr0xc9pk0xbba9q8WqFfeaY-biLkVcLq-J
+　　% Hqpepeea0-as0Fb9pgeaYRXxe9vr0-vr0-vqpWqaaeaabiGaciaaca
+　　% qabeaadaqaaqaafaGcbaaeaaaaaaaaa8qacaWGAbWdamaaBaaaleaa
+　　% peGaamOzaiaadwhacaWGZbGaamyzaiaadsgaa8aabeaaaaa!4523!
+　　${Z_{fused}}$% MathType!End!2!1!
+　　→ 解码输出 % MathType!Translator!2!1!LaTeX.tdl!LaTeX 2.09 and later!
+　　% MathType!MTEF!2!1!+-
+　　% feaahOart1ev3aqatCvAUfeBSjuyZL2yd9gzLbvyNv2CaerbuLwBLn
+　　% hiov2DGi1BTfMBaeXatLxBI9gBaerbd9wDYLwzYbItLDharqqtubsr
+　　% 4rNCHbWexLMBbXgBd9gzLbvyNv2CaeHbl7mZLdGeaGqiVCI8FfYJH8
+　　% YrFfeuY-Hhbbf9v8qqaqFr0xc9pk0xbba9q8WqFfeaY-biLkVcLq-J
+　　% Hqpepeea0-as0Fb9pgeaYRXxe9vr0-vr0-vqpWqaaeaabiGaciaaca
+　　% qabeaadaqaaqaafaGcbaaeaaaaaaaaa8qaceWGybWdayaajaaaaa!4036!
+　　$\hat X$% MathType!End!2!1!
+　　→ 得到 % MathType!Translator!2!1!LaTeX.tdl!LaTeX 2.09 and later!
+　　% MathType!MTEF!2!1!+-
+　　% feaahOart1ev3aqatCvAUfeBSjuyZL2yd9gzLbvyNv2CaerbuLwBLn
+　　% hiov2DGi1BTfMBaeXatLxBI9gBaerbd9wDYLwzYbItLDharqqtubsr
+　　% 4rNCHbWexLMBbXgBd9gzLbvyNv2CaeHbl7mZLdGeaGqiVCI8FfYJH8
+　　% YrFfeuY-Hhbbf9v8qqaqFr0xc9pk0xbba9q8WqFfeaY-biLkVcLq-J
+　　% Hqpepeea0-as0Fb9pgeaYRXxe9vr0-vr0-vqpWqaaeaabiGaciaaca
+　　% qabeaadaqaaqaafaGcbaaeaaaaaaaaa8qacaWGybWdamaaBaaaleaa
+　　% peGaamyAaiaad2gacaWGWbaapaqabaaaaa!4346!
+　　${X_{imp}}$% MathType!End!2!1!
+　　。
+　　实施例2
+　　为了说明本发明方法在工程数据上的可实施性，可选取某工业过程监控或医疗监测数据集作为实施例。设数据包含 % MathType!Translator!2!1!LaTeX.tdl!LaTeX 2.09 and later!
+　　% MathType!MTEF!2!1!+-
+　　% feaahOart1ev3aqatCvAUfeBSjuyZL2yd9gzLbvyNv2CaerbuLwBLn
+　　% hiov2DGi1BTfMBaeXatLxBI9gBaerbd9wDYLwzYbItLDharqqtubsr
+　　% 4rNCHbWexLMBbXgBd9gzLbvyNv2CaeHbl7mZLdGeaGqiVCI8FfYJH8
+　　% YrFfeuY-Hhbbf9v8qqaqFr0xc9pk0xbba9q8WqFfeaY-biLkVcLq-J
+　　% Hqpepeea0-as0Fb9pgeaYRXxe9vr0-vr0-vqpWqaaeaabiGaciaaca
+　　% qabeaadaqaaqaafaGcbaaeaaaaaaaaa8qacaWGubaaaa!4013!
+　　$T$% MathType!End!2!1!
+　　个时刻、% MathType!Translator!2!1!LaTeX.tdl!LaTeX 2.09 and later!
+　　% MathType!MTEF!2!1!+-
+　　% feaahOart1ev3aqatCvAUfeBSjuyZL2yd9gzLbvyNv2CaerbuLwBLn
+　　% hiov2DGi1BTfMBaeXatLxBI9gBaerbd9wDYLwzYbItLDharqqtubsr
+　　% 4rNCHbWexLMBbXgBd9gzLbvyNv2CaeHbl7mZLdGeaGqiVCI8FfYJH8
+　　% YrFfeuY-Hhbbf9v8qqaqFr0xc9pk0xbba9q8WqFfeaY-biLkVcLq-J
+　　% Hqpepeea0-as0Fb9pgeaYRXxe9vr0-vr0-vqpWqaaeaabiGaciaaca
+　　% qabeaadaqaaqaafaGcbaaeaaaaaaaaa8qacaWGobaaaa!400D!
+　　$N$% MathType!End!2!1!
+　　 个变量，将原始数据按时间顺序划分训练集与测试集（例如按 7:3 划分）。通过随机缺失或块缺失方式构造缺失掩码 % MathType!Translator!2!1!LaTeX.tdl!LaTeX 2.09 and later!
+　　% MathType!MTEF!2!1!+-
+　　% feaahOart1ev3aqatCvAUfeBSjuyZL2yd9gzLbvyNv2CaerbuLwBLn
+　　% hiov2DGi1BTfMBaeXatLxBI9gBaerbd9wDYLwzYbItLDharqqtubsr
+　　% 4rNCHbWexLMBbXgBd9gzLbvyNv2CaeHbl7mZLdGeaGqiVCI8FfYJH8
+　　% YrFfeuY-Hhbbf9v8qqaqFr0xc9pk0xbba9q8WqFfeaY-biLkVcLq-J
+　　% Hqpepeea0-as0Fb9pgeaYRXxe9vr0-vr0-vqpWqaaeaabiGaciaaca
+　　% qabeaadaqaaqaafaGcbaaeaaaaaaaaa8qacaWGnbaaaa!400C!
+　　$M$% MathType!End!2!1!
+　　。
+
+
+　　以上所述实施例的各技术特征可以进行任意的组合，为使描述简洁，未对上述实施例中的各个技术特征所有可能的组合都进行描述，然而，只要这些技术特征的组合不存在矛盾，都应当认为是本说明书记载的范围。
+　　以上所述实施例仅表达了本申请的几种实施方式，其描述较为具体和详细，但并不能因此而理解为对申请专利范围的限制。应当指出的是，对于本领域的普通技术人员来说，在不脱离本申请构思的前提下，还可以做出若干变形和改进，这些都属于本申请的保护范围。因此，本申请专利的保护范围应以所附权利要求为准。
+　　
+
+
+
+
+
+
+图 1：AE-CS模型流程图
+案件相关信息
+
+1
+
+
+权利要求书
+
+1
+
+
+说明书
+
+1
+
+
+说明书附图
+
+1
+
+

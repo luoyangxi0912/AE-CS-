@@ -1,0 +1,104 @@
+
+SAE_GAN(
+  (loss_func): MSELoss()
+  (generator): Sequential(
+    (0): Sequential(
+      (0): Linear(in_features=10, out_features=100, bias=True)
+      (1): Sigmoid()
+      (2): Linear(in_features=100, out_features=50, bias=True)
+      (3): Sigmoid()
+    )
+    (1): Sequential(
+      (0): Linear(in_features=50, out_features=100, bias=True)
+      (1): Sigmoid()
+      (2): Linear(in_features=100, out_features=10, bias=True)
+      (3): Affine()
+    )
+  )
+  (discriminator): Sequential(
+    (0): Linear(in_features=10, out_features=100, bias=True)
+    (1): Sigmoid()
+    (2): Linear(in_features=100, out_features=1, bias=True)
+    (3): Sigmoid()
+  )
+)
+
+run paras: {'run_times': 1, 'multirun_seed': 'r*2', '_run_id': '', 'e': 24, 'load_para_type': None, 'load_sub': None, 'load_file_name': None, 'view_addi_info': ['recon_loss', 'g_loss', 'd_loss_r', 'd_loss_g'], 'if_log': True, 'if_epoch_eval': None, 'if_vmap': False, 'if_save_excel': True, 'if_save_plot': True, 'fd_pr': ['re-T2&Q-kde', 'lv-\\phi_{\\cal{D}}-kde'], 'fd_pr_dt': [{'mm': 're', 'ts': 'T2', 'thrd_meth': 'kde'}, {'mm': 're', 'ts': 'Q', 'thrd_meth': 'kde'}, {'mm': 'lv', 'ts': '\\phi_{\\cal{D}}', 'thrd_meth': 'kde'}], 'fd_pr_name': ['re-T2-kde', 're-Q-kde', 'lv-\\phi_{\\cal{D}}-kde'], 'if_minus_mean': True, 'if_use_lstsq': False, 'expt_FAR': 0.005, 'if_plot_mm_kde': True, 'if_plot_score_hm': False, 'if_mm_tab': False, 'if_mm_tsne': False, 'alld_error': 0.005, 'cl': 0.995, 'if_intp': False}
+
+Train SAE_GAN[unsup_res]_CSTR_fd_Act2 in cuda:
+Epoch: 24 - 751/751 | recon_loss = 0.0196, g_loss = 2.5550, d_loss_r = 0.7084, d_loss_g = 0.2658                
+Finish training~ Spend 123 seconds
+
+Mean training losses: ['train-recon_loss' 'train-g_loss' 'train-d_loss_r' 'train-d_loss_g'] = [0.0256 2.3917 0.732  0.2592]
+
+Save model paras in '../Result/SAE_GAN[unsup_res]_CSTR_fd_Act2/Last'
+Plot [T2_cov_sqrt_inv] re-T2-kde.pdf in '../Result/SAE_GAN[unsup_res]_CSTR_fd_Act2'
+
+Plot: 10/10 subplot of 'score_kde'...                
+Save [mm_kde] re-T2-kde.pdf in ../Result/SAE_GAN[unsup_res]_CSTR_fd_Act2
+
+1) 're-T2-kde':
+
+Solutions = [ 106.59 3271.94 9778.93]
+Threshold = 106.59
+
+The test false alarm rates (FARs) are:
+[0.  0.  0.  0.  0.5 0.  0.  0.  0.  0. ](%)
+
+The test missed detection rates (MDRs) are:
+[35.16 17.88 18.58  1.2   3.1   4.3   1.1   5.19  4.6  24.98](%)
+
+The test AFAR is 0.05(%).
+The test AMDR is 11.61(%).
+
+Plot: 10/10 subplot of 'score_kde'...                
+Save [mm_kde] re-Q-kde.pdf in ../Result/SAE_GAN[unsup_res]_CSTR_fd_Act2
+
+2) 're-Q-kde':
+
+Solutions = [  2.15 138.86 313.1 ]
+Threshold = 2.15
+
+The test false alarm rates (FARs) are:
+[0.  0.  0.  0.  0.5 0.  0.5 0.5 0.  0.5](%)
+
+The test missed detection rates (MDRs) are:
+[35.06 27.97 27.97  0.8   3.3   3.5   0.9   7.79  6.99 29.87](%)
+
+The test AFAR is 0.2(%).
+The test AMDR is 14.42(%).
+
+Plot: 1/1 subplot of 'score_kde'...                
+Save [mm_kde] lv-\phi_{\cal{D}}-kde.pdf in ../Result/SAE_GAN[unsup_res]_CSTR_fd_Act2
+Traceback (most recent call last):
+  File "F:\torch_joff\joff\_run\_run_model.py", line 67, in _run_with_log
+    _run_n(self, p)
+  File "F:\torch_joff\joff\_run\_run_model.py", line 119, in _run_n
+    self.test()
+  File "F:\torch_joff\joff\_nn\_fcnn_module.py", line 72, in test
+    _test(self, **kwargs)
+  File "F:\torch_joff\joff\_test\_test_model.py", line 27, in _test
+    _test_model(self, p)
+  File "F:\torch_joff\joff\_test\_test_model.py", line 62, in _test_model
+    fault_evaluation(self, train_In, train_Out, train_Latent, [], 'offline', p)
+  File "F:\torch_joff\joff\_test\_fd.py", line 40, in fault_evaluation
+    _view_score_kde(_Score_off, self._save_path, p['pr_name'])
+  File "F:\torch_joff\joff\_plot\_view_score.py", line 47, in _view_score_kde
+    plt.savefig(path + '/[mm_kde] '+ pr_name + '.pdf', bbox_inches='tight')
+  File "F:\Anaconda\lib\site-packages\matplotlib\pyplot.py", line 996, in savefig
+    res = fig.savefig(*args, **kwargs)
+  File "F:\Anaconda\lib\site-packages\matplotlib\figure.py", line 3328, in savefig
+    self.canvas.print_figure(fname, **kwargs)
+  File "F:\Anaconda\lib\site-packages\matplotlib\backends\backend_qtagg.py", line 75, in print_figure
+    super().print_figure(*args, **kwargs)
+  File "F:\Anaconda\lib\site-packages\matplotlib\backend_bases.py", line 2362, in print_figure
+    result = print_method(
+  File "F:\Anaconda\lib\site-packages\matplotlib\backend_bases.py", line 2228, in <lambda>
+    print_method = functools.wraps(meth)(lambda *args, **kwargs: meth(
+  File "F:\Anaconda\lib\site-packages\matplotlib\backends\backend_pdf.py", line 2808, in print_pdf
+    file = PdfFile(filename, metadata=metadata)
+  File "F:\Anaconda\lib\site-packages\matplotlib\backends\backend_pdf.py", line 713, in __init__
+    fh, opened = cbook.to_filehandle(filename, "wb", return_opened=True)
+  File "F:\Anaconda\lib\site-packages\matplotlib\cbook\__init__.py", line 489, in to_filehandle
+    fh = open(fname, flag, encoding=encoding)
+FileNotFoundError: [Errno 2] No such file or directory: '../Result/SAE_GAN[unsup_res]_CSTR_fd_Act2/[mm_kde] lv-\\phi_{\\cal{D}}-kde.pdf'

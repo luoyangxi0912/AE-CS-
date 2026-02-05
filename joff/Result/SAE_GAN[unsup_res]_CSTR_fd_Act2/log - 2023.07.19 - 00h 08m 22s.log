@@ -1,0 +1,86 @@
+
+SAE_GAN(
+  (loss_func): MSELoss()
+  (generator): Sequential(
+    (0): Sequential(
+      (0): Linear(in_features=10, out_features=100, bias=True)
+      (1): Sigmoid()
+      (2): Linear(in_features=100, out_features=50, bias=True)
+      (3): Sigmoid()
+    )
+    (1): Sequential(
+      (0): Linear(in_features=50, out_features=100, bias=True)
+      (1): Sigmoid()
+      (2): Linear(in_features=100, out_features=10, bias=True)
+      (3): Affine()
+    )
+  )
+  (discriminator): Sequential(
+    (0): Linear(in_features=10, out_features=100, bias=True)
+    (1): Sigmoid()
+    (2): Linear(in_features=100, out_features=1, bias=True)
+    (3): Sigmoid()
+  )
+)
+
+run paras: {'run_times': 1, 'multirun_seed': 'r*2', '_run_id': '', 'e': 24, 'load_para_type': None, 'load_sub': None, 'load_file_name': None, 'view_addi_info': ['recon_loss', 'g_loss', 'd_loss_r', 'd_loss_g'], 'if_log': True, 'if_epoch_eval': None, 'if_vmap': False, 'if_save_excel': True, 'if_save_plot': True, 'fd_pr': ['re-T2&Q-kde', 'lv-\\phi_{\\cal{D}}-kde'], 'fd_pr_dt': [{'mm': 're', 'ts': 'T2', 'thrd_meth': 'kde'}, {'mm': 're', 'ts': 'Q', 'thrd_meth': 'kde'}, {'mm': 'lv', 'ts': '\\phi_{\\cal{D}}', 'thrd_meth': 'kde'}], 'fd_pr_name': ['re-T2-kde', 're-Q-kde', 'lv-\\phi_{\\cal{D}}-kde'], 'if_minus_mean': True, 'if_use_lstsq': False, 'expt_FAR': 0.005, 'if_plot_mm_kde': True, 'if_plot_score_hm': False, 'if_mm_tab': False, 'if_mm_tsne': False, 'alld_error': 0.005, 'cl': 0.995, 'if_intp': False}
+
+Train SAE_GAN[unsup_res]_CSTR_fd_Act2 in cuda:
+Epoch: 24 - 751/751 | recon_loss = 0.0295, g_loss = 1.8072, d_loss_r = 1.4139, d_loss_g = 0.4310                
+Finish training~ Spend 106 seconds
+
+Mean training losses: ['train-recon_loss' 'train-g_loss' 'train-d_loss_r' 'train-d_loss_g'] = [0.1029 1.8142 1.3071 0.4579]
+
+Save model paras in '../Result/SAE_GAN[unsup_res]_CSTR_fd_Act2/Last'
+Plot [T2_cov_sqrt_inv] re-T2-kde.pdf in '../Result/SAE_GAN[unsup_res]_CSTR_fd_Act2'
+
+Plot: 10/10 subplot of 'score_kde'...                
+Save [mm_kde] re-T2-kde.pdf in ../Result/SAE_GAN[unsup_res]_CSTR_fd_Act2
+
+1) 're-T2-kde':
+
+Solutions = [88.25]
+Threshold = 88.25
+
+The test false alarm rates (FARs) are:
+[0.  0.  0.  0.  0.5 0.  0.5 1.  0.  0.5](%)
+
+The test missed detection rates (MDRs) are:
+[36.26 14.29 12.99  1.    2.3   3.5   1.6   4.6   4.2  23.88](%)
+
+The test AFAR is 0.25(%).
+The test AMDR is 10.46(%).
+
+Plot: 10/10 subplot of 'score_kde'...                
+Save [mm_kde] re-Q-kde.pdf in ../Result/SAE_GAN[unsup_res]_CSTR_fd_Act2
+
+2) 're-Q-kde':
+
+Solutions = [  1.59  37.   119.17]
+Threshold = 1.59
+
+The test false alarm rates (FARs) are:
+[0.5 0.  0.  0.  0.5 0.  0.5 1.  0.  0.5](%)
+
+The test missed detection rates (MDRs) are:
+[38.26 22.58 23.58  6.29  2.4   3.6   1.7   6.19  6.29 28.27](%)
+
+The test AFAR is 0.3(%).
+The test AMDR is 13.92(%).
+
+Traceback (most recent call last):
+  File "F:\torch_joff\joff\_run\_run_model.py", line 67, in _run_with_log
+    _run_n(self, p)
+  File "F:\torch_joff\joff\_run\_run_model.py", line 119, in _run_n
+    self.test()
+  File "F:\torch_joff\joff\_nn\_fcnn_module.py", line 72, in test
+    _test(self, **kwargs)
+  File "F:\torch_joff\joff\_test\_test_model.py", line 27, in _test
+    _test_model(self, p)
+  File "F:\torch_joff\joff\_test\_test_model.py", line 62, in _test_model
+    fault_evaluation(self, train_In, train_Out, train_Latent, [], 'offline', p)
+  File "F:\torch_joff\joff\_test\_fd.py", line 40, in fault_evaluation
+    _view_score_kde(_Score_off, self._save_path, p['pr_name'])
+  File "F:\torch_joff\joff\_plot\_view_score.py", line 30, in _view_score_kde
+    row, col = int(i / axes.shape[1]), int(np.mod(i, axes.shape[1]))
+AttributeError: 'Axes' object has no attribute 'shape'

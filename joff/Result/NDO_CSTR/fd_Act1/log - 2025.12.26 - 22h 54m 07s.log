@@ -1,0 +1,806 @@
+
+NDO(
+  (loss_func): MSELoss()
+  (seq): Sequential(
+    (layer_0): Layer(
+      (0): Linear(in_features=52, out_features=200, bias=True)
+      (1): Gaussian()
+    )
+    (layer_1): Layer(
+      (0): Dropout(p=0.0133, inplace=False)
+      (1): Linear(in_features=200, out_features=150, bias=True)
+      (2): Sigmoid()
+    )
+    (layer_2): Layer(
+      (0): Dropout(p=0.01, inplace=False)
+      (1): Linear(in_features=150, out_features=50, bias=True)
+      (2): Gaussian()
+    )
+  )
+)
+
+run paras: {'run_times': 1, 'multirun_seed': 'r*2', '_run_id': '', 'e': 2, 'load_para_type': None, 'load_sub': None, 'load_file_name': None, 'load_path_replace': None, 'view_addi_info': ['observer_loss', 'stability_loss', 'loss'], 'if_log': True, 'if_epoch_eval': None, 'if_vmap': False, 'if_save_excel': True, 'if_save_plot': True, 'fd_pr': ['cust_mm_ey-T2&Q-kde'], 'fd_pr_dt': [{'mm': 'cust_mm_ey', 'ts': 'T2', 'thrd_meth': 'kde'}, {'mm': 'cust_mm_ey', 'ts': 'Q', 'thrd_meth': 'kde'}], 'fd_pr_name': ['cust_mm_ey-T2-kde', 'cust_mm_ey-Q-kde'], 'expt_FAR': 0.005, 'ts_post_op': None, 'if_use_lstsq': True, 'if_plot_mm_kde': False, 'if_plot_score_hm': False, 'if_plot_cov_inv': True, 'if_save_ts': False, 'alld_error': 0.005, 'cl': 0.995, 'if_intp': False}
+
+Train NDO_CSTR/fd_Act1 via cuda:
+U.size() = torch.Size([10, 16, 2]), Y.size() = torch.Size([10, 16, 8]), training = True
+U.size() = torch.Size([10, 16, 2]), Y.size() = torch.Size([10, 16, 8]), training = True
+U.size() = torch.Size([10, 16, 2]), Y.size() = torch.Size([10, 16, 8]), training = True
+U.size() = torch.Size([10, 16, 2]), Y.size() = torch.Size([10, 16, 8]), training = True
+U.size() = torch.Size([10, 16, 2]), Y.size() = torch.Size([10, 16, 8]), training = True
+U.size() = torch.Size([10, 16, 2]), Y.size() = torch.Size([10, 16, 8]), training = True
+U.size() = torch.Size([10, 16, 2]), Y.size() = torch.Size([10, 16, 8]), training = True
+U.size() = torch.Size([10, 16, 2]), Y.size() = torch.Size([10, 16, 8]), training = True
+U.size() = torch.Size([10, 16, 2]), Y.size() = torch.Size([10, 16, 8]), training = True
+U.size() = torch.Size([10, 16, 2]), Y.size() = torch.Size([10, 16, 8]), training = True
+Epoch: 1 - 10/751 | observer_loss = 5.4507, stability_loss = 0.0000, loss = 5.4507                U.size() = torch.Size([10, 16, 2]), Y.size() = torch.Size([10, 16, 8]), training = True
+U.size() = torch.Size([10, 16, 2]), Y.size() = torch.Size([10, 16, 8]), training = True
+U.size() = torch.Size([10, 16, 2]), Y.size() = torch.Size([10, 16, 8]), training = True
+U.size() = torch.Size([10, 16, 2]), Y.size() = torch.Size([10, 16, 8]), training = True
+U.size() = torch.Size([10, 16, 2]), Y.size() = torch.Size([10, 16, 8]), training = True
+U.size() = torch.Size([10, 16, 2]), Y.size() = torch.Size([10, 16, 8]), training = True
+U.size() = torch.Size([10, 16, 2]), Y.size() = torch.Size([10, 16, 8]), training = True
+U.size() = torch.Size([10, 16, 2]), Y.size() = torch.Size([10, 16, 8]), training = True
+U.size() = torch.Size([10, 16, 2]), Y.size() = torch.Size([10, 16, 8]), training = True
+U.size() = torch.Size([10, 16, 2]), Y.size() = torch.Size([10, 16, 8]), training = True
+Epoch: 1 - 20/751 | observer_loss = 6.3379, stability_loss = 0.0000, loss = 6.3379                U.size() = torch.Size([10, 16, 2]), Y.size() = torch.Size([10, 16, 8]), training = True
+U.size() = torch.Size([10, 16, 2]), Y.size() = torch.Size([10, 16, 8]), training = True
+U.size() = torch.Size([10, 16, 2]), Y.size() = torch.Size([10, 16, 8]), training = True
+U.size() = torch.Size([10, 16, 2]), Y.size() = torch.Size([10, 16, 8]), training = True
+U.size() = torch.Size([10, 16, 2]), Y.size() = torch.Size([10, 16, 8]), training = True
+U.size() = torch.Size([10, 16, 2]), Y.size() = torch.Size([10, 16, 8]), training = True
+U.size() = torch.Size([10, 16, 2]), Y.size() = torch.Size([10, 16, 8]), training = True
+U.size() = torch.Size([10, 16, 2]), Y.size() = torch.Size([10, 16, 8]), training = True
+U.size() = torch.Size([10, 16, 2]), Y.size() = torch.Size([10, 16, 8]), training = True
+U.size() = torch.Size([10, 16, 2]), Y.size() = torch.Size([10, 16, 8]), training = True
+Epoch: 1 - 30/751 | observer_loss = 4.8444, stability_loss = 0.0000, loss = 4.8444                U.size() = torch.Size([10, 16, 2]), Y.size() = torch.Size([10, 16, 8]), training = True
+U.size() = torch.Size([10, 16, 2]), Y.size() = torch.Size([10, 16, 8]), training = True
+U.size() = torch.Size([10, 16, 2]), Y.size() = torch.Size([10, 16, 8]), training = True
+U.size() = torch.Size([10, 16, 2]), Y.size() = torch.Size([10, 16, 8]), training = True
+U.size() = torch.Size([10, 16, 2]), Y.size() = torch.Size([10, 16, 8]), training = True
+U.size() = torch.Size([10, 16, 2]), Y.size() = torch.Size([10, 16, 8]), training = True
+U.size() = torch.Size([10, 16, 2]), Y.size() = torch.Size([10, 16, 8]), training = True
+U.size() = torch.Size([10, 16, 2]), Y.size() = torch.Size([10, 16, 8]), training = True
+U.size() = torch.Size([10, 16, 2]), Y.size() = torch.Size([10, 16, 8]), training = True
+U.size() = torch.Size([10, 16, 2]), Y.size() = torch.Size([10, 16, 8]), training = True
+Epoch: 1 - 40/751 | observer_loss = 4.8441, stability_loss = 0.0000, loss = 4.8441                U.size() = torch.Size([10, 16, 2]), Y.size() = torch.Size([10, 16, 8]), training = True
+U.size() = torch.Size([10, 16, 2]), Y.size() = torch.Size([10, 16, 8]), training = True
+U.size() = torch.Size([10, 16, 2]), Y.size() = torch.Size([10, 16, 8]), training = True
+U.size() = torch.Size([10, 16, 2]), Y.size() = torch.Size([10, 16, 8]), training = True
+U.size() = torch.Size([10, 16, 2]), Y.size() = torch.Size([10, 16, 8]), training = True
+U.size() = torch.Size([10, 16, 2]), Y.size() = torch.Size([10, 16, 8]), training = True
+U.size() = torch.Size([10, 16, 2]), Y.size() = torch.Size([10, 16, 8]), training = True
+U.size() = torch.Size([10, 16, 2]), Y.size() = torch.Size([10, 16, 8]), training = True
+U.size() = torch.Size([10, 16, 2]), Y.size() = torch.Size([10, 16, 8]), training = True
+U.size() = torch.Size([10, 16, 2]), Y.size() = torch.Size([10, 16, 8]), training = True
+Epoch: 1 - 50/751 | observer_loss = 5.6394, stability_loss = 0.0000, loss = 5.6394                U.size() = torch.Size([10, 16, 2]), Y.size() = torch.Size([10, 16, 8]), training = True
+U.size() = torch.Size([10, 16, 2]), Y.size() = torch.Size([10, 16, 8]), training = True
+U.size() = torch.Size([10, 16, 2]), Y.size() = torch.Size([10, 16, 8]), training = True
+U.size() = torch.Size([10, 16, 2]), Y.size() = torch.Size([10, 16, 8]), training = True
+U.size() = torch.Size([10, 16, 2]), Y.size() = torch.Size([10, 16, 8]), training = True
+U.size() = torch.Size([10, 16, 2]), Y.size() = torch.Size([10, 16, 8]), training = True
+U.size() = torch.Size([10, 16, 2]), Y.size() = torch.Size([10, 16, 8]), training = True
+U.size() = torch.Size([10, 16, 2]), Y.size() = torch.Size([10, 16, 8]), training = True
+U.size() = torch.Size([10, 16, 2]), Y.size() = torch.Size([10, 16, 8]), training = True
+U.size() = torch.Size([10, 16, 2]), Y.size() = torch.Size([10, 16, 8]), training = True
+Epoch: 1 - 60/751 | observer_loss = 5.0590, stability_loss = 0.0000, loss = 5.0590                U.size() = torch.Size([10, 16, 2]), Y.size() = torch.Size([10, 16, 8]), training = True
+U.size() = torch.Size([10, 16, 2]), Y.size() = torch.Size([10, 16, 8]), training = True
+U.size() = torch.Size([10, 16, 2]), Y.size() = torch.Size([10, 16, 8]), training = True
+U.size() = torch.Size([10, 16, 2]), Y.size() = torch.Size([10, 16, 8]), training = True
+U.size() = torch.Size([10, 16, 2]), Y.size() = torch.Size([10, 16, 8]), training = True
+U.size() = torch.Size([10, 16, 2]), Y.size() = torch.Size([10, 16, 8]), training = True
+U.size() = torch.Size([10, 16, 2]), Y.size() = torch.Size([10, 16, 8]), training = True
+U.size() = torch.Size([10, 16, 2]), Y.size() = torch.Size([10, 16, 8]), training = True
+U.size() = torch.Size([10, 16, 2]), Y.size() = torch.Size([10, 16, 8]), training = True
+U.size() = torch.Size([10, 16, 2]), Y.size() = torch.Size([10, 16, 8]), training = True
+Epoch: 1 - 70/751 | observer_loss = 5.6547, stability_loss = 0.0000, loss = 5.6547                U.size() = torch.Size([10, 16, 2]), Y.size() = torch.Size([10, 16, 8]), training = True
+U.size() = torch.Size([10, 16, 2]), Y.size() = torch.Size([10, 16, 8]), training = True
+U.size() = torch.Size([10, 16, 2]), Y.size() = torch.Size([10, 16, 8]), training = True
+U.size() = torch.Size([10, 16, 2]), Y.size() = torch.Size([10, 16, 8]), training = True
+U.size() = torch.Size([10, 16, 2]), Y.size() = torch.Size([10, 16, 8]), training = True
+U.size() = torch.Size([10, 16, 2]), Y.size() = torch.Size([10, 16, 8]), training = True
+U.size() = torch.Size([10, 16, 2]), Y.size() = torch.Size([10, 16, 8]), training = True
+U.size() = torch.Size([10, 16, 2]), Y.size() = torch.Size([10, 16, 8]), training = True
+U.size() = torch.Size([10, 16, 2]), Y.size() = torch.Size([10, 16, 8]), training = True
+U.size() = torch.Size([10, 16, 2]), Y.size() = torch.Size([10, 16, 8]), training = True
+Epoch: 1 - 80/751 | observer_loss = 5.3921, stability_loss = 0.0000, loss = 5.3921                U.size() = torch.Size([10, 16, 2]), Y.size() = torch.Size([10, 16, 8]), training = True
+U.size() = torch.Size([10, 16, 2]), Y.size() = torch.Size([10, 16, 8]), training = True
+U.size() = torch.Size([10, 16, 2]), Y.size() = torch.Size([10, 16, 8]), training = True
+U.size() = torch.Size([10, 16, 2]), Y.size() = torch.Size([10, 16, 8]), training = True
+U.size() = torch.Size([10, 16, 2]), Y.size() = torch.Size([10, 16, 8]), training = True
+U.size() = torch.Size([10, 16, 2]), Y.size() = torch.Size([10, 16, 8]), training = True
+U.size() = torch.Size([10, 16, 2]), Y.size() = torch.Size([10, 16, 8]), training = True
+U.size() = torch.Size([10, 16, 2]), Y.size() = torch.Size([10, 16, 8]), training = True
+U.size() = torch.Size([10, 16, 2]), Y.size() = torch.Size([10, 16, 8]), training = True
+U.size() = torch.Size([10, 16, 2]), Y.size() = torch.Size([10, 16, 8]), training = True
+Epoch: 1 - 90/751 | observer_loss = 5.6745, stability_loss = 0.0000, loss = 5.6746                U.size() = torch.Size([10, 16, 2]), Y.size() = torch.Size([10, 16, 8]), training = True
+U.size() = torch.Size([10, 16, 2]), Y.size() = torch.Size([10, 16, 8]), training = True
+U.size() = torch.Size([10, 16, 2]), Y.size() = torch.Size([10, 16, 8]), training = True
+U.size() = torch.Size([10, 16, 2]), Y.size() = torch.Size([10, 16, 8]), training = True
+U.size() = torch.Size([10, 16, 2]), Y.size() = torch.Size([10, 16, 8]), training = True
+U.size() = torch.Size([10, 16, 2]), Y.size() = torch.Size([10, 16, 8]), training = True
+U.size() = torch.Size([10, 16, 2]), Y.size() = torch.Size([10, 16, 8]), training = True
+U.size() = torch.Size([10, 16, 2]), Y.size() = torch.Size([10, 16, 8]), training = True
+U.size() = torch.Size([10, 16, 2]), Y.size() = torch.Size([10, 16, 8]), training = True
+U.size() = torch.Size([10, 16, 2]), Y.size() = torch.Size([10, 16, 8]), training = True
+Epoch: 1 - 100/751 | observer_loss = 5.4054, stability_loss = 0.0000, loss = 5.4054                U.size() = torch.Size([10, 16, 2]), Y.size() = torch.Size([10, 16, 8]), training = True
+U.size() = torch.Size([10, 16, 2]), Y.size() = torch.Size([10, 16, 8]), training = True
+U.size() = torch.Size([10, 16, 2]), Y.size() = torch.Size([10, 16, 8]), training = True
+U.size() = torch.Size([10, 16, 2]), Y.size() = torch.Size([10, 16, 8]), training = True
+U.size() = torch.Size([10, 16, 2]), Y.size() = torch.Size([10, 16, 8]), training = True
+U.size() = torch.Size([10, 16, 2]), Y.size() = torch.Size([10, 16, 8]), training = True
+U.size() = torch.Size([10, 16, 2]), Y.size() = torch.Size([10, 16, 8]), training = True
+U.size() = torch.Size([10, 16, 2]), Y.size() = torch.Size([10, 16, 8]), training = True
+U.size() = torch.Size([10, 16, 2]), Y.size() = torch.Size([10, 16, 8]), training = True
+U.size() = torch.Size([10, 16, 2]), Y.size() = torch.Size([10, 16, 8]), training = True
+Epoch: 1 - 110/751 | observer_loss = 4.7491, stability_loss = 0.0000, loss = 4.7491                U.size() = torch.Size([10, 16, 2]), Y.size() = torch.Size([10, 16, 8]), training = True
+U.size() = torch.Size([10, 16, 2]), Y.size() = torch.Size([10, 16, 8]), training = True
+U.size() = torch.Size([10, 16, 2]), Y.size() = torch.Size([10, 16, 8]), training = True
+U.size() = torch.Size([10, 16, 2]), Y.size() = torch.Size([10, 16, 8]), training = True
+U.size() = torch.Size([10, 16, 2]), Y.size() = torch.Size([10, 16, 8]), training = True
+U.size() = torch.Size([10, 16, 2]), Y.size() = torch.Size([10, 16, 8]), training = True
+U.size() = torch.Size([10, 16, 2]), Y.size() = torch.Size([10, 16, 8]), training = True
+U.size() = torch.Size([10, 16, 2]), Y.size() = torch.Size([10, 16, 8]), training = True
+U.size() = torch.Size([10, 16, 2]), Y.size() = torch.Size([10, 16, 8]), training = True
+U.size() = torch.Size([10, 16, 2]), Y.size() = torch.Size([10, 16, 8]), training = True
+Epoch: 1 - 120/751 | observer_loss = 4.4441, stability_loss = 0.0000, loss = 4.4441                U.size() = torch.Size([10, 16, 2]), Y.size() = torch.Size([10, 16, 8]), training = True
+U.size() = torch.Size([10, 16, 2]), Y.size() = torch.Size([10, 16, 8]), training = True
+U.size() = torch.Size([10, 16, 2]), Y.size() = torch.Size([10, 16, 8]), training = True
+U.size() = torch.Size([10, 16, 2]), Y.size() = torch.Size([10, 16, 8]), training = True
+U.size() = torch.Size([10, 16, 2]), Y.size() = torch.Size([10, 16, 8]), training = True
+U.size() = torch.Size([10, 16, 2]), Y.size() = torch.Size([10, 16, 8]), training = True
+U.size() = torch.Size([10, 16, 2]), Y.size() = torch.Size([10, 16, 8]), training = True
+U.size() = torch.Size([10, 16, 2]), Y.size() = torch.Size([10, 16, 8]), training = True
+U.size() = torch.Size([10, 16, 2]), Y.size() = torch.Size([10, 16, 8]), training = True
+U.size() = torch.Size([10, 16, 2]), Y.size() = torch.Size([10, 16, 8]), training = True
+Epoch: 1 - 130/751 | observer_loss = 4.3278, stability_loss = 0.0000, loss = 4.3278                U.size() = torch.Size([10, 16, 2]), Y.size() = torch.Size([10, 16, 8]), training = True
+U.size() = torch.Size([10, 16, 2]), Y.size() = torch.Size([10, 16, 8]), training = True
+U.size() = torch.Size([10, 16, 2]), Y.size() = torch.Size([10, 16, 8]), training = True
+U.size() = torch.Size([10, 16, 2]), Y.size() = torch.Size([10, 16, 8]), training = True
+U.size() = torch.Size([10, 16, 2]), Y.size() = torch.Size([10, 16, 8]), training = True
+U.size() = torch.Size([10, 16, 2]), Y.size() = torch.Size([10, 16, 8]), training = True
+U.size() = torch.Size([10, 16, 2]), Y.size() = torch.Size([10, 16, 8]), training = True
+U.size() = torch.Size([10, 16, 2]), Y.size() = torch.Size([10, 16, 8]), training = True
+U.size() = torch.Size([10, 16, 2]), Y.size() = torch.Size([10, 16, 8]), training = True
+U.size() = torch.Size([10, 16, 2]), Y.size() = torch.Size([10, 16, 8]), training = True
+Epoch: 1 - 140/751 | observer_loss = 4.8997, stability_loss = 0.0000, loss = 4.8997                U.size() = torch.Size([10, 16, 2]), Y.size() = torch.Size([10, 16, 8]), training = True
+U.size() = torch.Size([10, 16, 2]), Y.size() = torch.Size([10, 16, 8]), training = True
+U.size() = torch.Size([10, 16, 2]), Y.size() = torch.Size([10, 16, 8]), training = True
+U.size() = torch.Size([10, 16, 2]), Y.size() = torch.Size([10, 16, 8]), training = True
+U.size() = torch.Size([10, 16, 2]), Y.size() = torch.Size([10, 16, 8]), training = True
+U.size() = torch.Size([10, 16, 2]), Y.size() = torch.Size([10, 16, 8]), training = True
+U.size() = torch.Size([10, 16, 2]), Y.size() = torch.Size([10, 16, 8]), training = True
+U.size() = torch.Size([10, 16, 2]), Y.size() = torch.Size([10, 16, 8]), training = True
+U.size() = torch.Size([10, 16, 2]), Y.size() = torch.Size([10, 16, 8]), training = True
+U.size() = torch.Size([10, 16, 2]), Y.size() = torch.Size([10, 16, 8]), training = True
+Epoch: 1 - 150/751 | observer_loss = 5.8685, stability_loss = 0.0000, loss = 5.8685                U.size() = torch.Size([10, 16, 2]), Y.size() = torch.Size([10, 16, 8]), training = True
+U.size() = torch.Size([10, 16, 2]), Y.size() = torch.Size([10, 16, 8]), training = True
+U.size() = torch.Size([10, 16, 2]), Y.size() = torch.Size([10, 16, 8]), training = True
+U.size() = torch.Size([10, 16, 2]), Y.size() = torch.Size([10, 16, 8]), training = True
+U.size() = torch.Size([10, 16, 2]), Y.size() = torch.Size([10, 16, 8]), training = True
+U.size() = torch.Size([10, 16, 2]), Y.size() = torch.Size([10, 16, 8]), training = True
+U.size() = torch.Size([10, 16, 2]), Y.size() = torch.Size([10, 16, 8]), training = True
+U.size() = torch.Size([10, 16, 2]), Y.size() = torch.Size([10, 16, 8]), training = True
+U.size() = torch.Size([10, 16, 2]), Y.size() = torch.Size([10, 16, 8]), training = True
+U.size() = torch.Size([10, 16, 2]), Y.size() = torch.Size([10, 16, 8]), training = True
+Epoch: 1 - 160/751 | observer_loss = 5.5155, stability_loss = 0.0000, loss = 5.5155                U.size() = torch.Size([10, 16, 2]), Y.size() = torch.Size([10, 16, 8]), training = True
+U.size() = torch.Size([10, 16, 2]), Y.size() = torch.Size([10, 16, 8]), training = True
+U.size() = torch.Size([10, 16, 2]), Y.size() = torch.Size([10, 16, 8]), training = True
+U.size() = torch.Size([10, 16, 2]), Y.size() = torch.Size([10, 16, 8]), training = True
+U.size() = torch.Size([10, 16, 2]), Y.size() = torch.Size([10, 16, 8]), training = True
+U.size() = torch.Size([10, 16, 2]), Y.size() = torch.Size([10, 16, 8]), training = True
+U.size() = torch.Size([10, 16, 2]), Y.size() = torch.Size([10, 16, 8]), training = True
+U.size() = torch.Size([10, 16, 2]), Y.size() = torch.Size([10, 16, 8]), training = True
+U.size() = torch.Size([10, 16, 2]), Y.size() = torch.Size([10, 16, 8]), training = True
+U.size() = torch.Size([10, 16, 2]), Y.size() = torch.Size([10, 16, 8]), training = True
+Epoch: 1 - 170/751 | observer_loss = 3.8208, stability_loss = 0.0000, loss = 3.8208                U.size() = torch.Size([10, 16, 2]), Y.size() = torch.Size([10, 16, 8]), training = True
+U.size() = torch.Size([10, 16, 2]), Y.size() = torch.Size([10, 16, 8]), training = True
+U.size() = torch.Size([10, 16, 2]), Y.size() = torch.Size([10, 16, 8]), training = True
+U.size() = torch.Size([10, 16, 2]), Y.size() = torch.Size([10, 16, 8]), training = True
+U.size() = torch.Size([10, 16, 2]), Y.size() = torch.Size([10, 16, 8]), training = True
+U.size() = torch.Size([10, 16, 2]), Y.size() = torch.Size([10, 16, 8]), training = True
+U.size() = torch.Size([10, 16, 2]), Y.size() = torch.Size([10, 16, 8]), training = True
+U.size() = torch.Size([10, 16, 2]), Y.size() = torch.Size([10, 16, 8]), training = True
+U.size() = torch.Size([10, 16, 2]), Y.size() = torch.Size([10, 16, 8]), training = True
+U.size() = torch.Size([10, 16, 2]), Y.size() = torch.Size([10, 16, 8]), training = True
+Epoch: 1 - 180/751 | observer_loss = 4.0350, stability_loss = 0.0000, loss = 4.0350                U.size() = torch.Size([10, 16, 2]), Y.size() = torch.Size([10, 16, 8]), training = True
+U.size() = torch.Size([10, 16, 2]), Y.size() = torch.Size([10, 16, 8]), training = True
+U.size() = torch.Size([10, 16, 2]), Y.size() = torch.Size([10, 16, 8]), training = True
+U.size() = torch.Size([10, 16, 2]), Y.size() = torch.Size([10, 16, 8]), training = True
+U.size() = torch.Size([10, 16, 2]), Y.size() = torch.Size([10, 16, 8]), training = True
+U.size() = torch.Size([10, 16, 2]), Y.size() = torch.Size([10, 16, 8]), training = True
+U.size() = torch.Size([10, 16, 2]), Y.size() = torch.Size([10, 16, 8]), training = True
+U.size() = torch.Size([10, 16, 2]), Y.size() = torch.Size([10, 16, 8]), training = True
+U.size() = torch.Size([10, 16, 2]), Y.size() = torch.Size([10, 16, 8]), training = True
+U.size() = torch.Size([10, 16, 2]), Y.size() = torch.Size([10, 16, 8]), training = True
+Epoch: 1 - 190/751 | observer_loss = 5.3774, stability_loss = 0.0000, loss = 5.3774                U.size() = torch.Size([10, 16, 2]), Y.size() = torch.Size([10, 16, 8]), training = True
+U.size() = torch.Size([10, 16, 2]), Y.size() = torch.Size([10, 16, 8]), training = True
+U.size() = torch.Size([10, 16, 2]), Y.size() = torch.Size([10, 16, 8]), training = True
+U.size() = torch.Size([10, 16, 2]), Y.size() = torch.Size([10, 16, 8]), training = True
+U.size() = torch.Size([10, 16, 2]), Y.size() = torch.Size([10, 16, 8]), training = True
+U.size() = torch.Size([10, 16, 2]), Y.size() = torch.Size([10, 16, 8]), training = True
+U.size() = torch.Size([10, 16, 2]), Y.size() = torch.Size([10, 16, 8]), training = True
+U.size() = torch.Size([10, 16, 2]), Y.size() = torch.Size([10, 16, 8]), training = True
+U.size() = torch.Size([10, 16, 2]), Y.size() = torch.Size([10, 16, 8]), training = True
+U.size() = torch.Size([10, 16, 2]), Y.size() = torch.Size([10, 16, 8]), training = True
+Epoch: 1 - 200/751 | observer_loss = 4.4760, stability_loss = 0.0000, loss = 4.4760                U.size() = torch.Size([10, 16, 2]), Y.size() = torch.Size([10, 16, 8]), training = True
+U.size() = torch.Size([10, 16, 2]), Y.size() = torch.Size([10, 16, 8]), training = True
+U.size() = torch.Size([10, 16, 2]), Y.size() = torch.Size([10, 16, 8]), training = True
+U.size() = torch.Size([10, 16, 2]), Y.size() = torch.Size([10, 16, 8]), training = True
+U.size() = torch.Size([10, 16, 2]), Y.size() = torch.Size([10, 16, 8]), training = True
+U.size() = torch.Size([10, 16, 2]), Y.size() = torch.Size([10, 16, 8]), training = True
+U.size() = torch.Size([10, 16, 2]), Y.size() = torch.Size([10, 16, 8]), training = True
+U.size() = torch.Size([10, 16, 2]), Y.size() = torch.Size([10, 16, 8]), training = True
+U.size() = torch.Size([10, 16, 2]), Y.size() = torch.Size([10, 16, 8]), training = True
+U.size() = torch.Size([10, 16, 2]), Y.size() = torch.Size([10, 16, 8]), training = True
+Epoch: 1 - 210/751 | observer_loss = 4.2465, stability_loss = 0.0000, loss = 4.2465                U.size() = torch.Size([10, 16, 2]), Y.size() = torch.Size([10, 16, 8]), training = True
+U.size() = torch.Size([10, 16, 2]), Y.size() = torch.Size([10, 16, 8]), training = True
+U.size() = torch.Size([10, 16, 2]), Y.size() = torch.Size([10, 16, 8]), training = True
+U.size() = torch.Size([10, 16, 2]), Y.size() = torch.Size([10, 16, 8]), training = True
+U.size() = torch.Size([10, 16, 2]), Y.size() = torch.Size([10, 16, 8]), training = True
+U.size() = torch.Size([10, 16, 2]), Y.size() = torch.Size([10, 16, 8]), training = True
+U.size() = torch.Size([10, 16, 2]), Y.size() = torch.Size([10, 16, 8]), training = True
+U.size() = torch.Size([10, 16, 2]), Y.size() = torch.Size([10, 16, 8]), training = True
+U.size() = torch.Size([10, 16, 2]), Y.size() = torch.Size([10, 16, 8]), training = True
+U.size() = torch.Size([10, 16, 2]), Y.size() = torch.Size([10, 16, 8]), training = True
+Epoch: 1 - 220/751 | observer_loss = 4.8826, stability_loss = 0.0000, loss = 4.8826                U.size() = torch.Size([10, 16, 2]), Y.size() = torch.Size([10, 16, 8]), training = True
+U.size() = torch.Size([10, 16, 2]), Y.size() = torch.Size([10, 16, 8]), training = True
+U.size() = torch.Size([10, 16, 2]), Y.size() = torch.Size([10, 16, 8]), training = True
+U.size() = torch.Size([10, 16, 2]), Y.size() = torch.Size([10, 16, 8]), training = True
+U.size() = torch.Size([10, 16, 2]), Y.size() = torch.Size([10, 16, 8]), training = True
+U.size() = torch.Size([10, 16, 2]), Y.size() = torch.Size([10, 16, 8]), training = True
+U.size() = torch.Size([10, 16, 2]), Y.size() = torch.Size([10, 16, 8]), training = True
+U.size() = torch.Size([10, 16, 2]), Y.size() = torch.Size([10, 16, 8]), training = True
+U.size() = torch.Size([10, 16, 2]), Y.size() = torch.Size([10, 16, 8]), training = True
+U.size() = torch.Size([10, 16, 2]), Y.size() = torch.Size([10, 16, 8]), training = True
+Epoch: 1 - 230/751 | observer_loss = 5.0110, stability_loss = 0.0000, loss = 5.0110                U.size() = torch.Size([10, 16, 2]), Y.size() = torch.Size([10, 16, 8]), training = True
+U.size() = torch.Size([10, 16, 2]), Y.size() = torch.Size([10, 16, 8]), training = True
+U.size() = torch.Size([10, 16, 2]), Y.size() = torch.Size([10, 16, 8]), training = True
+U.size() = torch.Size([10, 16, 2]), Y.size() = torch.Size([10, 16, 8]), training = True
+U.size() = torch.Size([10, 16, 2]), Y.size() = torch.Size([10, 16, 8]), training = True
+U.size() = torch.Size([10, 16, 2]), Y.size() = torch.Size([10, 16, 8]), training = True
+U.size() = torch.Size([10, 16, 2]), Y.size() = torch.Size([10, 16, 8]), training = True
+U.size() = torch.Size([10, 16, 2]), Y.size() = torch.Size([10, 16, 8]), training = True
+U.size() = torch.Size([10, 16, 2]), Y.size() = torch.Size([10, 16, 8]), training = True
+U.size() = torch.Size([10, 16, 2]), Y.size() = torch.Size([10, 16, 8]), training = True
+Epoch: 1 - 240/751 | observer_loss = 4.6888, stability_loss = 0.0000, loss = 4.6888                U.size() = torch.Size([10, 16, 2]), Y.size() = torch.Size([10, 16, 8]), training = True
+U.size() = torch.Size([10, 16, 2]), Y.size() = torch.Size([10, 16, 8]), training = True
+U.size() = torch.Size([10, 16, 2]), Y.size() = torch.Size([10, 16, 8]), training = True
+U.size() = torch.Size([10, 16, 2]), Y.size() = torch.Size([10, 16, 8]), training = True
+U.size() = torch.Size([10, 16, 2]), Y.size() = torch.Size([10, 16, 8]), training = True
+U.size() = torch.Size([10, 16, 2]), Y.size() = torch.Size([10, 16, 8]), training = True
+U.size() = torch.Size([10, 16, 2]), Y.size() = torch.Size([10, 16, 8]), training = True
+U.size() = torch.Size([10, 16, 2]), Y.size() = torch.Size([10, 16, 8]), training = True
+U.size() = torch.Size([10, 16, 2]), Y.size() = torch.Size([10, 16, 8]), training = True
+U.size() = torch.Size([10, 16, 2]), Y.size() = torch.Size([10, 16, 8]), training = True
+Epoch: 1 - 250/751 | observer_loss = 4.5250, stability_loss = 0.0000, loss = 4.5250                U.size() = torch.Size([10, 16, 2]), Y.size() = torch.Size([10, 16, 8]), training = True
+U.size() = torch.Size([10, 16, 2]), Y.size() = torch.Size([10, 16, 8]), training = True
+U.size() = torch.Size([10, 16, 2]), Y.size() = torch.Size([10, 16, 8]), training = True
+U.size() = torch.Size([10, 16, 2]), Y.size() = torch.Size([10, 16, 8]), training = True
+U.size() = torch.Size([10, 16, 2]), Y.size() = torch.Size([10, 16, 8]), training = True
+U.size() = torch.Size([10, 16, 2]), Y.size() = torch.Size([10, 16, 8]), training = True
+U.size() = torch.Size([10, 16, 2]), Y.size() = torch.Size([10, 16, 8]), training = True
+U.size() = torch.Size([10, 16, 2]), Y.size() = torch.Size([10, 16, 8]), training = True
+U.size() = torch.Size([10, 16, 2]), Y.size() = torch.Size([10, 16, 8]), training = True
+U.size() = torch.Size([10, 16, 2]), Y.size() = torch.Size([10, 16, 8]), training = True
+Epoch: 1 - 260/751 | observer_loss = 5.0953, stability_loss = 0.0000, loss = 5.0953                U.size() = torch.Size([10, 16, 2]), Y.size() = torch.Size([10, 16, 8]), training = True
+U.size() = torch.Size([10, 16, 2]), Y.size() = torch.Size([10, 16, 8]), training = True
+U.size() = torch.Size([10, 16, 2]), Y.size() = torch.Size([10, 16, 8]), training = True
+U.size() = torch.Size([10, 16, 2]), Y.size() = torch.Size([10, 16, 8]), training = True
+U.size() = torch.Size([10, 16, 2]), Y.size() = torch.Size([10, 16, 8]), training = True
+U.size() = torch.Size([10, 16, 2]), Y.size() = torch.Size([10, 16, 8]), training = True
+U.size() = torch.Size([10, 16, 2]), Y.size() = torch.Size([10, 16, 8]), training = True
+U.size() = torch.Size([10, 16, 2]), Y.size() = torch.Size([10, 16, 8]), training = True
+U.size() = torch.Size([10, 16, 2]), Y.size() = torch.Size([10, 16, 8]), training = True
+U.size() = torch.Size([10, 16, 2]), Y.size() = torch.Size([10, 16, 8]), training = True
+Epoch: 1 - 270/751 | observer_loss = 4.3225, stability_loss = 0.0000, loss = 4.3225                U.size() = torch.Size([10, 16, 2]), Y.size() = torch.Size([10, 16, 8]), training = True
+U.size() = torch.Size([10, 16, 2]), Y.size() = torch.Size([10, 16, 8]), training = True
+U.size() = torch.Size([10, 16, 2]), Y.size() = torch.Size([10, 16, 8]), training = True
+U.size() = torch.Size([10, 16, 2]), Y.size() = torch.Size([10, 16, 8]), training = True
+U.size() = torch.Size([10, 16, 2]), Y.size() = torch.Size([10, 16, 8]), training = True
+U.size() = torch.Size([10, 16, 2]), Y.size() = torch.Size([10, 16, 8]), training = True
+U.size() = torch.Size([10, 16, 2]), Y.size() = torch.Size([10, 16, 8]), training = True
+U.size() = torch.Size([10, 16, 2]), Y.size() = torch.Size([10, 16, 8]), training = True
+U.size() = torch.Size([10, 16, 2]), Y.size() = torch.Size([10, 16, 8]), training = True
+U.size() = torch.Size([10, 16, 2]), Y.size() = torch.Size([10, 16, 8]), training = True
+Epoch: 1 - 280/751 | observer_loss = 3.9368, stability_loss = 0.0000, loss = 3.9368                U.size() = torch.Size([10, 16, 2]), Y.size() = torch.Size([10, 16, 8]), training = True
+U.size() = torch.Size([10, 16, 2]), Y.size() = torch.Size([10, 16, 8]), training = True
+U.size() = torch.Size([10, 16, 2]), Y.size() = torch.Size([10, 16, 8]), training = True
+U.size() = torch.Size([10, 16, 2]), Y.size() = torch.Size([10, 16, 8]), training = True
+U.size() = torch.Size([10, 16, 2]), Y.size() = torch.Size([10, 16, 8]), training = True
+U.size() = torch.Size([10, 16, 2]), Y.size() = torch.Size([10, 16, 8]), training = True
+U.size() = torch.Size([10, 16, 2]), Y.size() = torch.Size([10, 16, 8]), training = True
+U.size() = torch.Size([10, 16, 2]), Y.size() = torch.Size([10, 16, 8]), training = True
+U.size() = torch.Size([10, 16, 2]), Y.size() = torch.Size([10, 16, 8]), training = True
+U.size() = torch.Size([10, 16, 2]), Y.size() = torch.Size([10, 16, 8]), training = True
+Epoch: 1 - 290/751 | observer_loss = 4.7800, stability_loss = 0.0000, loss = 4.7800                U.size() = torch.Size([10, 16, 2]), Y.size() = torch.Size([10, 16, 8]), training = True
+U.size() = torch.Size([10, 16, 2]), Y.size() = torch.Size([10, 16, 8]), training = True
+U.size() = torch.Size([10, 16, 2]), Y.size() = torch.Size([10, 16, 8]), training = True
+U.size() = torch.Size([10, 16, 2]), Y.size() = torch.Size([10, 16, 8]), training = True
+U.size() = torch.Size([10, 16, 2]), Y.size() = torch.Size([10, 16, 8]), training = True
+U.size() = torch.Size([10, 16, 2]), Y.size() = torch.Size([10, 16, 8]), training = True
+U.size() = torch.Size([10, 16, 2]), Y.size() = torch.Size([10, 16, 8]), training = True
+U.size() = torch.Size([10, 16, 2]), Y.size() = torch.Size([10, 16, 8]), training = True
+U.size() = torch.Size([10, 16, 2]), Y.size() = torch.Size([10, 16, 8]), training = True
+U.size() = torch.Size([10, 16, 2]), Y.size() = torch.Size([10, 16, 8]), training = True
+Epoch: 1 - 300/751 | observer_loss = 4.1352, stability_loss = 0.0000, loss = 4.1352                U.size() = torch.Size([10, 16, 2]), Y.size() = torch.Size([10, 16, 8]), training = True
+U.size() = torch.Size([10, 16, 2]), Y.size() = torch.Size([10, 16, 8]), training = True
+U.size() = torch.Size([10, 16, 2]), Y.size() = torch.Size([10, 16, 8]), training = True
+U.size() = torch.Size([10, 16, 2]), Y.size() = torch.Size([10, 16, 8]), training = True
+U.size() = torch.Size([10, 16, 2]), Y.size() = torch.Size([10, 16, 8]), training = True
+U.size() = torch.Size([10, 16, 2]), Y.size() = torch.Size([10, 16, 8]), training = True
+U.size() = torch.Size([10, 16, 2]), Y.size() = torch.Size([10, 16, 8]), training = True
+U.size() = torch.Size([10, 16, 2]), Y.size() = torch.Size([10, 16, 8]), training = True
+U.size() = torch.Size([10, 16, 2]), Y.size() = torch.Size([10, 16, 8]), training = True
+U.size() = torch.Size([10, 16, 2]), Y.size() = torch.Size([10, 16, 8]), training = True
+Epoch: 1 - 310/751 | observer_loss = 3.7554, stability_loss = 0.0000, loss = 3.7554                U.size() = torch.Size([10, 16, 2]), Y.size() = torch.Size([10, 16, 8]), training = True
+U.size() = torch.Size([10, 16, 2]), Y.size() = torch.Size([10, 16, 8]), training = True
+U.size() = torch.Size([10, 16, 2]), Y.size() = torch.Size([10, 16, 8]), training = True
+U.size() = torch.Size([10, 16, 2]), Y.size() = torch.Size([10, 16, 8]), training = True
+U.size() = torch.Size([10, 16, 2]), Y.size() = torch.Size([10, 16, 8]), training = True
+U.size() = torch.Size([10, 16, 2]), Y.size() = torch.Size([10, 16, 8]), training = True
+U.size() = torch.Size([10, 16, 2]), Y.size() = torch.Size([10, 16, 8]), training = True
+U.size() = torch.Size([10, 16, 2]), Y.size() = torch.Size([10, 16, 8]), training = True
+U.size() = torch.Size([10, 16, 2]), Y.size() = torch.Size([10, 16, 8]), training = True
+U.size() = torch.Size([10, 16, 2]), Y.size() = torch.Size([10, 16, 8]), training = True
+Epoch: 1 - 320/751 | observer_loss = 3.5392, stability_loss = 0.0000, loss = 3.5392                U.size() = torch.Size([10, 16, 2]), Y.size() = torch.Size([10, 16, 8]), training = True
+U.size() = torch.Size([10, 16, 2]), Y.size() = torch.Size([10, 16, 8]), training = True
+U.size() = torch.Size([10, 16, 2]), Y.size() = torch.Size([10, 16, 8]), training = True
+U.size() = torch.Size([10, 16, 2]), Y.size() = torch.Size([10, 16, 8]), training = True
+U.size() = torch.Size([10, 16, 2]), Y.size() = torch.Size([10, 16, 8]), training = True
+U.size() = torch.Size([10, 16, 2]), Y.size() = torch.Size([10, 16, 8]), training = True
+U.size() = torch.Size([10, 16, 2]), Y.size() = torch.Size([10, 16, 8]), training = True
+U.size() = torch.Size([10, 16, 2]), Y.size() = torch.Size([10, 16, 8]), training = True
+U.size() = torch.Size([10, 16, 2]), Y.size() = torch.Size([10, 16, 8]), training = True
+U.size() = torch.Size([10, 16, 2]), Y.size() = torch.Size([10, 16, 8]), training = True
+Epoch: 1 - 330/751 | observer_loss = 3.8501, stability_loss = 0.0000, loss = 3.8501                U.size() = torch.Size([10, 16, 2]), Y.size() = torch.Size([10, 16, 8]), training = True
+U.size() = torch.Size([10, 16, 2]), Y.size() = torch.Size([10, 16, 8]), training = True
+U.size() = torch.Size([10, 16, 2]), Y.size() = torch.Size([10, 16, 8]), training = True
+U.size() = torch.Size([10, 16, 2]), Y.size() = torch.Size([10, 16, 8]), training = True
+U.size() = torch.Size([10, 16, 2]), Y.size() = torch.Size([10, 16, 8]), training = True
+U.size() = torch.Size([10, 16, 2]), Y.size() = torch.Size([10, 16, 8]), training = True
+U.size() = torch.Size([10, 16, 2]), Y.size() = torch.Size([10, 16, 8]), training = True
+U.size() = torch.Size([10, 16, 2]), Y.size() = torch.Size([10, 16, 8]), training = True
+U.size() = torch.Size([10, 16, 2]), Y.size() = torch.Size([10, 16, 8]), training = True
+U.size() = torch.Size([10, 16, 2]), Y.size() = torch.Size([10, 16, 8]), training = True
+Epoch: 1 - 340/751 | observer_loss = 3.3602, stability_loss = 0.0000, loss = 3.3602                U.size() = torch.Size([10, 16, 2]), Y.size() = torch.Size([10, 16, 8]), training = True
+U.size() = torch.Size([10, 16, 2]), Y.size() = torch.Size([10, 16, 8]), training = True
+U.size() = torch.Size([10, 16, 2]), Y.size() = torch.Size([10, 16, 8]), training = True
+U.size() = torch.Size([10, 16, 2]), Y.size() = torch.Size([10, 16, 8]), training = True
+U.size() = torch.Size([10, 16, 2]), Y.size() = torch.Size([10, 16, 8]), training = True
+U.size() = torch.Size([10, 16, 2]), Y.size() = torch.Size([10, 16, 8]), training = True
+U.size() = torch.Size([10, 16, 2]), Y.size() = torch.Size([10, 16, 8]), training = True
+U.size() = torch.Size([10, 16, 2]), Y.size() = torch.Size([10, 16, 8]), training = True
+U.size() = torch.Size([10, 16, 2]), Y.size() = torch.Size([10, 16, 8]), training = True
+U.size() = torch.Size([10, 16, 2]), Y.size() = torch.Size([10, 16, 8]), training = True
+Epoch: 1 - 350/751 | observer_loss = 3.5286, stability_loss = 0.0000, loss = 3.5286                U.size() = torch.Size([10, 16, 2]), Y.size() = torch.Size([10, 16, 8]), training = True
+U.size() = torch.Size([10, 16, 2]), Y.size() = torch.Size([10, 16, 8]), training = True
+U.size() = torch.Size([10, 16, 2]), Y.size() = torch.Size([10, 16, 8]), training = True
+U.size() = torch.Size([10, 16, 2]), Y.size() = torch.Size([10, 16, 8]), training = True
+U.size() = torch.Size([10, 16, 2]), Y.size() = torch.Size([10, 16, 8]), training = True
+U.size() = torch.Size([10, 16, 2]), Y.size() = torch.Size([10, 16, 8]), training = True
+U.size() = torch.Size([10, 16, 2]), Y.size() = torch.Size([10, 16, 8]), training = True
+U.size() = torch.Size([10, 16, 2]), Y.size() = torch.Size([10, 16, 8]), training = True
+U.size() = torch.Size([10, 16, 2]), Y.size() = torch.Size([10, 16, 8]), training = True
+U.size() = torch.Size([10, 16, 2]), Y.size() = torch.Size([10, 16, 8]), training = True
+Epoch: 1 - 360/751 | observer_loss = 4.3972, stability_loss = 0.0000, loss = 4.3972                U.size() = torch.Size([10, 16, 2]), Y.size() = torch.Size([10, 16, 8]), training = True
+U.size() = torch.Size([10, 16, 2]), Y.size() = torch.Size([10, 16, 8]), training = True
+U.size() = torch.Size([10, 16, 2]), Y.size() = torch.Size([10, 16, 8]), training = True
+U.size() = torch.Size([10, 16, 2]), Y.size() = torch.Size([10, 16, 8]), training = True
+U.size() = torch.Size([10, 16, 2]), Y.size() = torch.Size([10, 16, 8]), training = True
+U.size() = torch.Size([10, 16, 2]), Y.size() = torch.Size([10, 16, 8]), training = True
+U.size() = torch.Size([10, 16, 2]), Y.size() = torch.Size([10, 16, 8]), training = True
+U.size() = torch.Size([10, 16, 2]), Y.size() = torch.Size([10, 16, 8]), training = True
+U.size() = torch.Size([10, 16, 2]), Y.size() = torch.Size([10, 16, 8]), training = True
+U.size() = torch.Size([10, 16, 2]), Y.size() = torch.Size([10, 16, 8]), training = True
+Epoch: 1 - 370/751 | observer_loss = 5.2111, stability_loss = 0.0000, loss = 5.2111                U.size() = torch.Size([10, 16, 2]), Y.size() = torch.Size([10, 16, 8]), training = True
+U.size() = torch.Size([10, 16, 2]), Y.size() = torch.Size([10, 16, 8]), training = True
+U.size() = torch.Size([10, 16, 2]), Y.size() = torch.Size([10, 16, 8]), training = True
+U.size() = torch.Size([10, 16, 2]), Y.size() = torch.Size([10, 16, 8]), training = True
+U.size() = torch.Size([10, 16, 2]), Y.size() = torch.Size([10, 16, 8]), training = True
+U.size() = torch.Size([10, 16, 2]), Y.size() = torch.Size([10, 16, 8]), training = True
+U.size() = torch.Size([10, 16, 2]), Y.size() = torch.Size([10, 16, 8]), training = True
+U.size() = torch.Size([10, 16, 2]), Y.size() = torch.Size([10, 16, 8]), training = True
+U.size() = torch.Size([10, 16, 2]), Y.size() = torch.Size([10, 16, 8]), training = True
+U.size() = torch.Size([10, 16, 2]), Y.size() = torch.Size([10, 16, 8]), training = True
+Epoch: 1 - 380/751 | observer_loss = 2.9822, stability_loss = 0.0000, loss = 2.9822                U.size() = torch.Size([10, 16, 2]), Y.size() = torch.Size([10, 16, 8]), training = True
+U.size() = torch.Size([10, 16, 2]), Y.size() = torch.Size([10, 16, 8]), training = True
+U.size() = torch.Size([10, 16, 2]), Y.size() = torch.Size([10, 16, 8]), training = True
+U.size() = torch.Size([10, 16, 2]), Y.size() = torch.Size([10, 16, 8]), training = True
+U.size() = torch.Size([10, 16, 2]), Y.size() = torch.Size([10, 16, 8]), training = True
+U.size() = torch.Size([10, 16, 2]), Y.size() = torch.Size([10, 16, 8]), training = True
+U.size() = torch.Size([10, 16, 2]), Y.size() = torch.Size([10, 16, 8]), training = True
+U.size() = torch.Size([10, 16, 2]), Y.size() = torch.Size([10, 16, 8]), training = True
+U.size() = torch.Size([10, 16, 2]), Y.size() = torch.Size([10, 16, 8]), training = True
+U.size() = torch.Size([10, 16, 2]), Y.size() = torch.Size([10, 16, 8]), training = True
+Epoch: 1 - 390/751 | observer_loss = 5.0440, stability_loss = 0.0000, loss = 5.0440                U.size() = torch.Size([10, 16, 2]), Y.size() = torch.Size([10, 16, 8]), training = True
+U.size() = torch.Size([10, 16, 2]), Y.size() = torch.Size([10, 16, 8]), training = True
+U.size() = torch.Size([10, 16, 2]), Y.size() = torch.Size([10, 16, 8]), training = True
+U.size() = torch.Size([10, 16, 2]), Y.size() = torch.Size([10, 16, 8]), training = True
+U.size() = torch.Size([10, 16, 2]), Y.size() = torch.Size([10, 16, 8]), training = True
+U.size() = torch.Size([10, 16, 2]), Y.size() = torch.Size([10, 16, 8]), training = True
+U.size() = torch.Size([10, 16, 2]), Y.size() = torch.Size([10, 16, 8]), training = True
+U.size() = torch.Size([10, 16, 2]), Y.size() = torch.Size([10, 16, 8]), training = True
+U.size() = torch.Size([10, 16, 2]), Y.size() = torch.Size([10, 16, 8]), training = True
+U.size() = torch.Size([10, 16, 2]), Y.size() = torch.Size([10, 16, 8]), training = True
+Epoch: 1 - 400/751 | observer_loss = 4.3439, stability_loss = 0.0000, loss = 4.3439                U.size() = torch.Size([10, 16, 2]), Y.size() = torch.Size([10, 16, 8]), training = True
+U.size() = torch.Size([10, 16, 2]), Y.size() = torch.Size([10, 16, 8]), training = True
+U.size() = torch.Size([10, 16, 2]), Y.size() = torch.Size([10, 16, 8]), training = True
+U.size() = torch.Size([10, 16, 2]), Y.size() = torch.Size([10, 16, 8]), training = True
+U.size() = torch.Size([10, 16, 2]), Y.size() = torch.Size([10, 16, 8]), training = True
+U.size() = torch.Size([10, 16, 2]), Y.size() = torch.Size([10, 16, 8]), training = True
+U.size() = torch.Size([10, 16, 2]), Y.size() = torch.Size([10, 16, 8]), training = True
+U.size() = torch.Size([10, 16, 2]), Y.size() = torch.Size([10, 16, 8]), training = True
+U.size() = torch.Size([10, 16, 2]), Y.size() = torch.Size([10, 16, 8]), training = True
+U.size() = torch.Size([10, 16, 2]), Y.size() = torch.Size([10, 16, 8]), training = True
+Epoch: 1 - 410/751 | observer_loss = 4.4093, stability_loss = 0.0000, loss = 4.4093                U.size() = torch.Size([10, 16, 2]), Y.size() = torch.Size([10, 16, 8]), training = True
+U.size() = torch.Size([10, 16, 2]), Y.size() = torch.Size([10, 16, 8]), training = True
+U.size() = torch.Size([10, 16, 2]), Y.size() = torch.Size([10, 16, 8]), training = True
+U.size() = torch.Size([10, 16, 2]), Y.size() = torch.Size([10, 16, 8]), training = True
+U.size() = torch.Size([10, 16, 2]), Y.size() = torch.Size([10, 16, 8]), training = True
+U.size() = torch.Size([10, 16, 2]), Y.size() = torch.Size([10, 16, 8]), training = True
+U.size() = torch.Size([10, 16, 2]), Y.size() = torch.Size([10, 16, 8]), training = True
+U.size() = torch.Size([10, 16, 2]), Y.size() = torch.Size([10, 16, 8]), training = True
+U.size() = torch.Size([10, 16, 2]), Y.size() = torch.Size([10, 16, 8]), training = True
+U.size() = torch.Size([10, 16, 2]), Y.size() = torch.Size([10, 16, 8]), training = True
+Epoch: 1 - 420/751 | observer_loss = 3.9714, stability_loss = 0.0000, loss = 3.9714                U.size() = torch.Size([10, 16, 2]), Y.size() = torch.Size([10, 16, 8]), training = True
+U.size() = torch.Size([10, 16, 2]), Y.size() = torch.Size([10, 16, 8]), training = True
+U.size() = torch.Size([10, 16, 2]), Y.size() = torch.Size([10, 16, 8]), training = True
+U.size() = torch.Size([10, 16, 2]), Y.size() = torch.Size([10, 16, 8]), training = True
+U.size() = torch.Size([10, 16, 2]), Y.size() = torch.Size([10, 16, 8]), training = True
+U.size() = torch.Size([10, 16, 2]), Y.size() = torch.Size([10, 16, 8]), training = True
+U.size() = torch.Size([10, 16, 2]), Y.size() = torch.Size([10, 16, 8]), training = True
+U.size() = torch.Size([10, 16, 2]), Y.size() = torch.Size([10, 16, 8]), training = True
+U.size() = torch.Size([10, 16, 2]), Y.size() = torch.Size([10, 16, 8]), training = True
+U.size() = torch.Size([10, 16, 2]), Y.size() = torch.Size([10, 16, 8]), training = True
+Epoch: 1 - 430/751 | observer_loss = 4.0295, stability_loss = 0.0000, loss = 4.0295                U.size() = torch.Size([10, 16, 2]), Y.size() = torch.Size([10, 16, 8]), training = True
+U.size() = torch.Size([10, 16, 2]), Y.size() = torch.Size([10, 16, 8]), training = True
+U.size() = torch.Size([10, 16, 2]), Y.size() = torch.Size([10, 16, 8]), training = True
+U.size() = torch.Size([10, 16, 2]), Y.size() = torch.Size([10, 16, 8]), training = True
+U.size() = torch.Size([10, 16, 2]), Y.size() = torch.Size([10, 16, 8]), training = True
+U.size() = torch.Size([10, 16, 2]), Y.size() = torch.Size([10, 16, 8]), training = True
+U.size() = torch.Size([10, 16, 2]), Y.size() = torch.Size([10, 16, 8]), training = True
+U.size() = torch.Size([10, 16, 2]), Y.size() = torch.Size([10, 16, 8]), training = True
+U.size() = torch.Size([10, 16, 2]), Y.size() = torch.Size([10, 16, 8]), training = True
+U.size() = torch.Size([10, 16, 2]), Y.size() = torch.Size([10, 16, 8]), training = True
+Epoch: 1 - 440/751 | observer_loss = 3.2503, stability_loss = 0.0000, loss = 3.2503                U.size() = torch.Size([10, 16, 2]), Y.size() = torch.Size([10, 16, 8]), training = True
+U.size() = torch.Size([10, 16, 2]), Y.size() = torch.Size([10, 16, 8]), training = True
+U.size() = torch.Size([10, 16, 2]), Y.size() = torch.Size([10, 16, 8]), training = True
+U.size() = torch.Size([10, 16, 2]), Y.size() = torch.Size([10, 16, 8]), training = True
+U.size() = torch.Size([10, 16, 2]), Y.size() = torch.Size([10, 16, 8]), training = True
+U.size() = torch.Size([10, 16, 2]), Y.size() = torch.Size([10, 16, 8]), training = True
+U.size() = torch.Size([10, 16, 2]), Y.size() = torch.Size([10, 16, 8]), training = True
+U.size() = torch.Size([10, 16, 2]), Y.size() = torch.Size([10, 16, 8]), training = True
+U.size() = torch.Size([10, 16, 2]), Y.size() = torch.Size([10, 16, 8]), training = True
+U.size() = torch.Size([10, 16, 2]), Y.size() = torch.Size([10, 16, 8]), training = True
+Epoch: 1 - 450/751 | observer_loss = 4.2096, stability_loss = 0.0000, loss = 4.2096                U.size() = torch.Size([10, 16, 2]), Y.size() = torch.Size([10, 16, 8]), training = True
+U.size() = torch.Size([10, 16, 2]), Y.size() = torch.Size([10, 16, 8]), training = True
+U.size() = torch.Size([10, 16, 2]), Y.size() = torch.Size([10, 16, 8]), training = True
+U.size() = torch.Size([10, 16, 2]), Y.size() = torch.Size([10, 16, 8]), training = True
+U.size() = torch.Size([10, 16, 2]), Y.size() = torch.Size([10, 16, 8]), training = True
+U.size() = torch.Size([10, 16, 2]), Y.size() = torch.Size([10, 16, 8]), training = True
+U.size() = torch.Size([10, 16, 2]), Y.size() = torch.Size([10, 16, 8]), training = True
+U.size() = torch.Size([10, 16, 2]), Y.size() = torch.Size([10, 16, 8]), training = True
+U.size() = torch.Size([10, 16, 2]), Y.size() = torch.Size([10, 16, 8]), training = True
+U.size() = torch.Size([10, 16, 2]), Y.size() = torch.Size([10, 16, 8]), training = True
+Epoch: 1 - 460/751 | observer_loss = 3.8772, stability_loss = 0.0000, loss = 3.8772                U.size() = torch.Size([10, 16, 2]), Y.size() = torch.Size([10, 16, 8]), training = True
+U.size() = torch.Size([10, 16, 2]), Y.size() = torch.Size([10, 16, 8]), training = True
+U.size() = torch.Size([10, 16, 2]), Y.size() = torch.Size([10, 16, 8]), training = True
+U.size() = torch.Size([10, 16, 2]), Y.size() = torch.Size([10, 16, 8]), training = True
+U.size() = torch.Size([10, 16, 2]), Y.size() = torch.Size([10, 16, 8]), training = True
+U.size() = torch.Size([10, 16, 2]), Y.size() = torch.Size([10, 16, 8]), training = True
+U.size() = torch.Size([10, 16, 2]), Y.size() = torch.Size([10, 16, 8]), training = True
+U.size() = torch.Size([10, 16, 2]), Y.size() = torch.Size([10, 16, 8]), training = True
+U.size() = torch.Size([10, 16, 2]), Y.size() = torch.Size([10, 16, 8]), training = True
+U.size() = torch.Size([10, 16, 2]), Y.size() = torch.Size([10, 16, 8]), training = True
+Epoch: 1 - 470/751 | observer_loss = 4.4844, stability_loss = 0.0000, loss = 4.4844                U.size() = torch.Size([10, 16, 2]), Y.size() = torch.Size([10, 16, 8]), training = True
+U.size() = torch.Size([10, 16, 2]), Y.size() = torch.Size([10, 16, 8]), training = True
+U.size() = torch.Size([10, 16, 2]), Y.size() = torch.Size([10, 16, 8]), training = True
+U.size() = torch.Size([10, 16, 2]), Y.size() = torch.Size([10, 16, 8]), training = True
+U.size() = torch.Size([10, 16, 2]), Y.size() = torch.Size([10, 16, 8]), training = True
+U.size() = torch.Size([10, 16, 2]), Y.size() = torch.Size([10, 16, 8]), training = True
+U.size() = torch.Size([10, 16, 2]), Y.size() = torch.Size([10, 16, 8]), training = True
+U.size() = torch.Size([10, 16, 2]), Y.size() = torch.Size([10, 16, 8]), training = True
+U.size() = torch.Size([10, 16, 2]), Y.size() = torch.Size([10, 16, 8]), training = True
+U.size() = torch.Size([10, 16, 2]), Y.size() = torch.Size([10, 16, 8]), training = True
+Epoch: 1 - 480/751 | observer_loss = 4.0861, stability_loss = 0.0000, loss = 4.0861                U.size() = torch.Size([10, 16, 2]), Y.size() = torch.Size([10, 16, 8]), training = True
+U.size() = torch.Size([10, 16, 2]), Y.size() = torch.Size([10, 16, 8]), training = True
+U.size() = torch.Size([10, 16, 2]), Y.size() = torch.Size([10, 16, 8]), training = True
+U.size() = torch.Size([10, 16, 2]), Y.size() = torch.Size([10, 16, 8]), training = True
+U.size() = torch.Size([10, 16, 2]), Y.size() = torch.Size([10, 16, 8]), training = True
+U.size() = torch.Size([10, 16, 2]), Y.size() = torch.Size([10, 16, 8]), training = True
+U.size() = torch.Size([10, 16, 2]), Y.size() = torch.Size([10, 16, 8]), training = True
+U.size() = torch.Size([10, 16, 2]), Y.size() = torch.Size([10, 16, 8]), training = True
+U.size() = torch.Size([10, 16, 2]), Y.size() = torch.Size([10, 16, 8]), training = True
+U.size() = torch.Size([10, 16, 2]), Y.size() = torch.Size([10, 16, 8]), training = True
+Epoch: 1 - 490/751 | observer_loss = 3.3584, stability_loss = 0.0000, loss = 3.3584                U.size() = torch.Size([10, 16, 2]), Y.size() = torch.Size([10, 16, 8]), training = True
+U.size() = torch.Size([10, 16, 2]), Y.size() = torch.Size([10, 16, 8]), training = True
+U.size() = torch.Size([10, 16, 2]), Y.size() = torch.Size([10, 16, 8]), training = True
+U.size() = torch.Size([10, 16, 2]), Y.size() = torch.Size([10, 16, 8]), training = True
+U.size() = torch.Size([10, 16, 2]), Y.size() = torch.Size([10, 16, 8]), training = True
+U.size() = torch.Size([10, 16, 2]), Y.size() = torch.Size([10, 16, 8]), training = True
+U.size() = torch.Size([10, 16, 2]), Y.size() = torch.Size([10, 16, 8]), training = True
+U.size() = torch.Size([10, 16, 2]), Y.size() = torch.Size([10, 16, 8]), training = True
+U.size() = torch.Size([10, 16, 2]), Y.size() = torch.Size([10, 16, 8]), training = True
+U.size() = torch.Size([10, 16, 2]), Y.size() = torch.Size([10, 16, 8]), training = True
+Epoch: 1 - 500/751 | observer_loss = 3.6493, stability_loss = 0.0000, loss = 3.6493                U.size() = torch.Size([10, 16, 2]), Y.size() = torch.Size([10, 16, 8]), training = True
+U.size() = torch.Size([10, 16, 2]), Y.size() = torch.Size([10, 16, 8]), training = True
+U.size() = torch.Size([10, 16, 2]), Y.size() = torch.Size([10, 16, 8]), training = True
+U.size() = torch.Size([10, 16, 2]), Y.size() = torch.Size([10, 16, 8]), training = True
+U.size() = torch.Size([10, 16, 2]), Y.size() = torch.Size([10, 16, 8]), training = True
+U.size() = torch.Size([10, 16, 2]), Y.size() = torch.Size([10, 16, 8]), training = True
+U.size() = torch.Size([10, 16, 2]), Y.size() = torch.Size([10, 16, 8]), training = True
+U.size() = torch.Size([10, 16, 2]), Y.size() = torch.Size([10, 16, 8]), training = True
+U.size() = torch.Size([10, 16, 2]), Y.size() = torch.Size([10, 16, 8]), training = True
+U.size() = torch.Size([10, 16, 2]), Y.size() = torch.Size([10, 16, 8]), training = True
+Epoch: 1 - 510/751 | observer_loss = 4.2386, stability_loss = 0.0000, loss = 4.2386                U.size() = torch.Size([10, 16, 2]), Y.size() = torch.Size([10, 16, 8]), training = True
+U.size() = torch.Size([10, 16, 2]), Y.size() = torch.Size([10, 16, 8]), training = True
+U.size() = torch.Size([10, 16, 2]), Y.size() = torch.Size([10, 16, 8]), training = True
+U.size() = torch.Size([10, 16, 2]), Y.size() = torch.Size([10, 16, 8]), training = True
+U.size() = torch.Size([10, 16, 2]), Y.size() = torch.Size([10, 16, 8]), training = True
+U.size() = torch.Size([10, 16, 2]), Y.size() = torch.Size([10, 16, 8]), training = True
+U.size() = torch.Size([10, 16, 2]), Y.size() = torch.Size([10, 16, 8]), training = True
+U.size() = torch.Size([10, 16, 2]), Y.size() = torch.Size([10, 16, 8]), training = True
+U.size() = torch.Size([10, 16, 2]), Y.size() = torch.Size([10, 16, 8]), training = True
+U.size() = torch.Size([10, 16, 2]), Y.size() = torch.Size([10, 16, 8]), training = True
+Epoch: 1 - 520/751 | observer_loss = 5.3332, stability_loss = 0.0000, loss = 5.3332                U.size() = torch.Size([10, 16, 2]), Y.size() = torch.Size([10, 16, 8]), training = True
+U.size() = torch.Size([10, 16, 2]), Y.size() = torch.Size([10, 16, 8]), training = True
+U.size() = torch.Size([10, 16, 2]), Y.size() = torch.Size([10, 16, 8]), training = True
+U.size() = torch.Size([10, 16, 2]), Y.size() = torch.Size([10, 16, 8]), training = True
+U.size() = torch.Size([10, 16, 2]), Y.size() = torch.Size([10, 16, 8]), training = True
+U.size() = torch.Size([10, 16, 2]), Y.size() = torch.Size([10, 16, 8]), training = True
+U.size() = torch.Size([10, 16, 2]), Y.size() = torch.Size([10, 16, 8]), training = True
+U.size() = torch.Size([10, 16, 2]), Y.size() = torch.Size([10, 16, 8]), training = True
+U.size() = torch.Size([10, 16, 2]), Y.size() = torch.Size([10, 16, 8]), training = True
+U.size() = torch.Size([10, 16, 2]), Y.size() = torch.Size([10, 16, 8]), training = True
+Epoch: 1 - 530/751 | observer_loss = 4.5756, stability_loss = 0.0000, loss = 4.5756                U.size() = torch.Size([10, 16, 2]), Y.size() = torch.Size([10, 16, 8]), training = True
+U.size() = torch.Size([10, 16, 2]), Y.size() = torch.Size([10, 16, 8]), training = True
+U.size() = torch.Size([10, 16, 2]), Y.size() = torch.Size([10, 16, 8]), training = True
+U.size() = torch.Size([10, 16, 2]), Y.size() = torch.Size([10, 16, 8]), training = True
+U.size() = torch.Size([10, 16, 2]), Y.size() = torch.Size([10, 16, 8]), training = True
+U.size() = torch.Size([10, 16, 2]), Y.size() = torch.Size([10, 16, 8]), training = True
+U.size() = torch.Size([10, 16, 2]), Y.size() = torch.Size([10, 16, 8]), training = True
+U.size() = torch.Size([10, 16, 2]), Y.size() = torch.Size([10, 16, 8]), training = True
+U.size() = torch.Size([10, 16, 2]), Y.size() = torch.Size([10, 16, 8]), training = True
+U.size() = torch.Size([10, 16, 2]), Y.size() = torch.Size([10, 16, 8]), training = True
+Epoch: 1 - 540/751 | observer_loss = 3.4724, stability_loss = 0.0000, loss = 3.4724                U.size() = torch.Size([10, 16, 2]), Y.size() = torch.Size([10, 16, 8]), training = True
+U.size() = torch.Size([10, 16, 2]), Y.size() = torch.Size([10, 16, 8]), training = True
+U.size() = torch.Size([10, 16, 2]), Y.size() = torch.Size([10, 16, 8]), training = True
+U.size() = torch.Size([10, 16, 2]), Y.size() = torch.Size([10, 16, 8]), training = True
+U.size() = torch.Size([10, 16, 2]), Y.size() = torch.Size([10, 16, 8]), training = True
+U.size() = torch.Size([10, 16, 2]), Y.size() = torch.Size([10, 16, 8]), training = True
+U.size() = torch.Size([10, 16, 2]), Y.size() = torch.Size([10, 16, 8]), training = True
+U.size() = torch.Size([10, 16, 2]), Y.size() = torch.Size([10, 16, 8]), training = True
+U.size() = torch.Size([10, 16, 2]), Y.size() = torch.Size([10, 16, 8]), training = True
+U.size() = torch.Size([10, 16, 2]), Y.size() = torch.Size([10, 16, 8]), training = True
+Epoch: 1 - 550/751 | observer_loss = 4.1947, stability_loss = 0.0000, loss = 4.1947                U.size() = torch.Size([10, 16, 2]), Y.size() = torch.Size([10, 16, 8]), training = True
+U.size() = torch.Size([10, 16, 2]), Y.size() = torch.Size([10, 16, 8]), training = True
+U.size() = torch.Size([10, 16, 2]), Y.size() = torch.Size([10, 16, 8]), training = True
+U.size() = torch.Size([10, 16, 2]), Y.size() = torch.Size([10, 16, 8]), training = True
+U.size() = torch.Size([10, 16, 2]), Y.size() = torch.Size([10, 16, 8]), training = True
+U.size() = torch.Size([10, 16, 2]), Y.size() = torch.Size([10, 16, 8]), training = True
+U.size() = torch.Size([10, 16, 2]), Y.size() = torch.Size([10, 16, 8]), training = True
+U.size() = torch.Size([10, 16, 2]), Y.size() = torch.Size([10, 16, 8]), training = True
+U.size() = torch.Size([10, 16, 2]), Y.size() = torch.Size([10, 16, 8]), training = True
+U.size() = torch.Size([10, 16, 2]), Y.size() = torch.Size([10, 16, 8]), training = True
+Epoch: 1 - 560/751 | observer_loss = 3.3872, stability_loss = 0.0000, loss = 3.3872                U.size() = torch.Size([10, 16, 2]), Y.size() = torch.Size([10, 16, 8]), training = True
+U.size() = torch.Size([10, 16, 2]), Y.size() = torch.Size([10, 16, 8]), training = True
+U.size() = torch.Size([10, 16, 2]), Y.size() = torch.Size([10, 16, 8]), training = True
+U.size() = torch.Size([10, 16, 2]), Y.size() = torch.Size([10, 16, 8]), training = True
+U.size() = torch.Size([10, 16, 2]), Y.size() = torch.Size([10, 16, 8]), training = True
+U.size() = torch.Size([10, 16, 2]), Y.size() = torch.Size([10, 16, 8]), training = True
+U.size() = torch.Size([10, 16, 2]), Y.size() = torch.Size([10, 16, 8]), training = True
+U.size() = torch.Size([10, 16, 2]), Y.size() = torch.Size([10, 16, 8]), training = True
+U.size() = torch.Size([10, 16, 2]), Y.size() = torch.Size([10, 16, 8]), training = True
+U.size() = torch.Size([10, 16, 2]), Y.size() = torch.Size([10, 16, 8]), training = True
+Epoch: 1 - 570/751 | observer_loss = 3.8635, stability_loss = 0.0000, loss = 3.8635                U.size() = torch.Size([10, 16, 2]), Y.size() = torch.Size([10, 16, 8]), training = True
+U.size() = torch.Size([10, 16, 2]), Y.size() = torch.Size([10, 16, 8]), training = True
+U.size() = torch.Size([10, 16, 2]), Y.size() = torch.Size([10, 16, 8]), training = True
+U.size() = torch.Size([10, 16, 2]), Y.size() = torch.Size([10, 16, 8]), training = True
+U.size() = torch.Size([10, 16, 2]), Y.size() = torch.Size([10, 16, 8]), training = True
+U.size() = torch.Size([10, 16, 2]), Y.size() = torch.Size([10, 16, 8]), training = True
+U.size() = torch.Size([10, 16, 2]), Y.size() = torch.Size([10, 16, 8]), training = True
+U.size() = torch.Size([10, 16, 2]), Y.size() = torch.Size([10, 16, 8]), training = True
+U.size() = torch.Size([10, 16, 2]), Y.size() = torch.Size([10, 16, 8]), training = True
+U.size() = torch.Size([10, 16, 2]), Y.size() = torch.Size([10, 16, 8]), training = True
+Epoch: 1 - 580/751 | observer_loss = 3.2972, stability_loss = 0.0000, loss = 3.2972                U.size() = torch.Size([10, 16, 2]), Y.size() = torch.Size([10, 16, 8]), training = True
+U.size() = torch.Size([10, 16, 2]), Y.size() = torch.Size([10, 16, 8]), training = True
+U.size() = torch.Size([10, 16, 2]), Y.size() = torch.Size([10, 16, 8]), training = True
+U.size() = torch.Size([10, 16, 2]), Y.size() = torch.Size([10, 16, 8]), training = True
+U.size() = torch.Size([10, 16, 2]), Y.size() = torch.Size([10, 16, 8]), training = True
+U.size() = torch.Size([10, 16, 2]), Y.size() = torch.Size([10, 16, 8]), training = True
+U.size() = torch.Size([10, 16, 2]), Y.size() = torch.Size([10, 16, 8]), training = True
+U.size() = torch.Size([10, 16, 2]), Y.size() = torch.Size([10, 16, 8]), training = True
+U.size() = torch.Size([10, 16, 2]), Y.size() = torch.Size([10, 16, 8]), training = True
+U.size() = torch.Size([10, 16, 2]), Y.size() = torch.Size([10, 16, 8]), training = True
+Epoch: 1 - 590/751 | observer_loss = 3.4336, stability_loss = 0.0000, loss = 3.4336                U.size() = torch.Size([10, 16, 2]), Y.size() = torch.Size([10, 16, 8]), training = True
+U.size() = torch.Size([10, 16, 2]), Y.size() = torch.Size([10, 16, 8]), training = True
+U.size() = torch.Size([10, 16, 2]), Y.size() = torch.Size([10, 16, 8]), training = True
+U.size() = torch.Size([10, 16, 2]), Y.size() = torch.Size([10, 16, 8]), training = True
+U.size() = torch.Size([10, 16, 2]), Y.size() = torch.Size([10, 16, 8]), training = True
+U.size() = torch.Size([10, 16, 2]), Y.size() = torch.Size([10, 16, 8]), training = True
+U.size() = torch.Size([10, 16, 2]), Y.size() = torch.Size([10, 16, 8]), training = True
+U.size() = torch.Size([10, 16, 2]), Y.size() = torch.Size([10, 16, 8]), training = True
+U.size() = torch.Size([10, 16, 2]), Y.size() = torch.Size([10, 16, 8]), training = True
+U.size() = torch.Size([10, 16, 2]), Y.size() = torch.Size([10, 16, 8]), training = True
+Epoch: 1 - 600/751 | observer_loss = 3.5326, stability_loss = 0.0000, loss = 3.5326                U.size() = torch.Size([10, 16, 2]), Y.size() = torch.Size([10, 16, 8]), training = True
+U.size() = torch.Size([10, 16, 2]), Y.size() = torch.Size([10, 16, 8]), training = True
+U.size() = torch.Size([10, 16, 2]), Y.size() = torch.Size([10, 16, 8]), training = True
+U.size() = torch.Size([10, 16, 2]), Y.size() = torch.Size([10, 16, 8]), training = True
+U.size() = torch.Size([10, 16, 2]), Y.size() = torch.Size([10, 16, 8]), training = True
+U.size() = torch.Size([10, 16, 2]), Y.size() = torch.Size([10, 16, 8]), training = True
+U.size() = torch.Size([10, 16, 2]), Y.size() = torch.Size([10, 16, 8]), training = True
+U.size() = torch.Size([10, 16, 2]), Y.size() = torch.Size([10, 16, 8]), training = True
+U.size() = torch.Size([10, 16, 2]), Y.size() = torch.Size([10, 16, 8]), training = True
+U.size() = torch.Size([10, 16, 2]), Y.size() = torch.Size([10, 16, 8]), training = True
+Epoch: 1 - 610/751 | observer_loss = 3.7315, stability_loss = 0.0000, loss = 3.7315                U.size() = torch.Size([10, 16, 2]), Y.size() = torch.Size([10, 16, 8]), training = True
+U.size() = torch.Size([10, 16, 2]), Y.size() = torch.Size([10, 16, 8]), training = True
+U.size() = torch.Size([10, 16, 2]), Y.size() = torch.Size([10, 16, 8]), training = True
+U.size() = torch.Size([10, 16, 2]), Y.size() = torch.Size([10, 16, 8]), training = True
+U.size() = torch.Size([10, 16, 2]), Y.size() = torch.Size([10, 16, 8]), training = True
+U.size() = torch.Size([10, 16, 2]), Y.size() = torch.Size([10, 16, 8]), training = True
+U.size() = torch.Size([10, 16, 2]), Y.size() = torch.Size([10, 16, 8]), training = True
+U.size() = torch.Size([10, 16, 2]), Y.size() = torch.Size([10, 16, 8]), training = True
+U.size() = torch.Size([10, 16, 2]), Y.size() = torch.Size([10, 16, 8]), training = True
+U.size() = torch.Size([10, 16, 2]), Y.size() = torch.Size([10, 16, 8]), training = True
+Epoch: 1 - 620/751 | observer_loss = 3.5907, stability_loss = 0.0000, loss = 3.5907                U.size() = torch.Size([10, 16, 2]), Y.size() = torch.Size([10, 16, 8]), training = True
+U.size() = torch.Size([10, 16, 2]), Y.size() = torch.Size([10, 16, 8]), training = True
+U.size() = torch.Size([10, 16, 2]), Y.size() = torch.Size([10, 16, 8]), training = True
+U.size() = torch.Size([10, 16, 2]), Y.size() = torch.Size([10, 16, 8]), training = True
+U.size() = torch.Size([10, 16, 2]), Y.size() = torch.Size([10, 16, 8]), training = True
+U.size() = torch.Size([10, 16, 2]), Y.size() = torch.Size([10, 16, 8]), training = True
+U.size() = torch.Size([10, 16, 2]), Y.size() = torch.Size([10, 16, 8]), training = True
+U.size() = torch.Size([10, 16, 2]), Y.size() = torch.Size([10, 16, 8]), training = True
+U.size() = torch.Size([10, 16, 2]), Y.size() = torch.Size([10, 16, 8]), training = True
+U.size() = torch.Size([10, 16, 2]), Y.size() = torch.Size([10, 16, 8]), training = True
+Epoch: 1 - 630/751 | observer_loss = 3.5619, stability_loss = 0.0000, loss = 3.5619                U.size() = torch.Size([10, 16, 2]), Y.size() = torch.Size([10, 16, 8]), training = True
+U.size() = torch.Size([10, 16, 2]), Y.size() = torch.Size([10, 16, 8]), training = True
+U.size() = torch.Size([10, 16, 2]), Y.size() = torch.Size([10, 16, 8]), training = True
+U.size() = torch.Size([10, 16, 2]), Y.size() = torch.Size([10, 16, 8]), training = True
+U.size() = torch.Size([10, 16, 2]), Y.size() = torch.Size([10, 16, 8]), training = True
+U.size() = torch.Size([10, 16, 2]), Y.size() = torch.Size([10, 16, 8]), training = True
+U.size() = torch.Size([10, 16, 2]), Y.size() = torch.Size([10, 16, 8]), training = True
+U.size() = torch.Size([10, 16, 2]), Y.size() = torch.Size([10, 16, 8]), training = True
+U.size() = torch.Size([10, 16, 2]), Y.size() = torch.Size([10, 16, 8]), training = True
+U.size() = torch.Size([10, 16, 2]), Y.size() = torch.Size([10, 16, 8]), training = True
+Epoch: 1 - 640/751 | observer_loss = 4.8071, stability_loss = 0.0000, loss = 4.8071                U.size() = torch.Size([10, 16, 2]), Y.size() = torch.Size([10, 16, 8]), training = True
+U.size() = torch.Size([10, 16, 2]), Y.size() = torch.Size([10, 16, 8]), training = True
+U.size() = torch.Size([10, 16, 2]), Y.size() = torch.Size([10, 16, 8]), training = True
+U.size() = torch.Size([10, 16, 2]), Y.size() = torch.Size([10, 16, 8]), training = True
+U.size() = torch.Size([10, 16, 2]), Y.size() = torch.Size([10, 16, 8]), training = True
+U.size() = torch.Size([10, 16, 2]), Y.size() = torch.Size([10, 16, 8]), training = True
+U.size() = torch.Size([10, 16, 2]), Y.size() = torch.Size([10, 16, 8]), training = True
+U.size() = torch.Size([10, 16, 2]), Y.size() = torch.Size([10, 16, 8]), training = True
+U.size() = torch.Size([10, 16, 2]), Y.size() = torch.Size([10, 16, 8]), training = True
+U.size() = torch.Size([10, 16, 2]), Y.size() = torch.Size([10, 16, 8]), training = True
+Epoch: 1 - 650/751 | observer_loss = 3.3472, stability_loss = 0.0000, loss = 3.3472                U.size() = torch.Size([10, 16, 2]), Y.size() = torch.Size([10, 16, 8]), training = True
+U.size() = torch.Size([10, 16, 2]), Y.size() = torch.Size([10, 16, 8]), training = True
+U.size() = torch.Size([10, 16, 2]), Y.size() = torch.Size([10, 16, 8]), training = True
+U.size() = torch.Size([10, 16, 2]), Y.size() = torch.Size([10, 16, 8]), training = True
+U.size() = torch.Size([10, 16, 2]), Y.size() = torch.Size([10, 16, 8]), training = True
+U.size() = torch.Size([10, 16, 2]), Y.size() = torch.Size([10, 16, 8]), training = True
+U.size() = torch.Size([10, 16, 2]), Y.size() = torch.Size([10, 16, 8]), training = True
+U.size() = torch.Size([10, 16, 2]), Y.size() = torch.Size([10, 16, 8]), training = True
+U.size() = torch.Size([10, 16, 2]), Y.size() = torch.Size([10, 16, 8]), training = True
+U.size() = torch.Size([10, 16, 2]), Y.size() = torch.Size([10, 16, 8]), training = True
+Epoch: 1 - 660/751 | observer_loss = 4.2689, stability_loss = 0.0000, loss = 4.2689                U.size() = torch.Size([10, 16, 2]), Y.size() = torch.Size([10, 16, 8]), training = True
+U.size() = torch.Size([10, 16, 2]), Y.size() = torch.Size([10, 16, 8]), training = True
+U.size() = torch.Size([10, 16, 2]), Y.size() = torch.Size([10, 16, 8]), training = True
+U.size() = torch.Size([10, 16, 2]), Y.size() = torch.Size([10, 16, 8]), training = True
+U.size() = torch.Size([10, 16, 2]), Y.size() = torch.Size([10, 16, 8]), training = True
+U.size() = torch.Size([10, 16, 2]), Y.size() = torch.Size([10, 16, 8]), training = True
+U.size() = torch.Size([10, 16, 2]), Y.size() = torch.Size([10, 16, 8]), training = True
+U.size() = torch.Size([10, 16, 2]), Y.size() = torch.Size([10, 16, 8]), training = True
+U.size() = torch.Size([10, 16, 2]), Y.size() = torch.Size([10, 16, 8]), training = True
+U.size() = torch.Size([10, 16, 2]), Y.size() = torch.Size([10, 16, 8]), training = True
+Epoch: 1 - 670/751 | observer_loss = 5.1255, stability_loss = 0.0000, loss = 5.1255                U.size() = torch.Size([10, 16, 2]), Y.size() = torch.Size([10, 16, 8]), training = True
+U.size() = torch.Size([10, 16, 2]), Y.size() = torch.Size([10, 16, 8]), training = True
+U.size() = torch.Size([10, 16, 2]), Y.size() = torch.Size([10, 16, 8]), training = True
+U.size() = torch.Size([10, 16, 2]), Y.size() = torch.Size([10, 16, 8]), training = True
+U.size() = torch.Size([10, 16, 2]), Y.size() = torch.Size([10, 16, 8]), training = True
+U.size() = torch.Size([10, 16, 2]), Y.size() = torch.Size([10, 16, 8]), training = True
+U.size() = torch.Size([10, 16, 2]), Y.size() = torch.Size([10, 16, 8]), training = True
+U.size() = torch.Size([10, 16, 2]), Y.size() = torch.Size([10, 16, 8]), training = True
+U.size() = torch.Size([10, 16, 2]), Y.size() = torch.Size([10, 16, 8]), training = True
+U.size() = torch.Size([10, 16, 2]), Y.size() = torch.Size([10, 16, 8]), training = True
+Epoch: 1 - 680/751 | observer_loss = 4.3851, stability_loss = 0.0000, loss = 4.3851                U.size() = torch.Size([10, 16, 2]), Y.size() = torch.Size([10, 16, 8]), training = True
+U.size() = torch.Size([10, 16, 2]), Y.size() = torch.Size([10, 16, 8]), training = True
+U.size() = torch.Size([10, 16, 2]), Y.size() = torch.Size([10, 16, 8]), training = True
+U.size() = torch.Size([10, 16, 2]), Y.size() = torch.Size([10, 16, 8]), training = True
+U.size() = torch.Size([10, 16, 2]), Y.size() = torch.Size([10, 16, 8]), training = True
+U.size() = torch.Size([10, 16, 2]), Y.size() = torch.Size([10, 16, 8]), training = True
+U.size() = torch.Size([10, 16, 2]), Y.size() = torch.Size([10, 16, 8]), training = True
+U.size() = torch.Size([10, 16, 2]), Y.size() = torch.Size([10, 16, 8]), training = True
+U.size() = torch.Size([10, 16, 2]), Y.size() = torch.Size([10, 16, 8]), training = True
+U.size() = torch.Size([10, 16, 2]), Y.size() = torch.Size([10, 16, 8]), training = True
+Epoch: 1 - 690/751 | observer_loss = 3.7490, stability_loss = 0.0000, loss = 3.7490                U.size() = torch.Size([10, 16, 2]), Y.size() = torch.Size([10, 16, 8]), training = True
+U.size() = torch.Size([10, 16, 2]), Y.size() = torch.Size([10, 16, 8]), training = True
+U.size() = torch.Size([10, 16, 2]), Y.size() = torch.Size([10, 16, 8]), training = True
+U.size() = torch.Size([10, 16, 2]), Y.size() = torch.Size([10, 16, 8]), training = True
+U.size() = torch.Size([10, 16, 2]), Y.size() = torch.Size([10, 16, 8]), training = True
+U.size() = torch.Size([10, 16, 2]), Y.size() = torch.Size([10, 16, 8]), training = True
+U.size() = torch.Size([10, 16, 2]), Y.size() = torch.Size([10, 16, 8]), training = True
+U.size() = torch.Size([10, 16, 2]), Y.size() = torch.Size([10, 16, 8]), training = True
+U.size() = torch.Size([10, 16, 2]), Y.size() = torch.Size([10, 16, 8]), training = True
+U.size() = torch.Size([10, 16, 2]), Y.size() = torch.Size([10, 16, 8]), training = True
+Epoch: 1 - 700/751 | observer_loss = 4.0229, stability_loss = 0.0000, loss = 4.0229                U.size() = torch.Size([10, 16, 2]), Y.size() = torch.Size([10, 16, 8]), training = True
+U.size() = torch.Size([10, 16, 2]), Y.size() = torch.Size([10, 16, 8]), training = True
+U.size() = torch.Size([10, 16, 2]), Y.size() = torch.Size([10, 16, 8]), training = True
+U.size() = torch.Size([10, 16, 2]), Y.size() = torch.Size([10, 16, 8]), training = True
+U.size() = torch.Size([10, 16, 2]), Y.size() = torch.Size([10, 16, 8]), training = True
+U.size() = torch.Size([10, 16, 2]), Y.size() = torch.Size([10, 16, 8]), training = True
+U.size() = torch.Size([10, 16, 2]), Y.size() = torch.Size([10, 16, 8]), training = True
+U.size() = torch.Size([10, 16, 2]), Y.size() = torch.Size([10, 16, 8]), training = True
+U.size() = torch.Size([10, 16, 2]), Y.size() = torch.Size([10, 16, 8]), training = True
+U.size() = torch.Size([10, 16, 2]), Y.size() = torch.Size([10, 16, 8]), training = True
+Epoch: 1 - 710/751 | observer_loss = 7.0181, stability_loss = 0.0000, loss = 7.0181                U.size() = torch.Size([10, 16, 2]), Y.size() = torch.Size([10, 16, 8]), training = True
+U.size() = torch.Size([10, 16, 2]), Y.size() = torch.Size([10, 16, 8]), training = True
+U.size() = torch.Size([10, 16, 2]), Y.size() = torch.Size([10, 16, 8]), training = True
+U.size() = torch.Size([10, 16, 2]), Y.size() = torch.Size([10, 16, 8]), training = True
+U.size() = torch.Size([10, 16, 2]), Y.size() = torch.Size([10, 16, 8]), training = True
+U.size() = torch.Size([10, 16, 2]), Y.size() = torch.Size([10, 16, 8]), training = True
+U.size() = torch.Size([10, 16, 2]), Y.size() = torch.Size([10, 16, 8]), training = True
+U.size() = torch.Size([10, 16, 2]), Y.size() = torch.Size([10, 16, 8]), training = True
+U.size() = torch.Size([10, 16, 2]), Y.size() = torch.Size([10, 16, 8]), training = True
+U.size() = torch.Size([10, 16, 2]), Y.size() = torch.Size([10, 16, 8]), training = True
+Epoch: 1 - 720/751 | observer_loss = 3.6514, stability_loss = 0.0000, loss = 3.6514                U.size() = torch.Size([10, 16, 2]), Y.size() = torch.Size([10, 16, 8]), training = True
+U.size() = torch.Size([10, 16, 2]), Y.size() = torch.Size([10, 16, 8]), training = True
+U.size() = torch.Size([10, 16, 2]), Y.size() = torch.Size([10, 16, 8]), training = True
+U.size() = torch.Size([10, 16, 2]), Y.size() = torch.Size([10, 16, 8]), training = True
+U.size() = torch.Size([10, 16, 2]), Y.size() = torch.Size([10, 16, 8]), training = True
+U.size() = torch.Size([10, 16, 2]), Y.size() = torch.Size([10, 16, 8]), training = True
+U.size() = torch.Size([10, 16, 2]), Y.size() = torch.Size([10, 16, 8]), training = True
+U.size() = torch.Size([10, 16, 2]), Y.size() = torch.Size([10, 16, 8]), training = True
+U.size() = torch.Size([10, 16, 2]), Y.size() = torch.Size([10, 16, 8]), training = True
+U.size() = torch.Size([10, 16, 2]), Y.size() = torch.Size([10, 16, 8]), training = True
+Epoch: 1 - 730/751 | observer_loss = 5.0833, stability_loss = 0.0000, loss = 5.0833                U.size() = torch.Size([10, 16, 2]), Y.size() = torch.Size([10, 16, 8]), training = True
+U.size() = torch.Size([10, 16, 2]), Y.size() = torch.Size([10, 16, 8]), training = True
+U.size() = torch.Size([10, 16, 2]), Y.size() = torch.Size([10, 16, 8]), training = True
+U.size() = torch.Size([10, 16, 2]), Y.size() = torch.Size([10, 16, 8]), training = True
+U.size() = torch.Size([10, 16, 2]), Y.size() = torch.Size([10, 16, 8]), training = True
+U.size() = torch.Size([10, 16, 2]), Y.size() = torch.Size([10, 16, 8]), training = True
+U.size() = torch.Size([10, 16, 2]), Y.size() = torch.Size([10, 16, 8]), training = True
+U.size() = torch.Size([10, 16, 2]), Y.size() = torch.Size([10, 16, 8]), training = True
+U.size() = torch.Size([10, 16, 2]), Y.size() = torch.Size([10, 16, 8]), training = True
+U.size() = torch.Size([10, 16, 2]), Y.size() = torch.Size([10, 16, 8]), training = True
+Epoch: 1 - 740/751 | observer_loss = 4.2349, stability_loss = 0.0000, loss = 4.2349                U.size() = torch.Size([10, 16, 2]), Y.size() = torch.Size([10, 16, 8]), training = True
+U.size() = torch.Size([10, 16, 2]), Y.size() = torch.Size([10, 16, 8]), training = True
+U.size() = torch.Size([10, 16, 2]), Y.size() = torch.Size([10, 16, 8]), training = True
+U.size() = torch.Size([10, 16, 2]), Y.size() = torch.Size([10, 16, 8]), training = True
+U.size() = torch.Size([10, 16, 2]), Y.size() = torch.Size([10, 16, 8]), training = True
+U.size() = torch.Size([10, 16, 2]), Y.size() = torch.Size([10, 16, 8]), training = True
+U.size() = torch.Size([10, 16, 2]), Y.size() = torch.Size([10, 16, 8]), training = True
+U.size() = torch.Size([10, 16, 2]), Y.size() = torch.Size([10, 16, 8]), training = True
+U.size() = torch.Size([10, 16, 2]), Y.size() = torch.Size([10, 16, 8]), training = True
+U.size() = torch.Size([10, 16, 2]), Y.size() = torch.Size([10, 16, 8]), training = True
+Epoch: 1 - 750/751 | observer_loss = 3.9785, stability_loss = 0.0000, loss = 3.9785                U.size() = torch.Size([10, 1, 2]), Y.size() = torch.Size([10, 1, 8]), training = True
+Traceback (most recent call last):
+  File "F:\torch_joff\joff\_run\_run_model.py", line 67, in _run_with_log
+    _run_n(self, p)
+  File "F:\torch_joff\joff\_run\_run_model.py", line 111, in _run_n
+    train_model(self, **p)
+  File "F:\torch_joff\joff\_run\_run_model.py", line 199, in train_model
+    else: batch_training(self)
+          ^^^^^^^^^^^^^^^^^^^^
+  File "F:\torch_joff\joff\_run\_epoch.py", line 29, in batch_training
+    self.forward(input)
+  File "F:\torch_joff\joff\_model\arx.py", line 173, in forward
+    J = self.get_vmap_jac(x_pre, u, self.h_pres, self.c_pres)
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "F:\torch_joff\joff\_model\arx.py", line 106, in get_vmap_jac
+    return vmap_jac(self.dynamics_fn, 0, in_dims, *args)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "F:\torch_joff\joff\_model\arx.py", line 35, in vmap_jac
+    J = batch_jac_fn(*args)
+        ^^^^^^^^^^^^^^^^^^^
+  File "F:\anaconda3\Lib\site-packages\torch\_functorch\apis.py", line 203, in wrapped
+    return vmap_impl(
+           ^^^^^^^^^^
+  File "F:\anaconda3\Lib\site-packages\torch\_functorch\vmap.py", line 312, in vmap_impl
+    batch_size, flat_in_dims, flat_args, args_spec = _process_batched_inputs(
+                                                     ^^^^^^^^^^^^^^^^^^^^^^^^
+  File "F:\anaconda3\Lib\site-packages\torch\_functorch\vmap.py", line 143, in _process_batched_inputs
+    _validate_and_get_batch_size(flat_in_dims, flat_args),
+    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "F:\anaconda3\Lib\site-packages\torch\_functorch\vmap.py", line 65, in _validate_and_get_batch_size
+    raise ValueError(
+ValueError: vmap: Expected all tensors to have the same size in the mapped dimension, got sizes [16, 1, 16, 16, 16] for the mapped dimension

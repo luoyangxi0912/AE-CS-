@@ -1,0 +1,77 @@
+
+DAE(
+  (loss_func): MSELoss()
+  (encoder): Sequential(
+    (0): Dropout(p=0.052, inplace=False)
+    (1): Linear(in_features=520, out_features=260, bias=True)
+    (2): Affine()
+    (3): Dropout(p=0.026, inplace=False)
+    (4): Linear(in_features=260, out_features=130, bias=True)
+    (5): Gaussian()
+  )
+  (decoder): Sequential(
+    (0): Dropout(p=0.013, inplace=False)
+    (1): Linear(in_features=130, out_features=260, bias=True)
+    (2): Sigmoid()
+    (3): Dropout(p=0.026, inplace=False)
+    (4): Linear(in_features=260, out_features=520, bias=True)
+    (5): Affine()
+  )
+)
+
+run paras: {'run_times': 1, 'multirun_seed': 'r*2', '_run_id': '', 'e': 24, 'load_para_type': None, 'load_sub': None, 'load_file_name': None, 'view_addi_info': ['loss'], 'if_log': True, 'if_epoch_eval': None, 'if_vmap': False, 'if_save_excel': True, 'if_save_plot': True, 'fd_pr': ['re-T2&Q-kde'], 'fd_pr_dt': [{'mm': 're', 'ts': 'T2', 'thrd_meth': 'kde'}, {'mm': 're', 'ts': 'Q', 'thrd_meth': 'kde'}], 'fd_pr_name': ['re-T2-kde', 're-Q-kde'], 'expt_FAR': 0.025, 'ts_post_op': None, 'if_use_lstsq': True, 'if_plot_mm_kde': False, 'if_plot_score_hm': False, 'if_plot_cov_inv': True, 'if_save_ts': True, 'alld_error': 0.005, 'cl': 0.995, 'if_intp': False}
+
+Train DAE_HY/fd_Act5 via cuda:
+Epoch: 24 - 792/792 | loss = 0.0281                
+Finish training~ Spend 50 seconds
+
+Mean training losses: ['train-loss'] = [0.0305]
+
+Save model paras [Last] in 'file:///F:/torch_joff/joff/Result/DAE_HY/fd_Act5'
+
+1) 're-T2-kde':
+Threshold = 1338.97
+
+The test false alarm rates (FARs) are:
+[ 0.    3.64 23.03 18.18  8.48 10.91  2.42  6.1 ](%)
+
+The test missed detection rates (MDRs) are:
+[22.11  6.65 14.59  0.49  9.92  0.42  5.49 20.61](%)
+
+The test AFAR is 9.1(%).
+The test AMDR is 11.56(%).
+
+2) 're-Q-kde':
+Threshold = 35.43
+
+The test false alarm rates (FARs) are:
+[ 0.    0.   18.18 12.12  3.03  7.88  0.    3.66](%)
+
+The test missed detection rates (MDRs) are:
+[39.08 18.85 20.76 21.46 27.48  3.91 69.82 75.2 ](%)
+
+The test AFAR is 5.61(%).
+The test AMDR is 34.9(%).
+
+Save FD Result.xlsx in 'file:///F:/torch_joff/joff/Result/DAE_HY/fd_Act5/FD%20Result.xlsx'
+Plot Epoch-Loss.pdf in 'file:///F:/torch_joff/joff/Result/DAE_HY/fd_Act5/Epoch-Loss.pdf'
+Plot Normal.pdf in 'file:///F:/torch_joff/joff/Result/DAE_HY/fd_Act5/re-T2-kde/Normal.pdf'
+Plot Fault 1.pdf in 'file:///F:/torch_joff/joff/Result/DAE_HY/fd_Act5/re-T2-kde/Fault%201.pdf'
+Plot Fault 2.pdf in 'file:///F:/torch_joff/joff/Result/DAE_HY/fd_Act5/re-T2-kde/Fault%202.pdf'
+Plot Fault 3.pdf in 'file:///F:/torch_joff/joff/Result/DAE_HY/fd_Act5/re-T2-kde/Fault%203.pdf'
+Plot Fault 4.pdf in 'file:///F:/torch_joff/joff/Result/DAE_HY/fd_Act5/re-T2-kde/Fault%204.pdf'
+Plot Fault 5.pdf in 'file:///F:/torch_joff/joff/Result/DAE_HY/fd_Act5/re-T2-kde/Fault%205.pdf'
+Plot Fault 6.pdf in 'file:///F:/torch_joff/joff/Result/DAE_HY/fd_Act5/re-T2-kde/Fault%206.pdf'
+Plot Fault 7.pdf in 'file:///F:/torch_joff/joff/Result/DAE_HY/fd_Act5/re-T2-kde/Fault%207.pdf'
+Plot Fault 8.pdf in 'file:///F:/torch_joff/joff/Result/DAE_HY/fd_Act5/re-T2-kde/Fault%208.pdf'
+Plot Whole_fd.pdf in 'file:///F:/torch_joff/joff/Result/DAE_HY/fd_Act5/re-T2-kde/Whole_fd.pdf'
+Plot Normal.pdf in 'file:///F:/torch_joff/joff/Result/DAE_HY/fd_Act5/re-Q-kde/Normal.pdf'
+Plot Fault 1.pdf in 'file:///F:/torch_joff/joff/Result/DAE_HY/fd_Act5/re-Q-kde/Fault%201.pdf'
+Plot Fault 2.pdf in 'file:///F:/torch_joff/joff/Result/DAE_HY/fd_Act5/re-Q-kde/Fault%202.pdf'
+Plot Fault 3.pdf in 'file:///F:/torch_joff/joff/Result/DAE_HY/fd_Act5/re-Q-kde/Fault%203.pdf'
+Plot Fault 4.pdf in 'file:///F:/torch_joff/joff/Result/DAE_HY/fd_Act5/re-Q-kde/Fault%204.pdf'
+Plot Fault 5.pdf in 'file:///F:/torch_joff/joff/Result/DAE_HY/fd_Act5/re-Q-kde/Fault%205.pdf'
+Plot Fault 6.pdf in 'file:///F:/torch_joff/joff/Result/DAE_HY/fd_Act5/re-Q-kde/Fault%206.pdf'
+Plot Fault 7.pdf in 'file:///F:/torch_joff/joff/Result/DAE_HY/fd_Act5/re-Q-kde/Fault%207.pdf'
+Plot Fault 8.pdf in 'file:///F:/torch_joff/joff/Result/DAE_HY/fd_Act5/re-Q-kde/Fault%208.pdf'
+Plot Whole_fd.pdf in 'file:///F:/torch_joff/joff/Result/DAE_HY/fd_Act5/re-Q-kde/Whole_fd.pdf'

@@ -1,0 +1,17 @@
+__pycache__/
+*.pyc
+venv_tf210_gpu/
+.claude/
+.vscode/
+checkpoints/
+checkpoints_v2/
+checkpoints_v3/
+checkpoints_v4/
+logs/
+results/
+nul
+*.h5
+*.json
+!config.json
+*.csv
+!hangmei_90_拼接好的.csv

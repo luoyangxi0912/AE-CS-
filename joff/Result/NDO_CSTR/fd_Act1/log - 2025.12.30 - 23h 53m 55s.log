@@ -1,0 +1,24 @@
+
+NDO(
+  (loss_func): MSELoss()
+  (seq): Sequential(
+    (layer_0): Layer(
+      (0): Linear(in_features=53, out_features=200, bias=True)
+      (1): Gaussian()
+    )
+    (layer_1): Layer(
+      (0): Dropout(p=0.0133, inplace=False)
+      (1): Linear(in_features=200, out_features=150, bias=True)
+      (2): Tanh()
+    )
+    (layer_2): Layer(
+      (0): Dropout(p=0.01, inplace=False)
+      (1): Linear(in_features=150, out_features=50, bias=True)
+      (2): Affine()
+    )
+  )
+)
+
+run paras: {'run_times': 1, 'multirun_seed': 'r*2', '_run_id': '', 'e': 3, 'load_para_type': None, 'load_sub': None, 'load_file_name': None, 'load_path_replace': None, 'view_addi_info': ['observer_loss', 'L_abs_norm', 'stability_loss', 'loss'], 'if_log': True, 'if_epoch_eval': None, 'if_vmap': False, 'if_save_excel': True, 'if_save_plot': True, 'fd_pr': ['cust_mm_ey-T2&Q-kde'], 'fd_pr_dt': [{'mm': 'cust_mm_ey', 'ts': 'T2', 'thrd_meth': 'kde'}, {'mm': 'cust_mm_ey', 'ts': 'Q', 'thrd_meth': 'kde'}], 'fd_pr_name': ['cust_mm_ey-T2-kde', 'cust_mm_ey-Q-kde'], 'expt_FAR': 0.005, 'ts_post_op': None, 'if_use_lstsq': True, 'if_plot_mm_kde': False, 'if_plot_score_hm': False, 'if_plot_cov_inv': False, 'if_save_ts': False, 'alld_error': 0.005, 'cl': 0.995, 'if_intp': False}
+
+Train NDO_CSTR/fd_Act1 via cuda:

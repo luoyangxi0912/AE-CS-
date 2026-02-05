@@ -1,0 +1,249 @@
+
+PFBO(
+  (loss_func): MSELoss()
+  (H_E): NICE(
+    (loss_func): MSELoss()
+    (layers): ModuleList(
+      (0): AdditiveCouplingLayer(
+        (loss_func): MSELoss()
+        (net): Sequential(
+          (0): Linear(in_features=130, out_features=130, bias=True)
+          (1): Gaussian()
+          (2): Linear(in_features=130, out_features=130, bias=True)
+          (3): Affine()
+        )
+      )
+      (1): AdditiveCouplingLayer(
+        (loss_func): MSELoss()
+        (net): Sequential(
+          (0): Linear(in_features=130, out_features=130, bias=True)
+          (1): Sigmoid()
+          (2): Linear(in_features=130, out_features=130, bias=True)
+          (3): Affine()
+        )
+      )
+      (2): AdditiveCouplingLayer(
+        (loss_func): MSELoss()
+        (net): Sequential(
+          (0): Linear(in_features=130, out_features=130, bias=True)
+          (1): Gaussian()
+          (2): Linear(in_features=130, out_features=130, bias=True)
+          (3): Affine()
+        )
+      )
+    )
+  )
+  (H_P): NICE(
+    (loss_func): MSELoss()
+    (layers): ModuleList(
+      (0): AdditiveCouplingLayer(
+        (loss_func): MSELoss()
+        (net): Sequential(
+          (0): Linear(in_features=130, out_features=130, bias=True)
+          (1): Gaussian()
+          (2): Linear(in_features=130, out_features=130, bias=True)
+          (3): Affine()
+        )
+      )
+      (1-2): 2 x AdditiveCouplingLayer(
+        (loss_func): MSELoss()
+        (net): Sequential(
+          (0): Linear(in_features=130, out_features=130, bias=True)
+          (1): Affine()
+          (2): Linear(in_features=130, out_features=130, bias=True)
+          (3): Affine()
+        )
+      )
+    )
+  )
+)
+
+run paras: {'run_times': 1, 'multirun_seed': 'r*2', '_run_id': '', 'e': 1, 'load_para_type': None, 'load_sub': None, 'load_file_name': None, 'load_path_replace': None, 'view_addi_info': ['forward_loss', 'reverse_loss', 'x_recon_loss', 'loss'], 'if_log': True, 'if_epoch_eval': None, 'if_vmap': False, 'if_save_excel': True, 'if_save_plot': True, 'fd_pr': ['cust_mm_hp&cust_mm_x&cust_mm_catx&cust_mm_cat-T2&Q-kde'], 'fd_pr_dt': [{'mm': 'cust_mm_hp', 'ts': 'T2', 'thrd_meth': 'kde'}, {'mm': 'cust_mm_hp', 'ts': 'Q', 'thrd_meth': 'kde'}, {'mm': 'cust_mm_x', 'ts': 'T2', 'thrd_meth': 'kde'}, {'mm': 'cust_mm_x', 'ts': 'Q', 'thrd_meth': 'kde'}, {'mm': 'cust_mm_catx', 'ts': 'T2', 'thrd_meth': 'kde'}, {'mm': 'cust_mm_catx', 'ts': 'Q', 'thrd_meth': 'kde'}, {'mm': 'cust_mm_cat', 'ts': 'T2', 'thrd_meth': 'kde'}, {'mm': 'cust_mm_cat', 'ts': 'Q', 'thrd_meth': 'kde'}], 'fd_pr_name': ['cust_mm_hp-T2-kde', 'cust_mm_hp-Q-kde', 'cust_mm_x-T2-kde', 'cust_mm_x-Q-kde', 'cust_mm_catx-T2-kde', 'cust_mm_catx-Q-kde', 'cust_mm_cat-T2-kde', 'cust_mm_cat-Q-kde'], 'expt_FAR': 0.02, 'ts_post_op': None, 'if_use_lstsq': True, 'if_plot_mm_kde': False, 'if_plot_score_hm': False, 'if_plot_cov_inv': True, 'if_save_ts': False, 'alld_error': 0.005, 'cl': 0.995, 'if_intp': False}
+
+Train PFBO_HY/fd_Act1 via cuda:
+Epoch: 1 - 819/819 | forward_loss = 11.6705, reverse_loss = 15.7816, x_recon_loss = 11.9272, loss = 39.3793                
+Finish training~ Spend 13 seconds
+
+Mean training losses: ['train-forward_loss' 'train-reverse_loss' 'train-x_recon_loss'
+ 'train-loss'] = [ 78.0024  93.631   49.6662 221.2995]
+
+Save model paras [Last] in 'file:///F:/torch_joff/joff/Result/PFBO_HY/fd_Act1'
+
+1) 'cust_mm_hp-T2-kde':
+Threshold = 695.27
+
+The test false alarm rates (FARs) are:
+[0. 0. 0. 0. 0. 0. 0. 0.](%)
+
+The test missed detection rates (MDRs) are:
+[66.73 47.22 64.69 76.1  63.88 37.12 95.06 95.28](%)
+
+The test AFAR is 0.0(%).
+The test AMDR is 64.93(%).
+
+2) 'cust_mm_hp-Q-kde':
+Threshold = 78.06
+
+The test false alarm rates (FARs) are:
+[0. 0. 0. 0. 0. 0. 0. 0.](%)
+
+The test missed detection rates (MDRs) are:
+[74.13 62.03 66.15 78.05 74.92 44.74 95.61 96.21](%)
+
+The test AFAR is 0.0(%).
+The test AMDR is 71.25(%).
+
+3) 'cust_mm_x-T2-kde':
+Threshold = 691.79
+
+The test false alarm rates (FARs) are:
+[0. 0. 0. 0. 0. 0. 0. 0.](%)
+
+The test missed detection rates (MDRs) are:
+[68.18 44.41 67.49 77.56 67.56 38.98 94.65 95.41](%)
+
+The test AFAR is 0.0(%).
+The test AMDR is 65.53(%).
+
+4) 'cust_mm_x-Q-kde':
+Threshold = 73.16
+
+The test false alarm rates (FARs) are:
+[0. 0. 0. 0. 0. 0. 0. 0.](%)
+
+The test missed detection rates (MDRs) are:
+[94.06 78.55 93.52 86.83 75.25 47.99 95.88 96.14](%)
+
+The test AFAR is 0.0(%).
+The test AMDR is 81.67(%).
+
+5) 'cust_mm_catx-T2-kde':
+Threshold = 1773.80
+
+The test false alarm rates (FARs) are:
+[0. 0. 0. 0. 0. 0. 0. 0.](%)
+
+The test missed detection rates (MDRs) are:
+[33.73 14.6  26.93 20.98  9.36  1.56 26.34 66.29](%)
+
+The test AFAR is 0.0(%).
+The test AMDR is 27.22(%).
+
+6) 'cust_mm_catx-Q-kde':
+Threshold = 235.34
+
+The test false alarm rates (FARs) are:
+[0. 0. 0. 0. 0. 0. 0. 0.](%)
+
+The test missed detection rates (MDRs) are:
+[72.54 61.   66.26 78.54 55.52 44.68 95.61 96.14](%)
+
+The test AFAR is 0.0(%).
+The test AMDR is 70.08(%).
+
+7) 'cust_mm_cat-T2-kde':
+Threshold = 1255.62
+
+The test false alarm rates (FARs) are:
+[0. 0. 0. 0. 0. 0. 0. 0.](%)
+
+The test missed detection rates (MDRs) are:
+[48.71 21.38 47.93 44.39 15.38  9.85 65.29 89.23](%)
+
+The test AFAR is 0.0(%).
+The test AMDR is 43.5(%).
+
+8) 'cust_mm_cat-Q-kde':
+Threshold = 163.08
+
+The test false alarm rates (FARs) are:
+[0. 0. 0. 0. 0. 0. 0. 0.](%)
+
+The test missed detection rates (MDRs) are:
+[67.72 53.67 64.58 77.56 55.18 41.86 95.61 96.14](%)
+
+The test AFAR is 0.0(%).
+The test AMDR is 67.11(%).
+
+Save FD Result.xlsx in 'file:///F:/torch_joff/joff/Result/PFBO_HY/fd_Act1/FD%20Result.xlsx'
+Plot Epoch-Loss.pdf in 'file:///F:/torch_joff/joff/Result/PFBO_HY/fd_Act1/Epoch-Loss.pdf'
+Plot Normal.pdf of hp-T2-kde in 'file:///F:/torch_joff/joff/Result/PFBO_HY/fd_Act1/cust_mm_hp-T2-kde/Normal.pdf'
+Plot Fault 1.pdf of hp-T2-kde in 'file:///F:/torch_joff/joff/Result/PFBO_HY/fd_Act1/cust_mm_hp-T2-kde/Fault%201.pdf'
+Plot Fault 2.pdf of hp-T2-kde in 'file:///F:/torch_joff/joff/Result/PFBO_HY/fd_Act1/cust_mm_hp-T2-kde/Fault%202.pdf'
+Plot Fault 3.pdf of hp-T2-kde in 'file:///F:/torch_joff/joff/Result/PFBO_HY/fd_Act1/cust_mm_hp-T2-kde/Fault%203.pdf'
+Plot Fault 4.pdf of hp-T2-kde in 'file:///F:/torch_joff/joff/Result/PFBO_HY/fd_Act1/cust_mm_hp-T2-kde/Fault%204.pdf'
+Plot Fault 5.pdf of hp-T2-kde in 'file:///F:/torch_joff/joff/Result/PFBO_HY/fd_Act1/cust_mm_hp-T2-kde/Fault%205.pdf'
+Plot Fault 6.pdf of hp-T2-kde in 'file:///F:/torch_joff/joff/Result/PFBO_HY/fd_Act1/cust_mm_hp-T2-kde/Fault%206.pdf'
+Plot Fault 7.pdf of hp-T2-kde in 'file:///F:/torch_joff/joff/Result/PFBO_HY/fd_Act1/cust_mm_hp-T2-kde/Fault%207.pdf'
+Plot Fault 8.pdf of hp-T2-kde in 'file:///F:/torch_joff/joff/Result/PFBO_HY/fd_Act1/cust_mm_hp-T2-kde/Fault%208.pdf'
+Plot Whole_fd.pdf of hp-T2-kde in 'file:///F:/torch_joff/joff/Result/PFBO_HY/fd_Act1/cust_mm_hp-T2-kde/Whole_fd.pdf'
+Plot Normal.pdf of hp-Q-kde in 'file:///F:/torch_joff/joff/Result/PFBO_HY/fd_Act1/cust_mm_hp-Q-kde/Normal.pdf'
+Plot Fault 1.pdf of hp-Q-kde in 'file:///F:/torch_joff/joff/Result/PFBO_HY/fd_Act1/cust_mm_hp-Q-kde/Fault%201.pdf'
+Plot Fault 2.pdf of hp-Q-kde in 'file:///F:/torch_joff/joff/Result/PFBO_HY/fd_Act1/cust_mm_hp-Q-kde/Fault%202.pdf'
+Plot Fault 3.pdf of hp-Q-kde in 'file:///F:/torch_joff/joff/Result/PFBO_HY/fd_Act1/cust_mm_hp-Q-kde/Fault%203.pdf'
+Plot Fault 4.pdf of hp-Q-kde in 'file:///F:/torch_joff/joff/Result/PFBO_HY/fd_Act1/cust_mm_hp-Q-kde/Fault%204.pdf'
+Plot Fault 5.pdf of hp-Q-kde in 'file:///F:/torch_joff/joff/Result/PFBO_HY/fd_Act1/cust_mm_hp-Q-kde/Fault%205.pdf'
+Plot Fault 6.pdf of hp-Q-kde in 'file:///F:/torch_joff/joff/Result/PFBO_HY/fd_Act1/cust_mm_hp-Q-kde/Fault%206.pdf'
+Plot Fault 7.pdf of hp-Q-kde in 'file:///F:/torch_joff/joff/Result/PFBO_HY/fd_Act1/cust_mm_hp-Q-kde/Fault%207.pdf'
+Plot Fault 8.pdf of hp-Q-kde in 'file:///F:/torch_joff/joff/Result/PFBO_HY/fd_Act1/cust_mm_hp-Q-kde/Fault%208.pdf'
+Plot Whole_fd.pdf of hp-Q-kde in 'file:///F:/torch_joff/joff/Result/PFBO_HY/fd_Act1/cust_mm_hp-Q-kde/Whole_fd.pdf'
+Plot Normal.pdf of x-T2-kde in 'file:///F:/torch_joff/joff/Result/PFBO_HY/fd_Act1/cust_mm_x-T2-kde/Normal.pdf'
+Plot Fault 1.pdf of x-T2-kde in 'file:///F:/torch_joff/joff/Result/PFBO_HY/fd_Act1/cust_mm_x-T2-kde/Fault%201.pdf'
+Plot Fault 2.pdf of x-T2-kde in 'file:///F:/torch_joff/joff/Result/PFBO_HY/fd_Act1/cust_mm_x-T2-kde/Fault%202.pdf'
+Plot Fault 3.pdf of x-T2-kde in 'file:///F:/torch_joff/joff/Result/PFBO_HY/fd_Act1/cust_mm_x-T2-kde/Fault%203.pdf'
+Plot Fault 4.pdf of x-T2-kde in 'file:///F:/torch_joff/joff/Result/PFBO_HY/fd_Act1/cust_mm_x-T2-kde/Fault%204.pdf'
+Plot Fault 5.pdf of x-T2-kde in 'file:///F:/torch_joff/joff/Result/PFBO_HY/fd_Act1/cust_mm_x-T2-kde/Fault%205.pdf'
+Plot Fault 6.pdf of x-T2-kde in 'file:///F:/torch_joff/joff/Result/PFBO_HY/fd_Act1/cust_mm_x-T2-kde/Fault%206.pdf'
+Plot Fault 7.pdf of x-T2-kde in 'file:///F:/torch_joff/joff/Result/PFBO_HY/fd_Act1/cust_mm_x-T2-kde/Fault%207.pdf'
+Plot Fault 8.pdf of x-T2-kde in 'file:///F:/torch_joff/joff/Result/PFBO_HY/fd_Act1/cust_mm_x-T2-kde/Fault%208.pdf'
+Plot Whole_fd.pdf of x-T2-kde in 'file:///F:/torch_joff/joff/Result/PFBO_HY/fd_Act1/cust_mm_x-T2-kde/Whole_fd.pdf'
+Plot Normal.pdf of x-Q-kde in 'file:///F:/torch_joff/joff/Result/PFBO_HY/fd_Act1/cust_mm_x-Q-kde/Normal.pdf'
+Plot Fault 1.pdf of x-Q-kde in 'file:///F:/torch_joff/joff/Result/PFBO_HY/fd_Act1/cust_mm_x-Q-kde/Fault%201.pdf'
+Plot Fault 2.pdf of x-Q-kde in 'file:///F:/torch_joff/joff/Result/PFBO_HY/fd_Act1/cust_mm_x-Q-kde/Fault%202.pdf'
+Plot Fault 3.pdf of x-Q-kde in 'file:///F:/torch_joff/joff/Result/PFBO_HY/fd_Act1/cust_mm_x-Q-kde/Fault%203.pdf'
+Plot Fault 4.pdf of x-Q-kde in 'file:///F:/torch_joff/joff/Result/PFBO_HY/fd_Act1/cust_mm_x-Q-kde/Fault%204.pdf'
+Plot Fault 5.pdf of x-Q-kde in 'file:///F:/torch_joff/joff/Result/PFBO_HY/fd_Act1/cust_mm_x-Q-kde/Fault%205.pdf'
+Plot Fault 6.pdf of x-Q-kde in 'file:///F:/torch_joff/joff/Result/PFBO_HY/fd_Act1/cust_mm_x-Q-kde/Fault%206.pdf'
+Plot Fault 7.pdf of x-Q-kde in 'file:///F:/torch_joff/joff/Result/PFBO_HY/fd_Act1/cust_mm_x-Q-kde/Fault%207.pdf'
+Plot Fault 8.pdf of x-Q-kde in 'file:///F:/torch_joff/joff/Result/PFBO_HY/fd_Act1/cust_mm_x-Q-kde/Fault%208.pdf'
+Plot Whole_fd.pdf of x-Q-kde in 'file:///F:/torch_joff/joff/Result/PFBO_HY/fd_Act1/cust_mm_x-Q-kde/Whole_fd.pdf'
+Plot Normal.pdf of catx-T2-kde in 'file:///F:/torch_joff/joff/Result/PFBO_HY/fd_Act1/cust_mm_catx-T2-kde/Normal.pdf'
+Plot Fault 1.pdf of catx-T2-kde in 'file:///F:/torch_joff/joff/Result/PFBO_HY/fd_Act1/cust_mm_catx-T2-kde/Fault%201.pdf'
+Plot Fault 2.pdf of catx-T2-kde in 'file:///F:/torch_joff/joff/Result/PFBO_HY/fd_Act1/cust_mm_catx-T2-kde/Fault%202.pdf'
+Plot Fault 3.pdf of catx-T2-kde in 'file:///F:/torch_joff/joff/Result/PFBO_HY/fd_Act1/cust_mm_catx-T2-kde/Fault%203.pdf'
+Plot Fault 4.pdf of catx-T2-kde in 'file:///F:/torch_joff/joff/Result/PFBO_HY/fd_Act1/cust_mm_catx-T2-kde/Fault%204.pdf'
+Plot Fault 5.pdf of catx-T2-kde in 'file:///F:/torch_joff/joff/Result/PFBO_HY/fd_Act1/cust_mm_catx-T2-kde/Fault%205.pdf'
+Plot Fault 6.pdf of catx-T2-kde in 'file:///F:/torch_joff/joff/Result/PFBO_HY/fd_Act1/cust_mm_catx-T2-kde/Fault%206.pdf'
+Plot Fault 7.pdf of catx-T2-kde in 'file:///F:/torch_joff/joff/Result/PFBO_HY/fd_Act1/cust_mm_catx-T2-kde/Fault%207.pdf'
+Plot Fault 8.pdf of catx-T2-kde in 'file:///F:/torch_joff/joff/Result/PFBO_HY/fd_Act1/cust_mm_catx-T2-kde/Fault%208.pdf'
+Plot Whole_fd.pdf of catx-T2-kde in 'file:///F:/torch_joff/joff/Result/PFBO_HY/fd_Act1/cust_mm_catx-T2-kde/Whole_fd.pdf'
+Plot Normal.pdf of catx-Q-kde in 'file:///F:/torch_joff/joff/Result/PFBO_HY/fd_Act1/cust_mm_catx-Q-kde/Normal.pdf'
+Plot Fault 1.pdf of catx-Q-kde in 'file:///F:/torch_joff/joff/Result/PFBO_HY/fd_Act1/cust_mm_catx-Q-kde/Fault%201.pdf'
+Plot Fault 2.pdf of catx-Q-kde in 'file:///F:/torch_joff/joff/Result/PFBO_HY/fd_Act1/cust_mm_catx-Q-kde/Fault%202.pdf'
+Plot Fault 3.pdf of catx-Q-kde in 'file:///F:/torch_joff/joff/Result/PFBO_HY/fd_Act1/cust_mm_catx-Q-kde/Fault%203.pdf'
+Plot Fault 4.pdf of catx-Q-kde in 'file:///F:/torch_joff/joff/Result/PFBO_HY/fd_Act1/cust_mm_catx-Q-kde/Fault%204.pdf'
+Plot Fault 5.pdf of catx-Q-kde in 'file:///F:/torch_joff/joff/Result/PFBO_HY/fd_Act1/cust_mm_catx-Q-kde/Fault%205.pdf'
+Plot Fault 6.pdf of catx-Q-kde in 'file:///F:/torch_joff/joff/Result/PFBO_HY/fd_Act1/cust_mm_catx-Q-kde/Fault%206.pdf'
+Plot Fault 7.pdf of catx-Q-kde in 'file:///F:/torch_joff/joff/Result/PFBO_HY/fd_Act1/cust_mm_catx-Q-kde/Fault%207.pdf'
+Plot Fault 8.pdf of catx-Q-kde in 'file:///F:/torch_joff/joff/Result/PFBO_HY/fd_Act1/cust_mm_catx-Q-kde/Fault%208.pdf'
+Plot Whole_fd.pdf of catx-Q-kde in 'file:///F:/torch_joff/joff/Result/PFBO_HY/fd_Act1/cust_mm_catx-Q-kde/Whole_fd.pdf'
+Plot Normal.pdf of cat-T2-kde in 'file:///F:/torch_joff/joff/Result/PFBO_HY/fd_Act1/cust_mm_cat-T2-kde/Normal.pdf'
+Plot Fault 1.pdf of cat-T2-kde in 'file:///F:/torch_joff/joff/Result/PFBO_HY/fd_Act1/cust_mm_cat-T2-kde/Fault%201.pdf'
+Plot Fault 2.pdf of cat-T2-kde in 'file:///F:/torch_joff/joff/Result/PFBO_HY/fd_Act1/cust_mm_cat-T2-kde/Fault%202.pdf'
+Plot Fault 3.pdf of cat-T2-kde in 'file:///F:/torch_joff/joff/Result/PFBO_HY/fd_Act1/cust_mm_cat-T2-kde/Fault%203.pdf'
+Plot Fault 4.pdf of cat-T2-kde in 'file:///F:/torch_joff/joff/Result/PFBO_HY/fd_Act1/cust_mm_cat-T2-kde/Fault%204.pdf'
+Plot Fault 5.pdf of cat-T2-kde in 'file:///F:/torch_joff/joff/Result/PFBO_HY/fd_Act1/cust_mm_cat-T2-kde/Fault%205.pdf'
+Plot Fault 6.pdf of cat-T2-kde in 'file:///F:/torch_joff/joff/Result/PFBO_HY/fd_Act1/cust_mm_cat-T2-kde/Fault%206.pdf'
+Plot Fault 7.pdf of cat-T2-kde in 'file:///F:/torch_joff/joff/Result/PFBO_HY/fd_Act1/cust_mm_cat-T2-kde/Fault%207.pdf'
+Plot Fault 8.pdf of cat-T2-kde in 'file:///F:/torch_joff/joff/Result/PFBO_HY/fd_Act1/cust_mm_cat-T2-kde/Fault%208.pdf'
+Plot Whole_fd.pdf of cat-T2-kde in 'file:///F:/torch_joff/joff/Result/PFBO_HY/fd_Act1/cust_mm_cat-T2-kde/Whole_fd.pdf'
+Plot Normal.pdf of cat-Q-kde in 'file:///F:/torch_joff/joff/Result/PFBO_HY/fd_Act1/cust_mm_cat-Q-kde/Normal.pdf'
+Plot Fault 1.pdf of cat-Q-kde in 'file:///F:/torch_joff/joff/Result/PFBO_HY/fd_Act1/cust_mm_cat-Q-kde/Fault%201.pdf'
+Plot Fault 2.pdf of cat-Q-kde in 'file:///F:/torch_joff/joff/Result/PFBO_HY/fd_Act1/cust_mm_cat-Q-kde/Fault%202.pdf'
+Plot Fault 3.pdf of cat-Q-kde in 'file:///F:/torch_joff/joff/Result/PFBO_HY/fd_Act1/cust_mm_cat-Q-kde/Fault%203.pdf'
+Plot Fault 4.pdf of cat-Q-kde in 'file:///F:/torch_joff/joff/Result/PFBO_HY/fd_Act1/cust_mm_cat-Q-kde/Fault%204.pdf'
+Plot Fault 5.pdf of cat-Q-kde in 'file:///F:/torch_joff/joff/Result/PFBO_HY/fd_Act1/cust_mm_cat-Q-kde/Fault%205.pdf'
+Plot Fault 6.pdf of cat-Q-kde in 'file:///F:/torch_joff/joff/Result/PFBO_HY/fd_Act1/cust_mm_cat-Q-kde/Fault%206.pdf'
+Plot Fault 7.pdf of cat-Q-kde in 'file:///F:/torch_joff/joff/Result/PFBO_HY/fd_Act1/cust_mm_cat-Q-kde/Fault%207.pdf'
+Plot Fault 8.pdf of cat-Q-kde in 'file:///F:/torch_joff/joff/Result/PFBO_HY/fd_Act1/cust_mm_cat-Q-kde/Fault%208.pdf'
+Plot Whole_fd.pdf of cat-Q-kde in 'file:///F:/torch_joff/joff/Result/PFBO_HY/fd_Act1/cust_mm_cat-Q-kde/Whole_fd.pdf'

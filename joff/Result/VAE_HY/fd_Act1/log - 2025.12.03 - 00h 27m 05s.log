@@ -1,0 +1,84 @@
+
+VAE(
+  (loss_func): MSELoss()
+  (encoder): Sequential(
+    (0): Dropout(p=0.052, inplace=False)
+    (1): Linear(in_features=520, out_features=260, bias=True)
+    (2): Gaussian()
+  )
+  (u): Sequential(
+    (0): Dropout(p=0.026, inplace=False)
+    (1): Linear(in_features=260, out_features=130, bias=True)
+    (2): Affine()
+  )
+  (logv2): Sequential(
+    (0): Dropout(p=0.026, inplace=False)
+    (1): Linear(in_features=260, out_features=130, bias=True)
+    (2): Affine()
+  )
+  (decoder): Sequential(
+    (0): Dropout(p=0.013, inplace=False)
+    (1): Linear(in_features=130, out_features=260, bias=True)
+    (2): Affine()
+    (3): Dropout(p=0.026, inplace=False)
+    (4): Linear(in_features=260, out_features=520, bias=True)
+    (5): Affine()
+  )
+)
+
+run paras: {'run_times': 1, 'multirun_seed': 'r*2', '_run_id': '', 'e': 50, 'load_para_type': None, 'load_sub': None, 'load_file_name': None, 'view_addi_info': ['recon_loss', 'kl_loss', 'loss'], 'if_log': True, 'if_epoch_eval': None, 'if_vmap': False, 'if_save_excel': True, 'if_save_plot': True, 'fd_pr': ['re-T2&Q-kde'], 'fd_pr_dt': [{'mm': 're', 'ts': 'T2', 'thrd_meth': 'kde'}, {'mm': 're', 'ts': 'Q', 'thrd_meth': 'kde'}], 'fd_pr_name': ['re-T2-kde', 're-Q-kde'], 'ts_post_op': None, 'if_use_lstsq': True, 'expt_FAR': 0.005, 'if_plot_mm_kde': False, 'if_plot_score_hm': False, 'if_plot_cov_inv': True, 'if_mm_tab': False, 'if_mm_tsne': False, 'alld_error': 0.005, 'cl': 0.995, 'if_intp': False}
+
+Train VAE_HY/fd_Act1 in cuda:
+Epoch: 50 - 929/929 | recon_loss = 32.1663, kl_loss = 28.7656, loss = 60.9319                
+Finish training~ Spend 417 seconds
+
+Mean training losses: ['train-recon_loss' 'train-kl_loss' 'train-loss'] = [35.0677 29.5357 64.6034]
+
+Save model paras [Last] in 'file:///F:/torch_joff/joff/Result/VAE_HY/fd_Act1'
+
+1) 're-T2-kde':
+Threshold = 3409.36
+
+The test false alarm rates (FARs) are:
+[1.18 0.   9.41 1.18 0.   0.   0.   0.  ](%)
+
+The test missed detection rates (MDRs) are:
+[95.31 83.76 94.3  93.58 88.63 47.42 95.88 98.86](%)
+
+The test AFAR is 1.47(%).
+The test AMDR is 83.82(%).
+
+2) 're-Q-kde':
+Threshold = 116.83
+
+The test false alarm rates (FARs) are:
+[0.   0.   7.65 0.   0.   0.   0.   0.  ](%)
+
+The test missed detection rates (MDRs) are:
+[70.96 54.15 69.44 91.44 64.55 36.42 99.31 99.8 ](%)
+
+The test AFAR is 0.96(%).
+The test AMDR is 68.71(%).
+
+Save FD Result.xlsx in 'file:///F:/torch_joff/joff/Result/VAE_HY/fd_Act1/FD%20Result.xlsx'
+Plot Epoch-Loss.pdf in 'file:///F:/torch_joff/joff/Result/VAE_HY/fd_Act1/Epoch-Loss.pdf'
+Plot Normal.pdf in 'file:///F:/torch_joff/joff/Result/VAE_HY/fd_Act1/re-T2-kde/Normal.pdf'
+Plot Fault 1.pdf in 'file:///F:/torch_joff/joff/Result/VAE_HY/fd_Act1/re-T2-kde/Fault%201.pdf'
+Plot Fault 2.pdf in 'file:///F:/torch_joff/joff/Result/VAE_HY/fd_Act1/re-T2-kde/Fault%202.pdf'
+Plot Fault 3.pdf in 'file:///F:/torch_joff/joff/Result/VAE_HY/fd_Act1/re-T2-kde/Fault%203.pdf'
+Plot Fault 4.pdf in 'file:///F:/torch_joff/joff/Result/VAE_HY/fd_Act1/re-T2-kde/Fault%204.pdf'
+Plot Fault 5.pdf in 'file:///F:/torch_joff/joff/Result/VAE_HY/fd_Act1/re-T2-kde/Fault%205.pdf'
+Plot Fault 6.pdf in 'file:///F:/torch_joff/joff/Result/VAE_HY/fd_Act1/re-T2-kde/Fault%206.pdf'
+Plot Fault 7.pdf in 'file:///F:/torch_joff/joff/Result/VAE_HY/fd_Act1/re-T2-kde/Fault%207.pdf'
+Plot Fault 8.pdf in 'file:///F:/torch_joff/joff/Result/VAE_HY/fd_Act1/re-T2-kde/Fault%208.pdf'
+Plot Whole_fd.pdf in 'file:///F:/torch_joff/joff/Result/VAE_HY/fd_Act1/re-T2-kde/Whole_fd.pdf'
+Plot Normal.pdf in 'file:///F:/torch_joff/joff/Result/VAE_HY/fd_Act1/re-Q-kde/Normal.pdf'
+Plot Fault 1.pdf in 'file:///F:/torch_joff/joff/Result/VAE_HY/fd_Act1/re-Q-kde/Fault%201.pdf'
+Plot Fault 2.pdf in 'file:///F:/torch_joff/joff/Result/VAE_HY/fd_Act1/re-Q-kde/Fault%202.pdf'
+Plot Fault 3.pdf in 'file:///F:/torch_joff/joff/Result/VAE_HY/fd_Act1/re-Q-kde/Fault%203.pdf'
+Plot Fault 4.pdf in 'file:///F:/torch_joff/joff/Result/VAE_HY/fd_Act1/re-Q-kde/Fault%204.pdf'
+Plot Fault 5.pdf in 'file:///F:/torch_joff/joff/Result/VAE_HY/fd_Act1/re-Q-kde/Fault%205.pdf'
+Plot Fault 6.pdf in 'file:///F:/torch_joff/joff/Result/VAE_HY/fd_Act1/re-Q-kde/Fault%206.pdf'
+Plot Fault 7.pdf in 'file:///F:/torch_joff/joff/Result/VAE_HY/fd_Act1/re-Q-kde/Fault%207.pdf'
+Plot Fault 8.pdf in 'file:///F:/torch_joff/joff/Result/VAE_HY/fd_Act1/re-Q-kde/Fault%208.pdf'
+Plot Whole_fd.pdf in 'file:///F:/torch_joff/joff/Result/VAE_HY/fd_Act1/re-Q-kde/Whole_fd.pdf'

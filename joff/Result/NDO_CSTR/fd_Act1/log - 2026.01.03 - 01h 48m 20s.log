@@ -1,0 +1,47 @@
+
+NDO(
+  (loss_func): MSELoss()
+  (seq): Sequential(
+    (layer_0): Layer(
+      (0): Linear(in_features=17, out_features=240, bias=True)
+      (1): Gaussian()
+    )
+    (layer_1): Layer(
+      (0): Linear(in_features=240, out_features=120, bias=True)
+      (1): Sigmoid()
+    )
+    (layer_2): Layer(
+      (0): Linear(in_features=120, out_features=240, bias=True)
+      (1): Gaussian()
+    )
+    (layer_3): Layer(
+      (0): Linear(in_features=240, out_features=14, bias=True)
+      (1): Affine()
+    )
+  )
+)
+
+run paras: {'run_times': 1, 'multirun_seed': 'r*2', '_run_id': '', 'e': 24, 'load_para_type': None, 'load_sub': None, 'load_file_name': None, 'load_path_replace': None, 'view_addi_info': ['obs_erorr', 'M_obs', 'unobs_stb_loss', 'loss'], 'if_log': True, 'if_epoch_eval': None, 'if_vmap': False, 'if_save_excel': True, 'if_save_plot': True, 'fd_pr': ['cust_mm_ey-T2&Q-kde'], 'fd_pr_dt': [{'mm': 'cust_mm_ey', 'ts': 'T2', 'thrd_meth': 'kde'}, {'mm': 'cust_mm_ey', 'ts': 'Q', 'thrd_meth': 'kde'}], 'fd_pr_name': ['cust_mm_ey-T2-kde', 'cust_mm_ey-Q-kde'], 'expt_FAR': 0.005, 'ts_post_op': None, 'if_use_lstsq': True, 'if_plot_mm_kde': False, 'if_plot_score_hm': False, 'if_plot_cov_inv': False, 'if_save_ts': False, 'alld_error': 0.005, 'cl': 0.995, 'if_intp': False}
+
+Train NDO_CSTR/fd_Act1 via cuda:
+torch.Size([16, 14, 3]) torch.Size([9, 14, 3])
+Traceback (most recent call last):
+  File "F:\torch_joff\joff\_run\_run_model.py", line 67, in _run_with_log
+    _run_n(self, p)
+  File "F:\torch_joff\joff\_run\_run_model.py", line 111, in _run_n
+    train_model(self, **p)
+  File "F:\torch_joff\joff\_run\_run_model.py", line 199, in train_model
+    else: batch_training(self)
+          ^^^^^^^^^^^^^^^^^^^^
+  File "F:\torch_joff\joff\_run\_epoch.py", line 30, in batch_training
+    self.forward(input)
+  File "F:\torch_joff\joff\_model\arx.py", line 198, in forward
+    J = self.get_jacbi(*args)
+        ^^^^^^^^^^^^^^^^^^^^^
+  File "F:\torch_joff\joff\_model\arx.py", line 140, in get_jacbi
+    self.unobs_stb_loss += self.neg_diag_loss(A_2)
+                           ^^^^^^^^^^^^^^^^^^^^^^^
+  File "F:\torch_joff\joff\_model\arx.py", line 107, in neg_diag_loss
+    torch.relu(torch.sum(A.abs(), dim=-1) - A_diag.abs() * 2 + self.neg_diag_thrd))/A_diag.size(0)
+               ~~~~~~~~~~~~~~~~~~~~~~~~~~~^~~~~~~~~~~~~~~~~~
+RuntimeError: The size of tensor a (14) must match the size of tensor b (3) at non-singleton dimension 1

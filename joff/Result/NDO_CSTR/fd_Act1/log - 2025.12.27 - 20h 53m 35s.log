@@ -1,0 +1,85 @@
+
+NDO(
+  (loss_func): MSELoss()
+  (seq): Sequential(
+    (layer_0): Layer(
+      (0): Linear(in_features=53, out_features=200, bias=True)
+      (1): Gaussian()
+    )
+    (layer_1): Layer(
+      (0): Dropout(p=0.0133, inplace=False)
+      (1): Linear(in_features=200, out_features=150, bias=True)
+      (2): Sigmoid()
+    )
+    (layer_2): Layer(
+      (0): Dropout(p=0.01, inplace=False)
+      (1): Linear(in_features=150, out_features=50, bias=True)
+      (2): Gaussian()
+    )
+  )
+)
+
+run paras: {'run_times': 1, 'multirun_seed': 'r*2', '_run_id': '', 'e': 1, 'load_para_type': None, 'load_sub': None, 'load_file_name': None, 'load_path_replace': None, 'view_addi_info': ['observer_loss', 'stability_loss', 'loss'], 'if_log': True, 'if_epoch_eval': None, 'if_vmap': False, 'if_save_excel': True, 'if_save_plot': True, 'fd_pr': ['cust_mm_ey-T2&Q-kde'], 'fd_pr_dt': [{'mm': 'cust_mm_ey', 'ts': 'T2', 'thrd_meth': 'kde'}, {'mm': 'cust_mm_ey', 'ts': 'Q', 'thrd_meth': 'kde'}], 'fd_pr_name': ['cust_mm_ey-T2-kde', 'cust_mm_ey-Q-kde'], 'expt_FAR': 0.005, 'ts_post_op': None, 'if_use_lstsq': True, 'if_plot_mm_kde': False, 'if_plot_score_hm': False, 'if_plot_cov_inv': True, 'if_save_ts': False, 'alld_error': 0.005, 'cl': 0.995, 'if_intp': False}
+
+Train NDO_CSTR/fd_Act1 via cuda:
+Epoch: 1 - 1199/1199 | observer_loss = 10.9273, stability_loss = -0.5290, loss = 10.9273                
+Finish training~ Spend 237 seconds
+
+Mean training losses: ['train-observer_loss' 'train-stability_loss' 'train-loss'] = [ 8.9882 -0.5151  8.9882]
+
+Save model paras [Last] in 'file:///F:/torch_joff/joff/Result/NDO_CSTR/fd_Act1'
+
+1) 'cust_mm_ey-T2-kde':
+Threshold = 405.35
+
+The test false alarm rates (FARs) are:
+[0.   5.37 5.37 5.37  nan  nan  nan  nan  nan  nan](%)
+
+The test missed detection rates (MDRs) are:
+[42.06 24.49 23.39 18.22  0.     nan   nan   nan   nan   nan](%)
+
+The test AFAR is 4.83(%).
+The test AMDR is 23.3(%).
+
+2) 'cust_mm_ey-Q-kde':
+Threshold = 475.94
+
+The test false alarm rates (FARs) are:
+[0.   2.68 5.37 3.02  nan  nan  nan  nan  nan  nan](%)
+
+The test missed detection rates (MDRs) are:
+[39.71 65.99 34.83 47.54 96.88   nan   nan   nan   nan   nan](%)
+
+The test AFAR is 3.36(%).
+The test AMDR is 46.84(%).
+
+Save FD Result.xlsx in 'file:///F:/torch_joff/joff/Result/NDO_CSTR/fd_Act1/FD%20Result.xlsx'
+Plot Epoch-Loss.pdf in 'file:///F:/torch_joff/joff/Result/NDO_CSTR/fd_Act1/Epoch-Loss.pdf'
+Plot Normal.pdf [ey-T2-kde] in 'file:///F:/torch_joff/joff/Result/NDO_CSTR/fd_Act1/cust_mm_ey-T2-kde/Normal.pdf'
+Plot Fault 01.pdf [ey-T2-kde] in 'file:///F:/torch_joff/joff/Result/NDO_CSTR/fd_Act1/cust_mm_ey-T2-kde/Fault%2001.pdf'
+Plot Fault 02.pdf [ey-T2-kde] in 'file:///F:/torch_joff/joff/Result/NDO_CSTR/fd_Act1/cust_mm_ey-T2-kde/Fault%2002.pdf'
+Plot Fault 03.pdf [ey-T2-kde] in 'file:///F:/torch_joff/joff/Result/NDO_CSTR/fd_Act1/cust_mm_ey-T2-kde/Fault%2003.pdf'
+Plot Fault 04.pdf [ey-T2-kde] in 'file:///F:/torch_joff/joff/Result/NDO_CSTR/fd_Act1/cust_mm_ey-T2-kde/Fault%2004.pdf'
+Plot Fault 05.pdf [ey-T2-kde] in 'file:///F:/torch_joff/joff/Result/NDO_CSTR/fd_Act1/cust_mm_ey-T2-kde/Fault%2005.pdf'
+Traceback (most recent call last):
+  File "F:\torch_joff\joff\_run\_run_model.py", line 67, in _run_with_log
+    _run_n(self, p)
+  File "F:\torch_joff\joff\_run\_run_model.py", line 119, in _run_n
+    self.test()
+  File "F:\torch_joff\joff\_nn\_fcnn_module.py", line 80, in test
+    _test(self, **kwargs)
+  File "F:\torch_joff\joff\_test\_test_model.py", line 27, in _test
+    _test_model(self, p)
+  File "F:\torch_joff\joff\_test\_test_model.py", line 81, in _test_model
+    _save_result(self, p)
+  File "F:\torch_joff\joff\_save\_save_result.py", line 21, in _save_result
+    if p['if_save_plot']: _save_result2plot(self, p)
+                          ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "F:\torch_joff\joff\_save\_save_result.py", line 67, in _save_result2plot
+    _loop_plot_fd_curve(self._save_path + '/' + self.fd_pr_name[i].replace('\\', ''),
+  File "F:\torch_joff\joff\_plot\_line.py", line 72, in _loop_plot_fd_curve
+    _plot_fd_curve(path, _ts_name, _label_name[i], ['Normal', f'Fault {i+1:02d}'],
+  File "F:\torch_joff\joff\_plot\_line.py", line 107, in _plot_fd_curve
+    color = p['seg_color'][list_L.index(L[start_p]) % len(p['seg_color'])]
+                                        ~^^^^^^^^^
+IndexError: index 0 is out of bounds for axis 0 with size 0

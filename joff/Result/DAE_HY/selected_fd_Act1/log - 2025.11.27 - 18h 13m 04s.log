@@ -1,0 +1,93 @@
+
+DAE(
+  (loss_func): MSELoss()
+  (encoder): Sequential(
+    (0): Linear(in_features=520, out_features=260, bias=True)
+    (1): Gaussian()
+    (2): Linear(in_features=260, out_features=130, bias=True)
+    (3): Sigmoid()
+  )
+  (decoder): Sequential(
+    (0): Linear(in_features=130, out_features=260, bias=True)
+    (1): Affine()
+    (2): Linear(in_features=260, out_features=520, bias=True)
+    (3): Affine()
+  )
+)
+
+run paras: {'run_times': 1, 'multirun_seed': 'r*2', '_run_id': '', 'e': 3, 'load_para_type': None, 'load_sub': None, 'load_file_name': None, 'view_addi_info': ['loss'], 'if_log': True, 'if_epoch_eval': None, 'if_vmap': False, 'if_save_excel': True, 'if_save_plot': True, 'fd_pr': ['re-T2&Q-kde'], 'fd_pr_dt': [{'mm': 're', 'ts': 'T2', 'thrd_meth': 'kde'}, {'mm': 're', 'ts': 'Q', 'thrd_meth': 'kde'}], 'fd_pr_name': ['re-T2-kde', 're-Q-kde'], 'ts_post_op': None, 'if_use_lstsq': True, 'expt_FAR': 0.005, 'if_plot_mm_kde': False, 'if_plot_score_hm': False, 'if_plot_cov_inv': True, 'if_mm_tab': False, 'if_mm_tsne': False, 'alld_error': 0.005, 'cl': 0.995, 'if_intp': False}
+
+Train DAE_HY/selected_fd_Act1 in cuda:
+Epoch: 3 - 918/918 | loss = 0.0855                
+Finish training~ Spend 6 seconds
+
+Mean training losses: ['train-loss'] = [0.0924]
+
+Save model paras in '../Result/DAE_HY/selected_fd_Act1/Last'
+
+1) 're-T2-kde':
+
+Solutions = [1415.32]
+Threshold = 1415.32
+
+The test false alarm rates (FARs) are:
+[ 0.    0.    0.     nan  0.    0.    0.    0.    0.    0.    0.    0.
+  0.    0.    0.    0.    0.    0.    0.    0.    0.    0.    0.    0.
+  0.    0.    0.    0.    0.    0.    0.    0.    0.    0.    0.    0.
+  0.   52.17  0.    0.    0.    0.    6.94  0.    0.    0.  ](%)
+
+The test missed detection rates (MDRs) are:
+[100.   100.   100.   100.     7.55  97.8   79.38 100.   100.   100.
+  96.43 100.     0.   100.   100.    37.25 100.   100.   100.   100.
+  93.14  94.71  97.03  98.06 100.   100.   100.   100.   100.   100.
+  97.17 100.    30.36 100.   100.    20.21  35.19  95.74 100.   100.
+ 100.     0.    80.73 100.   100.   100.  ](%)
+
+The test AFAR is 1.25(%).
+The test AMDR is 85.2(%).
+
+2) 're-Q-kde':
+
+Solutions = [199.14]
+Threshold = 199.14
+
+The test false alarm rates (FARs) are:
+[ 0.    0.    0.     nan  0.    0.    0.    0.    0.    0.    0.    0.
+  0.    0.    0.    0.    0.    0.    0.    0.    0.    0.    0.    0.
+  0.    0.    0.    0.    0.    0.    0.    0.    0.    0.    0.    0.
+  0.   52.17  0.    0.    0.    0.    0.    0.    0.    0.  ](%)
+
+The test missed detection rates (MDRs) are:
+[100.   100.    96.55   4.24   4.32  48.9   18.12  98.31 100.   100.
+  23.81 100.     3.45 100.   100.     3.92  98.43 100.   100.   100.
+  92.16  18.24  86.31  19.42 100.   100.   100.   100.   100.    99.36
+  99.53  87.65   1.79 100.   100.    15.96  24.07  97.87 100.   100.
+  82.22   0.    62.84 100.    20.9  100.  ](%)
+
+The test AFAR is 0.88(%).
+The test AMDR is 72.42(%).
+Traceback (most recent call last):
+  File "F:\torch_joff\joff\_run\_run_model.py", line 67, in _run_with_log
+    _run_n(self, p)
+  File "F:\torch_joff\joff\_run\_run_model.py", line 119, in _run_n
+    self.test()
+  File "F:\torch_joff\joff\_nn\_fcnn_module.py", line 98, in test
+    _test(self, **kwargs)
+  File "F:\torch_joff\joff\_test\_test_model.py", line 27, in _test
+    _test_model(self, p)
+  File "F:\torch_joff\joff\_test\_test_model.py", line 79, in _test_model
+    _save_result(self, p)
+  File "F:\torch_joff\joff\_save\_save_result.py", line 20, in _save_result
+    if p['if_save_excel']: _save_result2excel(self, p)
+                           ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "F:\torch_joff\joff\_save\_save_result.py", line 46, in _save_result2excel
+    perf_df = pd.DataFrame(v, columns= self.test_perf_hd, index = index)
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "F:\anaconda3\Lib\site-packages\pandas\core\frame.py", line 827, in __init__
+    mgr = ndarray_to_mgr(
+          ^^^^^^^^^^^^^^^
+  File "F:\anaconda3\Lib\site-packages\pandas\core\internals\construction.py", line 336, in ndarray_to_mgr
+    _check_values_indices_shape_match(values, index, columns)
+  File "F:\anaconda3\Lib\site-packages\pandas\core\internals\construction.py", line 420, in _check_values_indices_shape_match
+    raise ValueError(f"Shape of passed values is {passed}, indices imply {implied}")
+ValueError: Shape of passed values is (47, 4), indices imply (9, 4)

@@ -1,0 +1,89 @@
+
+KW_VAE(
+  (loss_func): MSELoss()
+  (encoder): Sequential(
+    (0): Linear(in_features=10, out_features=100, bias=True)
+    (1): Sigmoid()
+  )
+  (u): Sequential(
+    (0): Linear(in_features=100, out_features=50, bias=True)
+    (1): Affine()
+  )
+  (logv2): Sequential(
+    (0): Linear(in_features=100, out_features=50, bias=True)
+    (1): Affine()
+  )
+  (decoder): Sequential(
+    (0): Linear(in_features=50, out_features=100, bias=True)
+    (1): Sigmoid()
+  )
+  (x_u): Sequential(
+    (0): Linear(in_features=100, out_features=10, bias=True)
+    (1): Affine()
+  )
+  (x_logv2): Sequential(
+    (0): Linear(in_features=100, out_features=10, bias=True)
+    (1): Affine()
+  )
+)
+
+run paras: {'run_times': 1, 'multirun_seed': 'r*2', '_run_id': '', 'e': 18, 'load_para_type': None, 'load_sub': None, 'load_file_name': None, 'view_addi_info': ['recon_loss', 'kl_loss', 'loss'], 'if_log': True, 'if_epoch_eval': None, 'if_vmap': False, 'if_save_excel': True, 'if_save_plot': True, 'fd_pr': ['cust_ts_recon-kde', 'cust_ts_kl-kde'], 'fd_pr_dt': [{'mm': None, 'ts': 'cust_ts_recon', 'thrd_meth': 'kde'}, {'mm': None, 'ts': 'cust_ts_kl', 'thrd_meth': 'kde'}], 'fd_pr_name': ['cust_ts_recon-kde', 'cust_ts_kl-kde'], 'if_minus_mean': True, 'if_use_lstsq': False, 'expt_FAR': 0.005, 'if_plot_mm_kde': False, 'if_plot_score_hm': False, 'if_mm_tab': False, 'if_mm_tsne': False, 'alld_error': 0.005, 'cl': 0.995, 'if_intp': False}
+
+Train KW_VAE[unsup_res]_CSTR_fd_Act2 in cuda:
+Epoch: 18 - 751/751 | recon_loss = 88.6173, kl_loss = 2.5723, loss = 91.1896                
+Finish training~ Spend 312 seconds
+
+Mean training losses: ['train-recon_loss' 'train-kl_loss' 'train-loss'] = [151.5214   4.6198 156.1413]
+
+Save model paras in '../Result/KW_VAE[unsup_res]_CSTR_fd_Act2/Last'
+
+1) 'cust_ts_recon-kde':
+
+Solutions = [18.36]
+Threshold = 18.36
+
+The test false alarm rates (FARs) are:
+[0.  0.  0.  0.  0.  0.  0.5 1.  0.  0.5](%)
+
+The test missed detection rates (MDRs) are:
+[52.75 63.74 45.75 30.87 15.88 17.08  5.49 28.87 33.47 79.52](%)
+
+The test AFAR is 0.2(%).
+The test AMDR is 37.34(%).
+
+2) 'cust_ts_kl-kde':
+
+Solutions = [1.48]
+Threshold = 1.48
+
+The test false alarm rates (FARs) are:
+[0.  0.  0.  0.  0.  0.  0.5 0.  0.  0.5](%)
+
+The test missed detection rates (MDRs) are:
+[55.34 89.51 51.75 31.27 22.48 39.46  6.79 47.75 64.44 99.8 ](%)
+
+The test AFAR is 0.1(%).
+The test AMDR is 50.86(%).
+
+Save FD Result.xlsx in '../Result/KW_VAE[unsup_res]_CSTR_fd_Act2'
+Plot Epoch-Loss.pdf in '../Result/KW_VAE[unsup_res]_CSTR_fd_Act2'
+Plot Fault 01.pdf in '../Result/KW_VAE[unsup_res]_CSTR_fd_Act2/cust_ts_recon-kde'
+Plot Fault 02.pdf in '../Result/KW_VAE[unsup_res]_CSTR_fd_Act2/cust_ts_recon-kde'
+Plot Fault 03.pdf in '../Result/KW_VAE[unsup_res]_CSTR_fd_Act2/cust_ts_recon-kde'
+Plot Fault 04.pdf in '../Result/KW_VAE[unsup_res]_CSTR_fd_Act2/cust_ts_recon-kde'
+Plot Fault 05.pdf in '../Result/KW_VAE[unsup_res]_CSTR_fd_Act2/cust_ts_recon-kde'
+Plot Fault 06.pdf in '../Result/KW_VAE[unsup_res]_CSTR_fd_Act2/cust_ts_recon-kde'
+Plot Fault 07.pdf in '../Result/KW_VAE[unsup_res]_CSTR_fd_Act2/cust_ts_recon-kde'
+Plot Fault 08.pdf in '../Result/KW_VAE[unsup_res]_CSTR_fd_Act2/cust_ts_recon-kde'
+Plot Fault 09.pdf in '../Result/KW_VAE[unsup_res]_CSTR_fd_Act2/cust_ts_recon-kde'
+Plot Fault 10.pdf in '../Result/KW_VAE[unsup_res]_CSTR_fd_Act2/cust_ts_recon-kde'
+Plot Fault 01.pdf in '../Result/KW_VAE[unsup_res]_CSTR_fd_Act2/cust_ts_kl-kde'
+Plot Fault 02.pdf in '../Result/KW_VAE[unsup_res]_CSTR_fd_Act2/cust_ts_kl-kde'
+Plot Fault 03.pdf in '../Result/KW_VAE[unsup_res]_CSTR_fd_Act2/cust_ts_kl-kde'
+Plot Fault 04.pdf in '../Result/KW_VAE[unsup_res]_CSTR_fd_Act2/cust_ts_kl-kde'
+Plot Fault 05.pdf in '../Result/KW_VAE[unsup_res]_CSTR_fd_Act2/cust_ts_kl-kde'
+Plot Fault 06.pdf in '../Result/KW_VAE[unsup_res]_CSTR_fd_Act2/cust_ts_kl-kde'
+Plot Fault 07.pdf in '../Result/KW_VAE[unsup_res]_CSTR_fd_Act2/cust_ts_kl-kde'
+Plot Fault 08.pdf in '../Result/KW_VAE[unsup_res]_CSTR_fd_Act2/cust_ts_kl-kde'
+Plot Fault 09.pdf in '../Result/KW_VAE[unsup_res]_CSTR_fd_Act2/cust_ts_kl-kde'
+Plot Fault 10.pdf in '../Result/KW_VAE[unsup_res]_CSTR_fd_Act2/cust_ts_kl-kde'

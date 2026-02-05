@@ -1,0 +1,143 @@
+
+SAE_GAN(
+  (loss_func): MSELoss()
+  (generator): Sequential(
+    (0): Sequential(
+      (0): Linear(in_features=10, out_features=100, bias=True)
+      (1): Sigmoid()
+      (2): Linear(in_features=100, out_features=50, bias=True)
+      (3): Sigmoid()
+    )
+    (1): Sequential(
+      (0): Linear(in_features=50, out_features=100, bias=True)
+      (1): Sigmoid()
+      (2): Linear(in_features=100, out_features=10, bias=True)
+      (3): Affine()
+    )
+  )
+  (discriminator): Sequential(
+    (0): Linear(in_features=10, out_features=100, bias=True)
+    (1): Sigmoid()
+    (2): Linear(in_features=100, out_features=1, bias=True)
+    (3): Sigmoid()
+  )
+)
+
+run paras: {'run_times': 1, 'multirun_seed': 'r*2', '_run_id': '', 'e': 18, 'load_para_type': None, 'load_sub': None, 'load_file_name': None, 'view_addi_info': ['recon_loss', 'g_loss', 'd_loss_r', 'd_loss_g'], 'if_log': True, 'if_epoch_eval': None, 'if_vmap': False, 'if_save_excel': True, 'if_save_plot': True, 'fd_pr': ['re-T2&Q-kde', 'lv-\\phi_{\\cal{D}}-kde'], 'fd_pr_dt': [{'mm': 're', 'ts': 'T2', 'thrd_meth': 'kde'}, {'mm': 're', 'ts': 'Q', 'thrd_meth': 'kde'}, {'mm': 'lv', 'ts': '\\phi_{\\cal{D}}', 'thrd_meth': 'kde'}], 'fd_pr_name': ['re-T2-kde', 're-Q-kde', 'lv-\\phi_{\\cal{D}}-kde'], 'if_minus_mean': True, 'if_use_lstsq': False, 'expt_FAR': 0.005, 'if_plot_mm_kde': False, 'if_plot_score_hm': False, 'if_mm_tab': False, 'if_mm_tsne': False, 'alld_error': 0.005, 'cl': 0.995, 'if_intp': False}
+
+Train SAE_GAN[unsup_res]_CSTR_fd_Act2 in cuda:
+Epoch: 18 - 751/751 | recon_loss = 0.0866, g_loss = 2.4515, d_loss_r = 1.4971, d_loss_g = 0.5860                
+Finish training~ Spend 83 seconds
+
+Mean training losses: ['train-recon_loss' 'train-g_loss' 'train-d_loss_r' 'train-d_loss_g'] = [0.1374 2.4971 1.5063 0.5646]
+
+Save model paras in '../Result/SAE_GAN[unsup_res]_CSTR_fd_Act2/Last'
+0 {'mm': 're', 'ts': 'T2', 'thrd_meth': 'kde'} re-T2-kde
+Plot [T2_cov_sqrt_inv] re-T2-kde.pdf in '../Result/SAE_GAN[unsup_res]_CSTR_fd_Act2'
+
+1) 're-T2-kde':
+
+Solutions = [98.16]
+Threshold = 98.16
+
+The test false alarm rates (FARs) are:
+[0.  0.  0.  0.  0.  0.  0.  0.5 0.  1. ](%)
+
+The test missed detection rates (MDRs) are:
+[40.26 15.18 15.88  1.2   3.    4.    2.4   4.9   4.6  23.58](%)
+
+The test AFAR is 0.15(%).
+The test AMDR is 11.5(%).
+1 {'mm': 're', 'ts': 'Q', 'thrd_meth': 'kde'} re-Q-kde
+
+2) 're-Q-kde':
+
+Solutions = [2.4]
+Threshold = 2.40
+
+The test false alarm rates (FARs) are:
+[0.5 0.  0.  0.  0.5 0.  0.5 0.5 0.  1. ](%)
+
+The test missed detection rates (MDRs) are:
+[36.96 22.68 27.17  7.89  4.3   4.3   2.    8.49  7.09 30.77](%)
+
+The test AFAR is 0.3(%).
+The test AMDR is 15.16(%).
+2 {'mm': 'lv', 'ts': '\\phi_{\\cal{D}}', 'thrd_meth': 'kde'} lv-\phi_{\cal{D}}-kde
+
+3) 'lv-\phi_{\cal{D}}-kde':
+
+Solutions = [0.8]
+Threshold = 0.80
+
+The test false alarm rates (FARs) are:
+[0.5 0.  0.  0.  0.  0.  0.  0.  0.  0. ](%)
+
+The test missed detection rates (MDRs) are:
+[ 82.22  99.5   89.31  46.75  33.57  36.26   9.99  39.76  33.47 100.  ](%)
+
+The test AFAR is 0.05(%).
+The test AMDR is 57.08(%).
+
+Save FD Result.xlsx in '../Result/SAE_GAN[unsup_res]_CSTR_fd_Act2'
+Plot Epoch-Loss.pdf in '../Result/SAE_GAN[unsup_res]_CSTR_fd_Act2'
+$T2$
+Plot Fault 01.pdf in '../Result/SAE_GAN[unsup_res]_CSTR_fd_Act2/re-T2-kde'
+$T2$
+Plot Fault 02.pdf in '../Result/SAE_GAN[unsup_res]_CSTR_fd_Act2/re-T2-kde'
+$T2$
+Plot Fault 03.pdf in '../Result/SAE_GAN[unsup_res]_CSTR_fd_Act2/re-T2-kde'
+$T2$
+Plot Fault 04.pdf in '../Result/SAE_GAN[unsup_res]_CSTR_fd_Act2/re-T2-kde'
+$T2$
+Plot Fault 05.pdf in '../Result/SAE_GAN[unsup_res]_CSTR_fd_Act2/re-T2-kde'
+$T2$
+Plot Fault 06.pdf in '../Result/SAE_GAN[unsup_res]_CSTR_fd_Act2/re-T2-kde'
+$T2$
+Plot Fault 07.pdf in '../Result/SAE_GAN[unsup_res]_CSTR_fd_Act2/re-T2-kde'
+$T2$
+Plot Fault 08.pdf in '../Result/SAE_GAN[unsup_res]_CSTR_fd_Act2/re-T2-kde'
+$T2$
+Plot Fault 09.pdf in '../Result/SAE_GAN[unsup_res]_CSTR_fd_Act2/re-T2-kde'
+$T2$
+Plot Fault 10.pdf in '../Result/SAE_GAN[unsup_res]_CSTR_fd_Act2/re-T2-kde'
+$Q$
+Plot Fault 01.pdf in '../Result/SAE_GAN[unsup_res]_CSTR_fd_Act2/re-Q-kde'
+$Q$
+Plot Fault 02.pdf in '../Result/SAE_GAN[unsup_res]_CSTR_fd_Act2/re-Q-kde'
+$Q$
+Plot Fault 03.pdf in '../Result/SAE_GAN[unsup_res]_CSTR_fd_Act2/re-Q-kde'
+$Q$
+Plot Fault 04.pdf in '../Result/SAE_GAN[unsup_res]_CSTR_fd_Act2/re-Q-kde'
+$Q$
+Plot Fault 05.pdf in '../Result/SAE_GAN[unsup_res]_CSTR_fd_Act2/re-Q-kde'
+$Q$
+Plot Fault 06.pdf in '../Result/SAE_GAN[unsup_res]_CSTR_fd_Act2/re-Q-kde'
+$Q$
+Plot Fault 07.pdf in '../Result/SAE_GAN[unsup_res]_CSTR_fd_Act2/re-Q-kde'
+$Q$
+Plot Fault 08.pdf in '../Result/SAE_GAN[unsup_res]_CSTR_fd_Act2/re-Q-kde'
+$Q$
+Plot Fault 09.pdf in '../Result/SAE_GAN[unsup_res]_CSTR_fd_Act2/re-Q-kde'
+$Q$
+Plot Fault 10.pdf in '../Result/SAE_GAN[unsup_res]_CSTR_fd_Act2/re-Q-kde'
+$\phi_{\cal{d}}$
+Plot Fault 01.pdf in '../Result/SAE_GAN[unsup_res]_CSTR_fd_Act2/lv-\phi_{\cal{D}}-kde'
+$\phi_{\cal{d}}$
+Plot Fault 02.pdf in '../Result/SAE_GAN[unsup_res]_CSTR_fd_Act2/lv-\phi_{\cal{D}}-kde'
+$\phi_{\cal{d}}$
+Plot Fault 03.pdf in '../Result/SAE_GAN[unsup_res]_CSTR_fd_Act2/lv-\phi_{\cal{D}}-kde'
+$\phi_{\cal{d}}$
+Plot Fault 04.pdf in '../Result/SAE_GAN[unsup_res]_CSTR_fd_Act2/lv-\phi_{\cal{D}}-kde'
+$\phi_{\cal{d}}$
+Plot Fault 05.pdf in '../Result/SAE_GAN[unsup_res]_CSTR_fd_Act2/lv-\phi_{\cal{D}}-kde'
+$\phi_{\cal{d}}$
+Plot Fault 06.pdf in '../Result/SAE_GAN[unsup_res]_CSTR_fd_Act2/lv-\phi_{\cal{D}}-kde'
+$\phi_{\cal{d}}$
+Plot Fault 07.pdf in '../Result/SAE_GAN[unsup_res]_CSTR_fd_Act2/lv-\phi_{\cal{D}}-kde'
+$\phi_{\cal{d}}$
+Plot Fault 08.pdf in '../Result/SAE_GAN[unsup_res]_CSTR_fd_Act2/lv-\phi_{\cal{D}}-kde'
+$\phi_{\cal{d}}$
+Plot Fault 09.pdf in '../Result/SAE_GAN[unsup_res]_CSTR_fd_Act2/lv-\phi_{\cal{D}}-kde'
+$\phi_{\cal{d}}$
+Plot Fault 10.pdf in '../Result/SAE_GAN[unsup_res]_CSTR_fd_Act2/lv-\phi_{\cal{D}}-kde'

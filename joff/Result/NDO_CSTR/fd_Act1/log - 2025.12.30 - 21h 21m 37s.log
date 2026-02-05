@@ -1,0 +1,64 @@
+
+NDO(
+  (loss_func): MSELoss()
+  (seq): Sequential(
+    (layer_0): Layer(
+      (0): Linear(in_features=53, out_features=200, bias=True)
+      (1): Gaussian()
+    )
+    (layer_1): Layer(
+      (0): Dropout(p=0.0133, inplace=False)
+      (1): Linear(in_features=200, out_features=150, bias=True)
+      (2): Tanh()
+    )
+    (layer_2): Layer(
+      (0): Dropout(p=0.01, inplace=False)
+      (1): Linear(in_features=150, out_features=50, bias=True)
+      (2): Affine()
+    )
+  )
+)
+
+run paras: {'run_times': 1, 'multirun_seed': 'r*2', '_run_id': '', 'e': 3, 'load_para_type': None, 'load_sub': None, 'load_file_name': None, 'load_path_replace': None, 'view_addi_info': ['observer_loss', 'unobs_stb_loss', 'L_abs_norm', 'stability_loss', 'loss'], 'if_log': True, 'if_epoch_eval': None, 'if_vmap': False, 'if_save_excel': True, 'if_save_plot': True, 'fd_pr': ['cust_mm_ey-T2&Q-kde'], 'fd_pr_dt': [{'mm': 'cust_mm_ey', 'ts': 'T2', 'thrd_meth': 'kde'}, {'mm': 'cust_mm_ey', 'ts': 'Q', 'thrd_meth': 'kde'}], 'fd_pr_name': ['cust_mm_ey-T2-kde', 'cust_mm_ey-Q-kde'], 'expt_FAR': 0.005, 'ts_post_op': None, 'if_use_lstsq': True, 'if_plot_mm_kde': False, 'if_plot_score_hm': False, 'if_plot_cov_inv': False, 'if_save_ts': False, 'alld_error': 0.005, 'cl': 0.995, 'if_intp': False}
+
+Train NDO_CSTR/fd_Act1 via cuda:
+3
+False
+Traceback (most recent call last):
+  File "F:\torch_joff\joff\_run\_run_model.py", line 67, in _run_with_log
+    _run_n(self, p)
+  File "F:\torch_joff\joff\_run\_run_model.py", line 111, in _run_n
+    train_model(self, **p)
+  File "F:\torch_joff\joff\_run\_run_model.py", line 199, in train_model
+    else: batch_training(self)
+          ^^^^^^^^^^^^^^^^^^^^
+  File "F:\torch_joff\joff\_run\_epoch.py", line 30, in batch_training
+    self.forward(input)
+  File "F:\torch_joff\joff\_model\arx.py", line 311, in forward
+    J = self.get_vmap_jac(*detached_inputs)
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "F:\torch_joff\joff\_model\arx.py", line 200, in get_vmap_jac
+    J = Jacbi(dynamics_fn_wrapper, 0).vmap_jac(*args)
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "F:\torch_joff\joff\_model\arx.py", line 69, in vmap_jac
+    return batch_jac_fn(*args)
+           ^^^^^^^^^^^^^^^^^^^
+  File "F:\anaconda3\Lib\site-packages\torch\_functorch\apis.py", line 208, in wrapped
+    return vmap_impl(
+           ^^^^^^^^^^
+  File "F:\anaconda3\Lib\site-packages\torch\_functorch\vmap.py", line 282, in vmap_impl
+    return _flat_vmap(
+           ^^^^^^^^^^^
+  File "F:\anaconda3\Lib\site-packages\torch\_functorch\vmap.py", line 432, in _flat_vmap
+    batched_outputs = func(*batched_inputs, **kwargs)
+                      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "F:\torch_joff\joff\_model\arx.py", line 73, in batch_jac
+    J = torch.autograd.functional.jacobian(
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "F:\anaconda3\Lib\site-packages\torch\autograd\functional.py", line 684, in jacobian
+    inputs = _grad_preprocess(inputs, create_graph=create_graph, need_graph=True)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "F:\anaconda3\Lib\site-packages\torch\autograd\functional.py", line 87, in _grad_preprocess
+    res.append(inp.detach().requires_grad_(need_graph))
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+RuntimeError: You are attempting to call Tensor.requires_grad_() (or perhaps using torch.autograd.functional.* APIs) inside of a function being transformed by a functorch transform. This is unsupported, please attempt to use the functorch transforms (e.g. grad, vjp, jacrev, jacfwd, hessian) or call requires_grad_() outside of a function being transformed instead.

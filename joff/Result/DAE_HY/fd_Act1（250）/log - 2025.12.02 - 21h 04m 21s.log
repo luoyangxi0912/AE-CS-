@@ -1,0 +1,39 @@
+
+DAE(
+  (loss_func): MSELoss()
+  (encoder): Sequential(
+    (0): Linear(in_features=520, out_features=260, bias=True)
+    (1): BatchNorm1d(260, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+    (2): Gaussian()
+    (3): Linear(in_features=260, out_features=130, bias=True)
+    (4): Sigmoid()
+  )
+  (decoder): Sequential(
+    (0): Linear(in_features=130, out_features=260, bias=True)
+    (1): Affine()
+    (2): Linear(in_features=260, out_features=520, bias=True)
+    (3): Affine()
+  )
+)
+
+run paras: {'run_times': 1, 'multirun_seed': 'r*2', '_run_id': '', 'e': 50, 'load_para_type': None, 'load_sub': None, 'load_file_name': None, 'view_addi_info': ['loss'], 'if_log': True, 'if_epoch_eval': None, 'if_vmap': False, 'if_save_excel': True, 'if_save_plot': True, 'fd_pr': ['re-T2&Q-kde'], 'fd_pr_dt': [{'mm': 're', 'ts': 'T2', 'thrd_meth': 'kde'}, {'mm': 're', 'ts': 'Q', 'thrd_meth': 'kde'}], 'fd_pr_name': ['re-T2-kde', 're-Q-kde'], 'ts_post_op': None, 'if_use_lstsq': True, 'expt_FAR': 0.005, 'if_plot_mm_kde': False, 'if_plot_score_hm': False, 'if_plot_cov_inv': True, 'if_mm_tab': False, 'if_mm_tsne': False, 'alld_error': 0.005, 'cl': 0.995, 'if_intp': False}
+
+Train DAE_HY/fd_Act1 in cuda:
+torch.Size([260, 520])
+torch.Size([260])
+Traceback (most recent call last):
+  File "F:\torch_joff\joff\_run\_run_model.py", line 67, in _run_with_log
+    _run_n(self, p)
+  File "F:\torch_joff\joff\_run\_run_model.py", line 108, in _run_n
+    _init_module_paras(self)
+  File "F:\torch_joff\joff\_nn\_para.py", line 39, in _init_module_paras
+    _init_para(weights)
+  File "F:\torch_joff\joff\_nn\_para.py", line 30, in _init_para
+    eval('nn.init.'+init+'(para)')
+  File "<string>", line 1, in <module>
+  File "F:\anaconda3\Lib\site-packages\torch\nn\init.py", line 440, in xavier_normal_
+    fan_in, fan_out = _calculate_fan_in_and_fan_out(tensor)
+                      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "F:\anaconda3\Lib\site-packages\torch\nn\init.py", line 348, in _calculate_fan_in_and_fan_out
+    raise ValueError(
+ValueError: Fan in and fan out can not be computed for tensor with fewer than 2 dimensions

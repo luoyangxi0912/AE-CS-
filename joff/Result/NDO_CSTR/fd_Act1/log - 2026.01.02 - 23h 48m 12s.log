@@ -1,0 +1,101 @@
+
+NDO(
+  (loss_func): MSELoss()
+  (seq): Sequential(
+    (layer_0): Layer(
+      (0): Linear(in_features=23, out_features=240, bias=True)
+      (1): Gaussian()
+    )
+    (layer_1): Layer(
+      (0): Linear(in_features=240, out_features=120, bias=True)
+      (1): Sigmoid()
+    )
+    (layer_2): Layer(
+      (0): Linear(in_features=120, out_features=240, bias=True)
+      (1): Gaussian()
+    )
+    (layer_3): Layer(
+      (0): Linear(in_features=240, out_features=13, bias=True)
+      (1): Affine()
+    )
+  )
+  (seq_2): Sequential(
+    (layer_0): Layer(
+      (0): Linear(in_features=10, out_features=240, bias=True)
+      (1): Gaussian()
+    )
+    (layer_1): Layer(
+      (0): Linear(in_features=480, out_features=120, bias=True)
+      (1): Sigmoid()
+    )
+    (layer_2): Layer(
+      (0): Linear(in_features=240, out_features=240, bias=True)
+      (1): Gaussian()
+    )
+    (layer_3): Layer(
+      (0): Linear(in_features=480, out_features=7, bias=True)
+      (1): Affine()
+    )
+  )
+)
+
+run paras: {'run_times': 1, 'multirun_seed': 'r*2', '_run_id': '', 'e': 24, 'load_para_type': None, 'load_sub': None, 'load_file_name': None, 'load_path_replace': None, 'view_addi_info': ['obs_erorr', 'M_obs', 'unobs_stb_loss', 'loss'], 'if_log': True, 'if_epoch_eval': None, 'if_vmap': False, 'if_save_excel': True, 'if_save_plot': True, 'fd_pr': ['cust_mm_ey-T2&Q-kde'], 'fd_pr_dt': [{'mm': 'cust_mm_ey', 'ts': 'T2', 'thrd_meth': 'kde'}, {'mm': 'cust_mm_ey', 'ts': 'Q', 'thrd_meth': 'kde'}], 'fd_pr_name': ['cust_mm_ey-T2-kde', 'cust_mm_ey-Q-kde'], 'expt_FAR': 0.005, 'ts_post_op': None, 'if_use_lstsq': True, 'if_plot_mm_kde': False, 'if_plot_score_hm': False, 'if_plot_cov_inv': False, 'if_save_ts': False, 'alld_error': 0.005, 'cl': 0.995, 'if_intp': False}
+
+Train NDO_CSTR/fd_Act1 via cuda:
+Epoch: 24 - 1998/1998 | obs_erorr = 23.9792, M_obs = 13.1429, unobs_stb_loss = 23.2326, loss = 47.2118                
+Finish training~ Spend 3269 seconds
+
+Mean training losses: ['train-obs_erorr' 'train-M_obs' 'train-unobs_stb_loss' 'train-loss'] = [15.0373 13.382  25.7298 40.7671]
+
+Save model paras [Last] in 'file:///F:/torch_joff/joff/Result/NDO_CSTR/fd_Act1'
+
+1) 'cust_mm_ey-T2-kde':
+Threshold = 413.76
+
+The test false alarm rates (FARs) are:
+[12.7  14.29 14.29 11.64 10.58 14.81 12.17 14.81 13.23 12.7 ](%)
+
+The test missed detection rates (MDRs) are:
+[25.13 19.32 21.52 12.51 28.43 23.22  1.8  19.82  6.01 29.63](%)
+
+The test AFAR is 13.12(%).
+The test AMDR is 18.74(%).
+
+2) 'cust_mm_ey-Q-kde':
+Threshold = 195.12
+
+The test false alarm rates (FARs) are:
+[1.59 0.   0.53 1.59 0.53 0.53 2.65 0.53 2.65 1.06](%)
+
+The test missed detection rates (MDRs) are:
+[42.34 52.45 39.44 22.32 16.22 13.81  5.01 25.13 22.92 75.48](%)
+
+The test AFAR is 1.16(%).
+The test AMDR is 31.51(%).
+
+Save FD Result.xlsx in 'file:///F:/torch_joff/joff/Result/NDO_CSTR/fd_Act1/FD%20Result.xlsx'
+Plot Epoch-Loss.pdf in 'file:///F:/torch_joff/joff/Result/NDO_CSTR/fd_Act1/Epoch-Loss.pdf'
+Plot Normal.pdf [ey-T2-kde] in 'file:///F:/torch_joff/joff/Result/NDO_CSTR/fd_Act1/cust_mm_ey-T2-kde/Normal.pdf'
+Plot Fault 01.pdf [ey-T2-kde] in 'file:///F:/torch_joff/joff/Result/NDO_CSTR/fd_Act1/cust_mm_ey-T2-kde/Fault%2001.pdf'
+Plot Fault 02.pdf [ey-T2-kde] in 'file:///F:/torch_joff/joff/Result/NDO_CSTR/fd_Act1/cust_mm_ey-T2-kde/Fault%2002.pdf'
+Plot Fault 03.pdf [ey-T2-kde] in 'file:///F:/torch_joff/joff/Result/NDO_CSTR/fd_Act1/cust_mm_ey-T2-kde/Fault%2003.pdf'
+Plot Fault 04.pdf [ey-T2-kde] in 'file:///F:/torch_joff/joff/Result/NDO_CSTR/fd_Act1/cust_mm_ey-T2-kde/Fault%2004.pdf'
+Plot Fault 05.pdf [ey-T2-kde] in 'file:///F:/torch_joff/joff/Result/NDO_CSTR/fd_Act1/cust_mm_ey-T2-kde/Fault%2005.pdf'
+Plot Fault 06.pdf [ey-T2-kde] in 'file:///F:/torch_joff/joff/Result/NDO_CSTR/fd_Act1/cust_mm_ey-T2-kde/Fault%2006.pdf'
+Plot Fault 07.pdf [ey-T2-kde] in 'file:///F:/torch_joff/joff/Result/NDO_CSTR/fd_Act1/cust_mm_ey-T2-kde/Fault%2007.pdf'
+Plot Fault 08.pdf [ey-T2-kde] in 'file:///F:/torch_joff/joff/Result/NDO_CSTR/fd_Act1/cust_mm_ey-T2-kde/Fault%2008.pdf'
+Plot Fault 09.pdf [ey-T2-kde] in 'file:///F:/torch_joff/joff/Result/NDO_CSTR/fd_Act1/cust_mm_ey-T2-kde/Fault%2009.pdf'
+Plot Fault 10.pdf [ey-T2-kde] in 'file:///F:/torch_joff/joff/Result/NDO_CSTR/fd_Act1/cust_mm_ey-T2-kde/Fault%2010.pdf'
+Plot Whole_fd.pdf [ey-T2-kde] in 'file:///F:/torch_joff/joff/Result/NDO_CSTR/fd_Act1/cust_mm_ey-T2-kde/Whole_fd.pdf'
+Plot Normal.pdf [ey-Q-kde] in 'file:///F:/torch_joff/joff/Result/NDO_CSTR/fd_Act1/cust_mm_ey-Q-kde/Normal.pdf'
+Plot Fault 01.pdf [ey-Q-kde] in 'file:///F:/torch_joff/joff/Result/NDO_CSTR/fd_Act1/cust_mm_ey-Q-kde/Fault%2001.pdf'
+Plot Fault 02.pdf [ey-Q-kde] in 'file:///F:/torch_joff/joff/Result/NDO_CSTR/fd_Act1/cust_mm_ey-Q-kde/Fault%2002.pdf'
+Plot Fault 03.pdf [ey-Q-kde] in 'file:///F:/torch_joff/joff/Result/NDO_CSTR/fd_Act1/cust_mm_ey-Q-kde/Fault%2003.pdf'
+Plot Fault 04.pdf [ey-Q-kde] in 'file:///F:/torch_joff/joff/Result/NDO_CSTR/fd_Act1/cust_mm_ey-Q-kde/Fault%2004.pdf'
+Plot Fault 05.pdf [ey-Q-kde] in 'file:///F:/torch_joff/joff/Result/NDO_CSTR/fd_Act1/cust_mm_ey-Q-kde/Fault%2005.pdf'
+Plot Fault 06.pdf [ey-Q-kde] in 'file:///F:/torch_joff/joff/Result/NDO_CSTR/fd_Act1/cust_mm_ey-Q-kde/Fault%2006.pdf'
+Plot Fault 07.pdf [ey-Q-kde] in 'file:///F:/torch_joff/joff/Result/NDO_CSTR/fd_Act1/cust_mm_ey-Q-kde/Fault%2007.pdf'
+Plot Fault 08.pdf [ey-Q-kde] in 'file:///F:/torch_joff/joff/Result/NDO_CSTR/fd_Act1/cust_mm_ey-Q-kde/Fault%2008.pdf'
+Plot Fault 09.pdf [ey-Q-kde] in 'file:///F:/torch_joff/joff/Result/NDO_CSTR/fd_Act1/cust_mm_ey-Q-kde/Fault%2009.pdf'
+Plot Fault 10.pdf [ey-Q-kde] in 'file:///F:/torch_joff/joff/Result/NDO_CSTR/fd_Act1/cust_mm_ey-Q-kde/Fault%2010.pdf'
+Plot Whole_fd.pdf [ey-Q-kde] in 'file:///F:/torch_joff/joff/Result/NDO_CSTR/fd_Act1/cust_mm_ey-Q-kde/Whole_fd.pdf'
