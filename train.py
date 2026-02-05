@@ -16,29 +16,11 @@ from pathlib import Path
 from datetime import datetime
 import json
 
-# ===== GPU内存配置 (必须在导入其他TF模块之前!) =====
-# 设置环境变量限制GPU内存
-os.environ['TF_FORCE_GPU_ALLOW_GROWTH'] = 'false'  # 禁用自动增长
-os.environ['TF_GPU_ALLOCATOR'] = 'cuda_malloc_async'  # 使用异步分配器
+# ===== 强制使用 CPU，彻底避免 GPU OOM =====
+os.environ['CUDA_VISIBLE_DEVICES'] = '-1'
 
 import tensorflow as tf
-
-GPU_MEMORY_LIMIT_MB = 1024
-
-gpus = tf.config.list_physical_devices('GPU')
-if gpus:
-    try:
-        # 设置硬性内存限制，防止 OOM 和系统死机
-        tf.config.set_logical_device_configuration(
-            gpus[0],
-            [tf.config.LogicalDeviceConfiguration(memory_limit=GPU_MEMORY_LIMIT_MB)]
-        )
-        print(f"[OK] GPU内存硬限制已设置: {GPU_MEMORY_LIMIT_MB}MB")
-    except RuntimeError as e:
-        print(f"[ERROR] GPU配置失败（可能TensorFlow已初始化）: {e}")
-        print("[INFO] 请确保此脚本是第一个导入TensorFlow的模块")
-else:
-    print("[INFO] 未检测到GPU，将使用CPU训练")
+print("[INFO] 强制使用 CPU 训练（已禁用 GPU）")
 # ======================================
 
 import numpy as np
@@ -423,7 +405,44 @@ class AECSTrainer:
 
         return avg_losses['total'], avg_losses
 
-    def train(self, epochs: int = 100, early_stopping_patience: int = 10):
+    def resume_from_checkpoint(self):
+        """
+        从检查点恢复训练状态
+        """
+        state_path = self.checkpoint_dir / 'training_state.json'
+        best_model_path = self.checkpoint_dir / 'best_model.weights.h5'
+
+        if not state_path.exists() or not best_model_path.exists():
+            print("[INFO] 未找到检查点，从头开始训练")
+            return 0
+
+        # 加载训练状态
+        with open(state_path, 'r') as f:
+            state = json.load(f)
+
+        self.current_epoch = state['epoch']
+        self.best_val_loss = state['best_val_loss']
+        self.train_loss_history = state['train_loss_history']
+        self.val_loss_history = state['val_loss_history']
+        self.lr_history = state.get('lr_history', [])
+
+        # 恢复学习率
+        if self.lr_history:
+            self.current_lr = self.lr_history[-1]
+            self.optimizer.learning_rate.assign(self.current_lr)
+
+        # 先做一次前向传播创建模型变量，然后加载权重
+        dummy_batch = next(iter(self.train_dataset.get_dataset()))
+        _ = self.model(dummy_batch[0], dummy_batch[1], training=False)
+        self.model.load_weights(str(best_model_path))
+
+        print(f"[OK] 已从 Epoch {self.current_epoch} 恢复训练")
+        print(f"     最佳验证损失: {self.best_val_loss:.4f}")
+        print(f"     当前学习率: {self.current_lr:.6f}")
+
+        return self.current_epoch
+
+    def train(self, epochs: int = 100, early_stopping_patience: int = 10, resume: bool = False):
         """
         训练循环
 
@@ -437,8 +456,15 @@ class AECSTrainer:
 
         best_epoch = 0
         patience_counter = 0
+        start_epoch = 0
 
-        for epoch in range(epochs):
+        # 断点恢复
+        if resume:
+            start_epoch = self.resume_from_checkpoint()
+            best_epoch = start_epoch
+            print(f"  从 Epoch {start_epoch + 1} 继续训练到 Epoch {epochs}")
+
+        for epoch in range(start_epoch, epochs):
             self.current_epoch = epoch + 1
 
             # 训练阶段
@@ -653,6 +679,8 @@ def main():
                         help='Dropout概率 (增强正则化: 0.1→0.3)')
     parser.add_argument('--l2_reg', type=float, default=0.005,
                         help='L2正则化系数 (增强正则化: 0.0005→0.005)')
+    parser.add_argument('--resume', action='store_true', default=False,
+                        help='从检查点断点恢复训练')
 
     args = parser.parse_args()
 
@@ -684,7 +712,7 @@ def main():
     trainer.setup()
 
     # 开始训练
-    trainer.train(epochs=args.epochs, early_stopping_patience=args.early_stopping_patience)
+    trainer.train(epochs=args.epochs, early_stopping_patience=args.early_stopping_patience, resume=args.resume)
 
 
 if __name__ == '__main__':

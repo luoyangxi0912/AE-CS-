@@ -1,0 +1,17 @@
+{
+  "data_path": "hangmei_90_\u62fc\u63a5\u597d\u7684.csv",
+  "checkpoint_dir": "checkpoints_iter",
+  "epochs": 50,
+  "batch_size": 8,
+  "learning_rate": 0.001,
+  "latent_dim": 64,
+  "hidden_units": 128,
+  "train_iters": 3,
+  "momentum": 0.1,
+  "lambda1": 1.0,
+  "lambda2": 0.1,
+  "lambda3": 0.1,
+  "early_stopping_patience": 15,
+  "resume": false,
+  "n_features": 44
+}
