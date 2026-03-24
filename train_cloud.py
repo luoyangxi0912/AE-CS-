@@ -42,8 +42,8 @@ class AECSTrainerV2:
     def __init__(self, model, train_dataset, val_dataset,
                  checkpoint_dir='checkpoints_v9',
                  learning_rate=0.001,
-                 lambda1=1.0, lambda2=1.0, lambda3=10.0,
-                 p_drop=0.5,
+                 lambda1=0.5, lambda2=0.5, lambda3=0.5,
+                 p_drop=0.2,
                  n_corrupted=3,
                  p_consist=0.1,
                  use_lr_scheduler=True,
@@ -234,13 +234,13 @@ class AECSTrainerV2:
                   f"space={val_loss['space']:.4f}  "
                   f"time={val_loss['time']:.4f}")
 
-            improved = val_loss['total'] < self.best_val_loss
+            improved = val_loss['recon'] < self.best_val_loss
             if improved:
-                self.best_val_loss = val_loss['total']
+                self.best_val_loss = val_loss['recon']
                 best_epoch = epoch + 1
                 patience_counter = 0
                 self.save_checkpoint(epoch + 1, is_best=True)
-                print(f"  [BEST] val_loss={self.best_val_loss:.4f}")
+                print(f"  [BEST] val_recon={self.best_val_loss:.4f}")
             else:
                 patience_counter += 1
                 print(f"  未改善 ({patience_counter}/{early_stopping_patience})")
@@ -267,7 +267,7 @@ class AECSTrainerV2:
                 print(f"\n早停触发! 最佳模型在 Epoch {best_epoch}")
                 break
 
-        print(f"\n训练完成! 最佳验证损失: {self.best_val_loss:.4f} "
+        print(f"\n训练完成! 最佳验证 recon 损失: {self.best_val_loss:.4f} "
               f"(Epoch {best_epoch})")
         return self.best_val_loss
 
@@ -345,7 +345,7 @@ def main():
 
     parser.add_argument('--latent_dim', type=int, default=32)
     parser.add_argument('--hidden_units', type=int, default=128)
-    parser.add_argument('--dropout_rate', type=float, default=0.3)
+    parser.add_argument('--dropout_rate', type=float, default=0.1)
     parser.add_argument('--l2_reg', type=float, default=0.0005)
 
     parser.add_argument('--learning_rate', type=float, default=0.001)
@@ -354,13 +354,13 @@ def main():
     parser.add_argument('--lr_factor', type=float, default=0.5)
     parser.add_argument('--min_lr', type=float, default=1e-6)
 
-    parser.add_argument('--p_drop', type=float, default=0.5)
+    parser.add_argument('--p_drop', type=float, default=0.2)
     parser.add_argument('--n_corrupted', type=int, default=3)
     parser.add_argument('--p_consist', type=float, default=0.1)
 
-    parser.add_argument('--lambda1', type=float, default=1.0)
-    parser.add_argument('--lambda2', type=float, default=1.0)
-    parser.add_argument('--lambda3', type=float, default=10.0)
+    parser.add_argument('--lambda1', type=float, default=0.5)
+    parser.add_argument('--lambda2', type=float, default=0.5)
+    parser.add_argument('--lambda3', type=float, default=0.5)
 
     parser.add_argument('--stride', type=int, default=12)
     parser.add_argument('--seed', type=int, default=42)
