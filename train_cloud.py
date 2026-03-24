@@ -1,25 +1,27 @@
 """
-训练脚本 - AE-CS模型 (V9: 修复 delta≈0 问题)
+AE-CS V9 云服务器训练脚本 (GPU加速版)
 
-架构: 三编码器-单解码器, KNN初始化, 门控融合
-训练: 自监督掩码重建 + 一致性去噪 + 邻域保持损失
-
-V9 关键修复:
-  - L_recon 仅在额外掩盖的位置计算 (消除 80% 零信号干扰)
-  - p_drop=0.5 (增加有用梯度信号占比)
-  - stride=12 (增加训练样本)
-  - delta clip [-2.0, 2.0] (放宽表达能力)
+与 train_iterative.py 的区别:
+  - 移除 CUDA_VISIBLE_DEVICES='-1' (启用GPU)
+  - 增大 batch_size=32 (利用GPU显存)
+  - 添加 GPU 显存按需增长配置
+  - 其余逻辑完全一致
 
 用法:
-    python train_iterative.py --checkpoint_dir checkpoints_v9 --epochs 100
+    python train_cloud.py --checkpoint_dir checkpoints_v9 --epochs 100
 """
 
-# ===== 强制使用 CPU =====
 import os
-os.environ['CUDA_VISIBLE_DEVICES'] = '-1'
-
 import tensorflow as tf
-print("[INFO] 强制使用 CPU 训练")
+
+# === GPU 配置 ===
+gpus = tf.config.list_physical_devices('GPU')
+if gpus:
+    for gpu in gpus:
+        tf.config.experimental.set_memory_growth(gpu, True)
+    print(f"[INFO] 使用 GPU 训练: {gpus[0]}")
+else:
+    print("[INFO] 未检测到 GPU，使用 CPU 训练")
 
 import numpy as np
 import json
@@ -104,9 +106,7 @@ class AECSTrainerV2:
                 z_corrupted = self.model.encode(X_batch, cm, training=True)
                 z_corrupted_list.append(z_corrupted)
 
-            # Step 4: V9 核心修复 — recon_mask 仅覆盖额外掩盖位置
-            # 这些位置的 x_space_init = KNN填充 ≠ x_true → delta 目标非零
-            # 消除了旧版 80% 零信号淹没 20% 有用信号的问题
+            # Step 4: V9 核心 — recon_mask 仅覆盖额外掩盖位置
             recon_mask = mask_batch * (1.0 - corrupted_mask)
 
             loss, losses_dict = total_loss(
@@ -123,7 +123,6 @@ class AECSTrainerV2:
                 recon_mask=recon_mask,
             )
 
-        # 梯度裁剪 + 更新
         gradients = tape.gradient(loss, self.model.trainable_variables)
         gradients = [tf.clip_by_norm(g, 1.0) if g is not None else g
                      for g in gradients]
@@ -134,7 +133,7 @@ class AECSTrainerV2:
         return {k: float(v.numpy()) for k, v in losses_dict.items()}
 
     def validate(self):
-        """验证 - 同样应用 V9 修复"""
+        """验证"""
         val_losses = []
         val_rng = tf.random.Generator.from_seed(12345)
 
@@ -161,7 +160,6 @@ class AECSTrainerV2:
                 z_corrupted = self.model.encode(X_batch, cm, training=False)
                 z_corrupted_list.append(z_corrupted)
 
-            # V9: recon_mask 仅额外掩盖位置
             recon_mask = mask_batch * (1.0 - corrupted_mask)
 
             _, losses_dict = total_loss(
@@ -198,13 +196,11 @@ class AECSTrainerV2:
             best_epoch = start_epoch
 
         print(f"\n{'='*70}")
-        print(f"AE-CS V9 训练 (修复 delta 学习信号)")
+        print(f"AE-CS V9 训练 (GPU加速)")
         print(f"  p_drop={self.p_drop}, n_corrupted={self.n_corrupted}, "
               f"p_consist={self.p_consist}")
         print(f"  lambda1={self.lambda1}, lambda2={self.lambda2}, "
               f"lambda3={self.lambda3}")
-        print(f"  LR scheduler: {self.use_lr_scheduler} "
-              f"(patience={self.lr_patience}, factor={self.lr_factor})")
         print(f"{'='*70}")
 
         for epoch in range(start_epoch, epochs):
@@ -215,11 +211,6 @@ class AECSTrainerV2:
             for batch_idx, (X_batch, mask_batch) in enumerate(train_ds):
                 loss_dict = self.train_step(X_batch, mask_batch)
                 epoch_losses.append(loss_dict)
-
-                if (batch_idx + 1) % 50 == 0:
-                    print(f"  Epoch {epoch+1} Batch {batch_idx+1}: "
-                          f"total={loss_dict['total']:.4f} "
-                          f"recon={loss_dict['recon']:.4f}")
 
             train_loss = {
                 k: np.mean([l[k] for l in epoch_losses])
@@ -344,17 +335,13 @@ class AECSTrainerV2:
 
 
 def main():
-    parser = argparse.ArgumentParser(
-        description='AE-CS V9 训练 (修复 delta 学习信号)'
-    )
+    parser = argparse.ArgumentParser(description='AE-CS V9 训练 (GPU加速)')
 
-    parser.add_argument('--data_path', type=str,
-                        default='hangmei_90_拼接好的.csv')
-    parser.add_argument('--checkpoint_dir', type=str,
-                        default='checkpoints_v9')
+    parser.add_argument('--data_path', type=str, default='hangmei_90_拼接好的.csv')
+    parser.add_argument('--checkpoint_dir', type=str, default='checkpoints_v9')
     parser.add_argument('--epochs', type=int, default=100)
-    parser.add_argument('--batch_size', type=int, default=8)
-    parser.add_argument('--early_stopping_patience', type=int, default=15)
+    parser.add_argument('--batch_size', type=int, default=32)
+    parser.add_argument('--early_stopping_patience', type=int, default=20)
 
     parser.add_argument('--latent_dim', type=int, default=32)
     parser.add_argument('--hidden_units', type=int, default=128)
@@ -367,8 +354,7 @@ def main():
     parser.add_argument('--lr_factor', type=float, default=0.5)
     parser.add_argument('--min_lr', type=float, default=1e-6)
 
-    parser.add_argument('--p_drop', type=float, default=0.5,
-                        help='去噪掩盖比例 (V9: 0.2→0.5, 增加有用信号占比)')
+    parser.add_argument('--p_drop', type=float, default=0.5)
     parser.add_argument('--n_corrupted', type=int, default=3)
     parser.add_argument('--p_consist', type=float, default=0.1)
 
@@ -376,9 +362,7 @@ def main():
     parser.add_argument('--lambda2', type=float, default=1.0)
     parser.add_argument('--lambda3', type=float, default=10.0)
 
-    parser.add_argument('--stride', type=int, default=12,
-                        help='窗口滑动步长 (V9: 24→12, 增加训练样本)')
-
+    parser.add_argument('--stride', type=int, default=12)
     parser.add_argument('--seed', type=int, default=42)
     parser.add_argument('--resume', action='store_true')
 
@@ -388,7 +372,7 @@ def main():
     np.random.seed(args.seed)
 
     print("=" * 70)
-    print("AE-CS V9 训练 (修复 delta 学习信号)")
+    print("AE-CS V9 训练 (GPU加速)")
     print("=" * 70)
 
     # 1. 数据加载
@@ -431,8 +415,6 @@ def main():
         dropout_rate=args.dropout_rate,
         l2_reg=args.l2_reg
     )
-    print(f"  latent_dim={args.latent_dim}, dropout={args.dropout_rate}, "
-          f"l2_reg={args.l2_reg}")
 
     # 3. 保存配置
     config = {
@@ -442,8 +424,7 @@ def main():
         'batch_size': args.batch_size,
         'latent_dim': args.latent_dim,
         'hidden_units': args.hidden_units,
-        'k_spatial': 5,
-        'k_temporal': 5,
+        'k_spatial': 5, 'k_temporal': 5,
         'dropout_rate': args.dropout_rate,
         'l2_reg': args.l2_reg,
         'learning_rate': args.learning_rate,
@@ -465,7 +446,7 @@ def main():
         json.dump(config, f, indent=4, ensure_ascii=False)
 
     # 4. 训练
-    print("\n[3] 初始化训练器...")
+    print("\n[3] 开始训练...")
     trainer = AECSTrainerV2(
         model=model,
         train_dataset=train_dataset,
