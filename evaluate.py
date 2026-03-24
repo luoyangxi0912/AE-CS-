@@ -22,6 +22,8 @@ import pandas as pd
 import matplotlib.pyplot as plt
 import seaborn as sns
 from sklearn.metrics import mean_squared_error, mean_absolute_error, r2_score
+
+os.environ['CUDA_VISIBLE_DEVICES'] = '-1'
 import tensorflow as tf
 
 # 导入自定义模块
@@ -60,17 +62,17 @@ def load_model_and_data(checkpoint_dir, data_path):
     print("=" * 80)
 
     data_loader = AECSDataLoader(
-        batch_size=config['batch_size'],
+        batch_size=config.get('batch_size', 8),
         shuffle_train=False,  # 评估时不打乱
-        seed=config['seed']
+        seed=config.get('seed', 42)
     )
     data_loader.preprocessor.data_path = Path(data_path)
-    data_loader.preprocessor.window_size = config['window_size']
+    data_loader.preprocessor.window_size = config.get('window_size', 48)
 
     # 准备数据
     datasets = data_loader.prepare(
-        missing_rate=config['missing_rate'],
-        missing_type=config['missing_type'],
+        missing_rate=config.get('missing_rate', 0.2),
+        missing_type=config.get('missing_type', 'MCAR'),
         train_ratio=0.7,
         val_ratio=0.15
     )
@@ -85,13 +87,13 @@ def load_model_and_data(checkpoint_dir, data_path):
     print("=" * 80)
 
     model = AECS(
-        n_features=config['n_features'],
-        latent_dim=config['latent_dim'],
-        hidden_units=config['hidden_units'],
-        k_spatial=config['k_spatial'],
-        k_temporal=config['k_temporal'],
-        dropout_rate=config.get('dropout_rate', 0.2),
-        l2_reg=config.get('l2_reg', 0.001)
+        n_features=config.get('n_features', 44),
+        latent_dim=config.get('latent_dim', 32),
+        hidden_units=config.get('hidden_units', 128),
+        k_spatial=config.get('k_spatial', 5),
+        k_temporal=config.get('k_temporal', 5),
+        dropout_rate=config.get('dropout_rate', 0.1),
+        l2_reg=config.get('l2_reg', 0.0005)
     )
 
     # 4. 加载权重
@@ -175,6 +177,11 @@ def calculate_metrics(predictions, ground_truth, masks):
     y_true_missing = ground_truth[missing_mask]
     y_pred_missing = predictions[missing_mask]
 
+    print(f"[Sanity Check] missing_rate = {1.0 - masks.mean():.4f}")
+    print(f"[Sanity Check] y_true_missing.mean = {y_true_missing.mean():.4f}, std = {y_true_missing.std():.4f}")
+    print(f"[Sanity Check] y_true_missing min = {y_true_missing.min():.4f}, max = {y_true_missing.max():.4f}")
+
+
     # 在观测位置也计算指标作为对比
     observed_mask = masks.astype(bool)
     y_true_observed = ground_truth[observed_mask]
@@ -243,69 +250,13 @@ def analyze_per_feature(predictions, ground_truth, masks, save_dir):
     n_features = predictions.shape[2]
     missing_mask = (1 - masks).astype(bool)
 
-    feature_metrics = []
-
-    for i in range(n_features):
-        # 获取该特征的缺失位置
-        feature_missing = missing_mask[:, :, i]
-
-        if feature_missing.sum() == 0:
-            continue
-
-        y_true = ground_truth[:, :, i][feature_missing]
-        y_pred = predictions[:, :, i][feature_missing]
-
-        mse = mean_squared_error(y_true, y_pred)
-        mae = mean_absolute_error(y_true, y_pred)
-        r2 = r2_score(y_true, y_pred)
-
-        feature_metrics.append({
-            'feature': i,
-            'mse': mse,
-            'rmse': np.sqrt(mse),
-            'mae': mae,
-            'r2': r2,
-            'n_missing': feature_missing.sum()
-        })
-
-    feature_df = pd.DataFrame(feature_metrics)
-    feature_df = feature_df.sort_values('mae', ascending=False)
-
-    print("\n按MAE排序的特征性能 (前10个最差):")
-    print(feature_df.head(10).to_string(index=False))
-
-    print("\n按MAE排序的特征性能 (前10个最好):")
-    print(feature_df.tail(10).to_string(index=False))
-
-    # 保存完整结果
-    feature_df.to_csv(save_dir / 'feature_performance.csv', index=False)
-    print(f"\n特征性能已保存到: {save_dir / 'feature_performance.csv'}")
-
-    return feature_df
-
-
-def visualize_predictions(predictions, ground_truth, masks, save_dir, n_samples=5):
-    """
-    可视化预测结果
-
-    Args:
-        predictions: 预测值
-        ground_truth: 真实值
-        masks: 掩码
-        save_dir: 保存目录
-        n_samples: 可视化样本数
-    """
-    print("\n" + "=" * 80)
-    print("生成可视化图表")
-    print("=" * 80)
-
-    save_dir = Path(save_dir)
-    save_dir.mkdir(parents=True, exist_ok=True)
-
-    # 1. 预测vs真实值散点图 (缺失位置)
-    missing_mask = (1 - masks).astype(bool)
     y_true_missing = ground_truth[missing_mask]
     y_pred_missing = predictions[missing_mask]
+
+    print(f"[Sanity Check] missing_rate = {1.0 - masks.mean():.4f}")
+    print(f"[Sanity Check] y_true_missing.mean = {y_true_missing.mean():.4f}, std = {y_true_missing.std():.4f}")
+    print(f"[Sanity Check] y_true_missing min = {y_true_missing.min():.4f}, max = {y_true_missing.max():.4f}")
+
 
     plt.figure(figsize=(10, 10))
     plt.scatter(y_true_missing, y_pred_missing, alpha=0.1, s=1)
@@ -347,7 +298,7 @@ def visualize_predictions(predictions, ground_truth, masks, save_dir, n_samples=
     print(f"  保存: {save_dir / 'error_distribution.png'}")
 
     # 3. 时间序列可视化 (随机选择几个样本)
-    indices = np.random.choice(len(predictions), size=min(n_samples, len(predictions)), replace=False)
+    indices = np.random.choice(len(predictions), size=min(100, len(predictions)), replace=False)
 
     for idx in indices:
         fig, axes = plt.subplots(4, 1, figsize=(15, 12))
@@ -394,13 +345,13 @@ def main():
     """主函数"""
     parser = argparse.ArgumentParser(description='评估AE-CS模型')
     parser.add_argument('--checkpoint_dir', type=str,
-                       default=r'./checkpoints/regularized',
+                       default=r'./checkpoints_v4',
                        help='检查点目录')
     parser.add_argument('--data_path', type=str,
                        default=r'D:\数据补全\hangmei_90_拼接好的.csv',
                        help='数据文件路径')
     parser.add_argument('--output_dir', type=str,
-                       default=r'./results/evaluation',
+                       default=r'./results/eval_v4',
                        help='结果保存目录')
 
     args = parser.parse_args()

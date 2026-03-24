@@ -206,7 +206,9 @@ class Encoder(Model):
         self.dropout1 = layers.Dropout(dropout_rate, name='dropout1')
         self.dropout2 = layers.Dropout(dropout_rate, name='dropout2')
 
-        # Fully connected layer to latent space with L2 regularization
+        # 输入噪声层，防止三编码器输出坍缩
+        # 数据 z-score 归一化后 std≈1, 噪声需要足够大才能打破对称性
+        self.input_noise = layers.GaussianNoise(0.05, name='input_noise')
         # 实验1：移除潜在层高斯激活，改用线性激活（None）
         # 原代码: activation=gaussian_activation
         self.dense_latent = layers.Dense(
@@ -216,25 +218,34 @@ class Encoder(Model):
             name='latent'
         )
 
-        # Batch normalization
-        self.bn1 = layers.BatchNormalization(name='bn1')
-        self.bn2 = layers.BatchNormalization(name='bn2')
-        
-    def call(self, x, mask, training=False):
+        # LayerNorm (替代 BatchNorm，消除三编码器尺度不对齐)
+        self.bn1 = layers.LayerNormalization(name='ln1')
+        self.bn2 = layers.LayerNormalization(name='ln2')
+
+    def call(self, x, mask, training=False, pre_filled=False):
         """
         Args:
             x: [batch_size, time_steps, n_features] - 输入数据
             mask: [batch_size, time_steps, n_features] - 掩码矩阵 (1=观测, 0=缺失)
             training: bool - 是否为训练模式
+            pre_filled: bool - 输入是否已经过KNN预填充（空间/时间编码器使用）
+                        True时保留缺失位置的KNN填充值，False时将缺失位置置零
 
         Returns:
             z: [batch_size, time_steps, latent_dim] - 潜在表示
         """
-        # 关键修复：将缺失位置的值置为0，防止数据泄露
-        # 原代码: x_masked = tf.concat([x, mask], axis=-1)  ← 模型能看到缺失位置的真实值
-        # 修复后: 先用掩码过滤，确保缺失位置为0
-        x_observed = x * mask  # 缺失位置 (mask=0) 的值变为0
-        x_masked = tf.concat([x_observed, mask], axis=-1)
+        if pre_filled:
+            # 空间/时间编码器：输入已经过KNN预填充，保留填充值
+            # 缺失位置包含有价值的KNN邻域信息，不应置零
+            x_input = x
+        else:
+            # 原始编码器：将缺失位置置零，防止数据泄露
+            x_input = x * mask
+
+        # V6: 训练时加入微小噪声，防止三编码器坍缩到相同输出
+        x_input = self.input_noise(x_input, training=training)
+
+        x_masked = tf.concat([x_input, mask], axis=-1)
 
         # GRU encoding
         h1 = self.gru1(x_masked, training=training)
@@ -282,16 +293,16 @@ class Decoder(Model):
             name='output'
         )
 
-        # Batch normalization
-        self.bn1 = layers.BatchNormalization(name='bn1')
-        self.bn2 = layers.BatchNormalization(name='bn2')
-        
+        # LayerNorm (与 Encoder 一致，替代 BatchNorm)
+        self.bn1 = layers.LayerNormalization(name='ln1')
+        self.bn2 = layers.LayerNormalization(name='ln2')
+
     def call(self, z, training=False):
         """
         Args:
             z: [batch_size, time_steps, latent_dim] - 潜在表示
             training: bool - 是否为训练模式
-            
+
         Returns:
             x_hat: [batch_size, time_steps, n_features] - 重建的数据
         """
@@ -306,6 +317,11 @@ class Decoder(Model):
 
         # Reconstruct to original feature space
         x_hat = self.dense_out(h2)
+
+        # V9: 放宽裁剪 [-0.5, 0.5] → [-2.0, 2.0]
+        # 真实修正量 std=0.162, 但个别位置修正可达 ±1.0+
+        # 过紧的裁剪限制模型表达能力，Feature 11 已由掩码隔离
+        x_hat = tf.clip_by_value(x_hat, -2.0, 2.0)
 
         return x_hat
 
@@ -354,20 +370,21 @@ class GatingNetwork(Model):
         # Output 3 weights (for orig, space, time)
         self.dense_alpha = layers.Dense(3, activation='softmax', name='alpha')
 
-    def call(self, z_orig, z_space, z_time, missing_rate, training=False):
+    def call(self, z_orig, z_space, z_time, missing_rate, training=False, warmup=False):
         """
         Args:
             z_orig: [batch_size, time_steps, latent_dim] - 原始表示
             z_space: [batch_size, time_steps, latent_dim] - 空间表示
             z_time: [batch_size, time_steps, latent_dim] - 时间表示
-            missing_rate: [batch_size] or scalar - 缺失率ρ (每个样本的缺失率)
+            missing_rate: [batch_size] or scalar - 缺失率ρ(每个样本的缺失率)
             training: bool - 是否为训练模式
+            warmup: bool - 是否为预热模式（强制应用 alpha1=1，alpha2=0，alpha3=0，但保留梯度流）
 
         Returns:
-            alpha: [batch_size, 3] - 全局融合权重
+            alpha: [batch_size, 3] - 预测的融合权重（用于计算惩罚损失，无论是否warmup都会计算）
             z_fused: [batch_size, time_steps, latent_dim] - 融合后的表示
         """
-        # 步骤1: 全局平均池化 (GAP) - 将时间维度压缩
+        # 步骤1: 全局平均池化 (GAP) - 将时间维度压缩 
         gap_orig = tf.reduce_mean(z_orig, axis=1)    # [batch, latent]
         gap_space = tf.reduce_mean(z_space, axis=1)  # [batch, latent]
         gap_time = tf.reduce_mean(z_time, axis=1)    # [batch, latent]
@@ -387,15 +404,24 @@ class GatingNetwork(Model):
         combined = tf.concat([gap_orig, gap_space, gap_time, missing_rate_expanded], axis=-1)
         # combined shape: [batch, latent*3 + 1]
 
-        # 步骤3: 计算全局注意力权重
+        # 步骤3: 计算全局注意力权重 (alpha_pred)
         h1 = self.dense1(combined)  # [batch, latent*2]
         h2 = self.dense2(h1)        # [batch, latent]
         h2 = self.dropout(h2, training=training)
         alpha = self.dense_alpha(h2)  # [batch, 3]
 
+        # 区分实际应用的权重 alpha_used 和 预测的权重 alpha
+        if warmup:
+            # 预热阶段，强制使应用的权重偏向原始特征
+            batch_size = tf.shape(z_orig)[0]
+            alpha_used = tf.constant([[1.0, 0.0, 0.0]], dtype=tf.float32)
+            alpha_used = tf.tile(alpha_used, [batch_size, 1])
+        else:
+            alpha_used = alpha
+
         # 步骤4: 扩展权重到时间维度并融合
-        # alpha: [batch, 3] -> [batch, 1, 3] -> 广播到 [batch, time, latent]
-        alpha_expanded = tf.expand_dims(alpha, axis=1)  # [batch, 1, 3]
+        # alpha_used: [batch, 3] -> [batch, 1, 3] -> 广播到 [batch, time, latent]
+        alpha_expanded = tf.expand_dims(alpha_used, axis=1)  # [batch, 1, 3]
 
         # 提取三个权重分量
         alpha_1 = tf.expand_dims(alpha_expanded[:, :, 0], axis=-1)  # [batch, 1, 1]
@@ -405,6 +431,7 @@ class GatingNetwork(Model):
         # 融合：广播机制会自动将[batch,1,1]扩展到[batch,time,latent]
         z_fused = alpha_1 * z_orig + alpha_2 * z_space + alpha_3 * z_time
 
+        # 始终返回预测的 alpha（为了计算 Huber 损失时的梯度流），而不影响前向融合传播的 z_fused
         return alpha, z_fused
 
 
@@ -480,6 +507,12 @@ class AECS(Model):
         self._cached_x_time_init = None
         self._cache_valid = False
 
+        # V8: Feature 11 delta 隔离掩码
+        # Feature 11 方差极小 (KNN R²=0.997)，任何非零 delta 都会造成梯度黑洞
+        feat_mask = np.ones((1, 1, n_features), dtype=np.float32)
+        feat_mask[0, 0, 11] = 0.0
+        self.feat_delta_mask = tf.constant(feat_mask)
+
     def _prepare_inputs(self, x, mask):
         """
         准备三个编码器的输入（专利步骤S5的输入初始化策略）
@@ -504,7 +537,7 @@ class AECS(Model):
 
         return x_zero, x_space_init, x_time_init
 
-    def call(self, x, mask, training=False, return_all=False):
+    def call(self, x, mask, training=False, return_all=False, warmup=False):
         """
         完整的前向传播（符合专利步骤S3-S6）
 
@@ -513,6 +546,7 @@ class AECS(Model):
             mask: [batch_size, time_steps, n_features] - 掩码
             training: bool - 训练模式
             return_all: bool - 是否返回所有中间结果
+            warmup: bool - 是否为warmup阶段（锁定门控网络权重为[1, 0, 0]）
 
         Returns:
             如果return_all=False:
@@ -528,29 +562,36 @@ class AECS(Model):
 
         # ========== 步骤S3：三路编码 ==========
 
-        # 第一编码器：一致性去噪编码，输入零值填充数据
-        z_orig = self.encoder_orig(x_zero, mask, training=training)
+        # 第一编码器：一致性去噪编码，输入零值填充数据（缺失位置=0）
+        z_orig = self.encoder_orig(x_zero, mask, training=training, pre_filled=False)
 
-        # 第二编码器：空间邻域编码，输入空间KNN初始化数据
-        z_space = self.encoder_space(x_space_init, mask, training=training)
+        # 第二编码器：空间邻域编码，输入空间KNN初始化数据（缺失位置=KNN填充值）
+        z_space = self.encoder_space(x_space_init, mask, training=training, pre_filled=True)
 
-        # 第三编码器：时间邻域编码，输入时间KNN初始化数据
-        z_time = self.encoder_time(x_time_init, mask, training=training)
+        # 第三编码器：时间邻域编码，输入时间KNN初始化数据（缺失位置=KNN填充值）
+        z_time = self.encoder_time(x_time_init, mask, training=training, pre_filled=True)
 
         # ========== 步骤S4：计算邻域信息（用于损失函数）==========
-        # 注意：这里的邻域计算仅用于计算空间/时间保持损失
-        # Z_space和Z_time已经由独立编码器生成
         _, _, neighborhood_info = self.neighborhood_module.compute_neighborhood_embeddings(
             x, z_orig, mask
         )
 
-        # ========== 步骤S4：自适应融合 ==========
+        # ========== 步骤S4：Z 尺度对齐并融合 ==========
+        # L2 归一化：消除表示间的尺度差异，并确保融合门控权重的稳定学习
+        z_orig_norm = tf.nn.l2_normalize(z_orig, axis=-1)
+        z_space_norm = tf.nn.l2_normalize(z_space, axis=-1)
+        z_time_norm = tf.nn.l2_normalize(z_time, axis=-1)
+
         alpha, z_fused = self.gating_network(
-            z_orig, z_space, z_time, missing_rate, training=training
+            z_orig_norm, z_space_norm, z_time_norm, missing_rate, training=training
         )
 
         # ========== 解码重构 ==========
-        x_hat = self.decoder(z_fused, training=training)
+        x_delta = self.decoder(z_fused, training=training)
+        # Feature 11 隔离 — 方差极小，任何非零 delta 都导致梯度爆炸
+        x_delta = x_delta * self.feat_delta_mask
+        x_hat = x_space_init + x_delta
+        x_hat = tf.clip_by_value(x_hat, -5.0, 5.0)  # 安全裁剪
 
         # ========== 步骤S6：掩码融合输出 ==========
         if training:
@@ -569,7 +610,6 @@ class AECS(Model):
                 'alpha': alpha,
                 'missing_rate': missing_rate,
                 'neighborhood_info': neighborhood_info,
-                # 额外信息用于调试
                 'x_space_init': x_space_init,
                 'x_time_init': x_time_init
             }
@@ -584,9 +624,9 @@ class AECS(Model):
     def encode_all(self, x, mask, training=False):
         """使用所有三个编码器编码，返回三路潜在表示"""
         x_zero, x_space_init, x_time_init = self._prepare_inputs(x, mask)
-        z_orig = self.encoder_orig(x_zero, mask, training=training)
-        z_space = self.encoder_space(x_space_init, mask, training=training)
-        z_time = self.encoder_time(x_time_init, mask, training=training)
+        z_orig = self.encoder_orig(x_zero, mask, training=training, pre_filled=False)
+        z_space = self.encoder_space(x_space_init, mask, training=training, pre_filled=True)
+        z_time = self.encoder_time(x_time_init, mask, training=training, pre_filled=True)
         return z_orig, z_space, z_time
 
     def decode(self, z, training=False):
@@ -629,65 +669,3 @@ class AECS(Model):
 
 
 # ========== 保持向后兼容的旧版AECS ==========
-class AECS_Legacy(Model):
-    """
-    [已废弃] 旧版 AE-CS 模型（单编码器 + 邻域聚合）
-
-    保留此类仅为向后兼容。新代码应使用 AECS 类。
-
-    与新版AECS的区别：
-    - 旧版：1个编码器，Z_space和Z_time通过邻域聚合得到
-    - 新版：3个独立编码器，分别生成Z_orig、Z_space、Z_time（符合专利）
-    """
-    def __init__(self, n_features, latent_dim=64, hidden_units=128,
-                 k_spatial=5, k_temporal=5, use_partial_distance=True, use_variable_mapping=True,
-                 dropout_rate=0.2, l2_reg=0.001, name='ae_cs_legacy'):
-        super(AECS_Legacy, self).__init__(name=name)
-
-        self.n_features = n_features
-        self.latent_dim = latent_dim
-        self.k_spatial = k_spatial
-        self.k_temporal = k_temporal
-
-        # 单编码器
-        self.encoder = Encoder(latent_dim, hidden_units, dropout_rate=dropout_rate, l2_reg=l2_reg)
-        self.decoder = Decoder(n_features, hidden_units, dropout_rate=dropout_rate, l2_reg=l2_reg)
-        self.gating_network = GatingNetwork(latent_dim, dropout_rate=dropout_rate, l2_reg=l2_reg)
-
-        from .neighborhood import NeighborhoodModule
-        self.neighborhood_module = NeighborhoodModule(k_spatial, k_temporal, use_partial_distance, use_variable_mapping)
-
-    def call(self, x, mask, training=False, return_all=False):
-        """旧版前向传播（单编码器 + 邻域聚合）"""
-        missing_rate = 1.0 - tf.reduce_mean(mask, axis=[1, 2])
-
-        # 单编码器
-        z_orig = self.encoder(x, mask, training=training)
-
-        # 邻域聚合得到Z_space和Z_time（不符合专利）
-        z_space, z_time, neighborhood_info = self.neighborhood_module.compute_neighborhood_embeddings(
-            x, z_orig, mask
-        )
-
-        alpha, z_fused = self.gating_network(z_orig, z_space, z_time, missing_rate, training=training)
-        x_hat = self.decoder(z_fused, training=training)
-
-        if training:
-            x_filled = x_hat
-        else:
-            x_filled = mask * x + (1.0 - mask) * x_hat
-
-        if return_all:
-            return {
-                'x_hat': x_hat,
-                'x_filled': x_filled,
-                'z_orig': z_orig,
-                'z_space': z_space,
-                'z_time': z_time,
-                'z_fused': z_fused,
-                'alpha': alpha,
-                'missing_rate': missing_rate,
-                'neighborhood_info': neighborhood_info
-            }
-        else:
-            return x_filled

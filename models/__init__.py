@@ -35,7 +35,6 @@ from .ae_cs import (
     Decoder,
     GatingNetwork,
     AECS,
-    AECS_Legacy,
     gaussian_activation,
     compute_spatial_knn_init,
     compute_temporal_knn_init
@@ -57,20 +56,12 @@ from .neighborhood import (
     NeighborhoodModule,
     weighted_aggregation
 )
-from .iterative_imputation import (
-    IterativeImputer,
-    adaptive_iterative_impute,
-    compute_spatial_knn_init_iterative,
-    compute_temporal_knn_init_iterative
-)
-
 __all__ = [
     # 模型组件
     'Encoder',
     'Decoder',
     'GatingNetwork',
     'AECS',
-    'AECS_Legacy',
     'gaussian_activation',
     # 输入初始化
     'compute_spatial_knn_init',
@@ -92,8 +83,4 @@ __all__ = [
     'NeighborhoodModule',
     'weighted_aggregation',
     # 循环插补
-    'IterativeImputer',
-    'adaptive_iterative_impute',
-    'compute_spatial_knn_init_iterative',
-    'compute_temporal_knn_init_iterative'
 ]

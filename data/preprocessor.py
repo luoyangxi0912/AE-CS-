@@ -258,6 +258,16 @@ class HangmeiPreprocessor:
                 raise ValueError("Scaler not fitted. Call with fit=True first.")
             normalized = self.scaler.transform(data)
 
+        # 裁剪极端离群点 (例如 Feature 11 的 -17σ 离群点)
+        # 防止梯度爆炸和 MSE 损失中的天文数字误差
+        clip_range = 5.0
+        n_clipped = np.sum(np.abs(normalized) > clip_range)
+        if n_clipped > 0:
+            pct = n_clipped / normalized.size * 100
+            print(f"  Clipping: {n_clipped} values ({pct:.2f}%) "
+                  f"outside [-{clip_range}, {clip_range}]")
+        normalized = np.clip(normalized, -clip_range, clip_range)
+
         return normalized.astype(np.float32)
 
     def denormalize(self, data: np.ndarray) -> np.ndarray:
@@ -367,9 +377,16 @@ class HangmeiPreprocessor:
                      val_ratio: float = 0.15,
                      seed: Optional[int] = 42) -> Dict[str, Tuple[np.ndarray, np.ndarray]]:
         """
-        完整的数据准备流程
+        完整的数据准备流程（v3 - 无泄露版）
 
-        重要：先划分数据集，再归一化，避免数据泄露！
+        方案：时间顺序划分 + 缓冲区隔离 + 全局归一化
+        - 全局归一化：消除分布漂移
+        - 缓冲区 = window_size：彻底杜绝跨分区窗口重叠
+        - 各分区内 stride=1：保证足够样本量
+
+        数据布局:
+        |--- Train ---|--Gap--|--- Val ---|--Gap--|--- Test ---|
+                       48点                 48点
 
         Args:
             missing_rate: 缺失率
@@ -383,68 +400,98 @@ class HangmeiPreprocessor:
         """
         # 1. 加载原始数据
         df = self.load_data()
-        data = df.values
+        raw_data = df.values  # [T, N]
+        T, N = raw_data.shape
+        gap = self.window_size  # 缓冲区大小 = 窗口大小
 
-        T, N = data.shape
+        # 2. 全局归一化（在整个数据集上fit，消除分布漂移）
+        normalized = self.normalize(raw_data, fit=True)
 
-        # 2. 先划分原始数据（时间序列按顺序划分）
-        train_end = int(T * train_ratio)
-        val_end = int(T * (train_ratio + val_ratio))
+        print(f"Global normalization: mean={normalized.mean():.4f}, std={normalized.std():.4f}")
 
-        train_data = data[:train_end]
-        val_data = data[train_end:val_end]
-        test_data = data[val_end:]
+        # 3. 按时间顺序划分，中间留缓冲区
+        usable = T - 2 * gap  # 去掉两个缓冲区后的可用时间点
+        train_len = int(usable * train_ratio)
+        val_len = int(usable * val_ratio)
+        test_len = usable - train_len - val_len
 
-        print(f"Data split before normalization: train={train_data.shape[0]}, val={val_data.shape[0]}, test={test_data.shape[0]}")
+        train_start = 0
+        train_end = train_start + train_len
 
-        # 3. 归一化：只在训练集上fit，避免数据泄露
-        train_normalized = self.normalize(train_data, fit=True)
-        val_normalized = self.normalize(val_data, fit=False)
-        test_normalized = self.normalize(test_data, fit=False)
+        val_start = train_end + gap  # 跳过缓冲区
+        val_end = val_start + val_len
 
-        # 验证归一化是否正确
-        print(f"Normalization check:")
-        print(f"  Train: mean={train_normalized.mean():.6f}, std={train_normalized.std():.6f}")
-        print(f"  Val:   mean={val_normalized.mean():.6f}, std={val_normalized.std():.6f}")
-        print(f"  Test:  mean={test_normalized.mean():.6f}, std={test_normalized.std():.6f}")
+        test_start = val_end + gap   # 跳过缓冲区
+        test_end = T
 
-        # 4. 为每个子集创建缺失值掩码
+        print(f"Time series split (with gap={gap}):")
+        print(f"  Train: [{train_start}, {train_end})  ({train_len} points)")
+        print(f"  Gap:   [{train_end}, {val_start})")
+        print(f"  Val:   [{val_start}, {val_end})  ({val_len} points)")
+        print(f"  Gap:   [{val_end}, {test_start})")
+        print(f"  Test:  [{test_start}, {test_end})  ({test_end - test_start} points)")
+
+        # 4. 切出各分区的原始数据
+        train_data = normalized[train_start:train_end]
+        val_data = normalized[val_start:val_end]
+        test_data = normalized[test_start:test_end]
+
+        # 验证分布（全局归一化后应该接近）
+        print(f"Distribution check (post global normalization):")
+        print(f"  Train: mean={train_data.mean():.4f}, std={train_data.std():.4f}")
+        print(f"  Val:   mean={val_data.mean():.4f}, std={val_data.std():.4f}")
+        print(f"  Test:  mean={test_data.mean():.4f}, std={test_data.std():.4f}")
+
+        # 5. 各分区内创建滑动窗口（stride=1）
+        train_windows, _ = self.create_windows(train_data)
+        val_windows, _ = self.create_windows(val_data)
+        test_windows, _ = self.create_windows(test_data)
+
+        print(f"Windows created (stride={self.stride}):")
+        print(f"  Train: {len(train_windows)} windows")
+        print(f"  Val:   {len(val_windows)} windows")
+        print(f"  Test:  {len(test_windows)} windows")
+
+        # 6. 为每个子集创建缺失值掩码
+        def create_window_masks(data_windows, base_seed):
+            n, ws, nf = data_windows.shape
+            masks = np.ones_like(data_windows, dtype=np.float32)
+            if base_seed is not None:
+                np.random.seed(base_seed)
+            for i in range(n):
+                if missing_type.startswith('BLOCK_'):
+                    block_size = int(missing_type.split('_')[1])
+                    window_mask = self.create_structured_missing(
+                        data_windows[i], missing_rate=missing_rate,
+                        block_size=block_size, seed=None
+                    )
+                else:
+                    window_mask = self.create_missing_mask(
+                        data_windows[i], missing_rate=missing_rate,
+                        missing_type=missing_type, seed=None
+                    )
+                masks[i] = window_mask
+            actual_rate = 1 - masks.mean()
+            print(f"  Mask created: actual missing rate={actual_rate:.2%}")
+            return masks
+
+        print("Creating masks...")
+        train_masks = create_window_masks(train_windows, seed)
+        val_masks = create_window_masks(val_windows, seed + 1 if seed else None)
+        test_masks = create_window_masks(test_windows, seed + 2 if seed else None)
+
+        # 7. 训练集内部打乱（保持val/test不打乱）
         if seed is not None:
             np.random.seed(seed)
+            shuffle_idx = np.random.permutation(len(train_windows))
+            train_windows = train_windows[shuffle_idx]
+            train_masks = train_masks[shuffle_idx]
 
-        train_mask = self.create_missing_mask(
-            train_normalized,
-            missing_rate=missing_rate,
-            missing_type=missing_type,
-            seed=seed
-        )
-
-        val_mask = self.create_missing_mask(
-            val_normalized,
-            missing_rate=missing_rate,
-            missing_type=missing_type,
-            seed=seed + 1 if seed is not None else None
-        )
-
-        test_mask = self.create_missing_mask(
-            test_normalized,
-            missing_rate=missing_rate,
-            missing_type=missing_type,
-            seed=seed + 2 if seed is not None else None
-        )
-
-        # 5. 为每个子集创建时间窗口
-        train_windows, train_window_masks = self.create_windows(train_normalized, train_mask)
-        val_windows, val_window_masks = self.create_windows(val_normalized, val_mask)
-        test_windows, test_window_masks = self.create_windows(test_normalized, test_mask)
-
-        print(f"Created windows: train={len(train_windows)}, val={len(val_windows)}, test={len(test_windows)}")
-
-        # 6. 返回划分后的数据集
+        # 8. 返回
         splits = {
-            'train': (train_windows, train_window_masks),
-            'val': (val_windows, val_window_masks),
-            'test': (test_windows, test_window_masks)
+            'train': (train_windows, train_masks),
+            'val': (val_windows, val_masks),
+            'test': (test_windows, test_masks)
         }
 
         return splits
