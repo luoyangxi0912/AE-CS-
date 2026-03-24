@@ -17,6 +17,21 @@ from data import AECSDataLoader
 from models.ae_cs import AECS
 
 
+def to_native(obj):
+    """Convert numpy/tensorflow scalar types to Python native JSON-serializable values."""
+    if isinstance(obj, dict):
+        return {k: to_native(v) for k, v in obj.items()}
+    if isinstance(obj, list):
+        return [to_native(v) for v in obj]
+    if isinstance(obj, (np.floating,)):
+        return float(obj)
+    if isinstance(obj, (np.integer,)):
+        return int(obj)
+    if isinstance(obj, np.ndarray):
+        return obj.tolist()
+    return obj
+
+
 def load_model_and_data(checkpoint_dir, data_path):
     checkpoint_dir = Path(checkpoint_dir)
 
@@ -312,7 +327,7 @@ def main():
 
     metrics_path = output_dir / 'metrics.json'
     with open(metrics_path, 'w', encoding='utf-8') as f:
-        json.dump(metrics, f, indent=4, ensure_ascii=False)
+        json.dump(to_native(metrics), f, indent=4, ensure_ascii=False)
     print(f'\nSaved metrics: {metrics_path}')
 
     _ = analyze_per_feature(predictions, ground_truth, masks, output_dir)
