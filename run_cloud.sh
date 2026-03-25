@@ -7,7 +7,7 @@
 # - Package artifacts for download
 # ============================================================
 
-set -euo pipefail
+set -eu
 
 CHECKPOINT_DIR="checkpoints_v11"
 RESULTS_DIR="results/eval_v11"
