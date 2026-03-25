@@ -572,9 +572,35 @@ class AECS(Model):
         z_time = self.encoder_time(x_time_init, mask, training=training, pre_filled=True)
 
         # ========== 步骤S4：计算邻域信息（用于损失函数）==========
-        _, _, neighborhood_info = self.neighborhood_module.compute_neighborhood_embeddings(
-            x, z_orig, mask
+        # Compute neighborhood info once and reuse spatial indices for z_space.
+        _, _, neighborhood_time_info = self.neighborhood_module.compute_neighborhood_embeddings(
+            x, z_time, mask
         )
+
+        indices_space = neighborhood_time_info.get('indices_space')
+        weights_space = neighborhood_time_info.get('weights_space')
+        if indices_space is not None:
+            z_neighbors_space = tf.gather(z_space, indices_space, batch_dims=1)
+        else:
+            # Fallback path for legacy non-partial-distance mode.
+            _, _, neighborhood_space_info = self.neighborhood_module.compute_neighborhood_embeddings(
+                x, z_space, mask
+            )
+            z_neighbors_space = neighborhood_space_info.get('z_neighbors_space')
+            weights_space = neighborhood_space_info.get('weights_space')
+
+        neighborhood_info = {
+            'z_neighbors_space': z_neighbors_space,
+            'weights_space': weights_space,
+            'indices_space': indices_space,
+            'z_space_anchor': z_space,
+            'z_var': neighborhood_time_info.get('z_var'),
+            'z_var_neighbors': neighborhood_time_info.get('z_var_neighbors'),
+            'weights_var': neighborhood_time_info.get('weights_var'),
+            'z_neighbors_time': neighborhood_time_info.get('z_neighbors_time'),
+            'weights_time': neighborhood_time_info.get('weights_time'),
+            'indices_time': neighborhood_time_info.get('indices_time')
+        }
 
         # ========== 步骤S4：Z 尺度对齐并融合 ==========
         # L2 归一化：消除表示间的尺度差异，并确保融合门控权重的稳定学习
@@ -582,9 +608,15 @@ class AECS(Model):
         z_space_norm = tf.nn.l2_normalize(z_space, axis=-1)
         z_time_norm = tf.nn.l2_normalize(z_time, axis=-1)
 
-        alpha, z_fused = self.gating_network(
+        alpha, _ = self.gating_network(
             z_orig_norm, z_space_norm, z_time_norm, missing_rate, training=training
         )
+        alpha_expanded = tf.expand_dims(alpha, axis=1)  # [batch, 1, 3]
+        alpha_1 = tf.expand_dims(alpha_expanded[:, :, 0], axis=-1)
+        alpha_2 = tf.expand_dims(alpha_expanded[:, :, 1], axis=-1)
+        alpha_3 = tf.expand_dims(alpha_expanded[:, :, 2], axis=-1)
+        # Decode from unnormalized representations to preserve magnitude information.
+        z_fused = alpha_1 * z_orig + alpha_2 * z_space + alpha_3 * z_time
 
         # ========== 解码重构 ==========
         x_delta = self.decoder(z_fused, training=training)
@@ -665,7 +697,18 @@ class AECS(Model):
             alpha: [batch, 3] - 融合权重
             z_fused: [batch, time, latent] - 融合后的表示
         """
-        return self.gating_network(z_orig, z_space, z_time, missing_rate, training=training)
+        z_orig_norm = tf.nn.l2_normalize(z_orig, axis=-1)
+        z_space_norm = tf.nn.l2_normalize(z_space, axis=-1)
+        z_time_norm = tf.nn.l2_normalize(z_time, axis=-1)
+        alpha, _ = self.gating_network(
+            z_orig_norm, z_space_norm, z_time_norm, missing_rate, training=training
+        )
+        alpha_expanded = tf.expand_dims(alpha, axis=1)
+        alpha_1 = tf.expand_dims(alpha_expanded[:, :, 0], axis=-1)
+        alpha_2 = tf.expand_dims(alpha_expanded[:, :, 1], axis=-1)
+        alpha_3 = tf.expand_dims(alpha_expanded[:, :, 2], axis=-1)
+        z_fused = alpha_1 * z_orig + alpha_2 * z_space + alpha_3 * z_time
+        return alpha, z_fused
 
 
 # ========== 保持向后兼容的旧版AECS ==========

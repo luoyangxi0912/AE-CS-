@@ -2,7 +2,7 @@
 
 > 目标：让 AE-CS 模型性能超过 KNN 基线（R²=0.93），达到可发表水平
 > 创建日期：2026-03-24
-> 当前状态：模型 R²=0.9275，低于基线 0.93
+> 当前状态：V11 代码修复完成，待重新训练验证
 
 ---
 
@@ -11,11 +11,22 @@
 - 已完成 V9 架构重写（BN→LN、Encoder pre_filled、consistency sigma_c 修复）
 - 已在 AutoDL GPU 服务器完成首次训练（train_cloud.py, Epoch 40 早停, 60 epochs 总计）
 - 已完成首次评估：缺失位 R²=0.9275, 整体 R²=0.9856
-- **结论：模型劣于 KNN 基线（0.9275 < 0.93），delta 修正为负贡献**
+- 已完成 V10 训练（`checkpoints_v10`，早停 Epoch 34，最佳验证 recon=0.1385）
+- 已完成 V10 评估（`results_v10`）：缺失位 R²=0.9271，RMSE=0.1637，MAE=0.0905
+- **V10 结论：相比 V9 未提升主指标（R² 0.9275 → 0.9271），仍低于 KNN 基线 0.93**
+- **V11 代码修复完成（2026-03-25）：修复 5 个 bug，详见下方任务 2**
+
+### V9 vs V10 对比（缺失位）
+
+| 版本 | R² | RMSE | MAE | 结论 |
+|------|----|------|-----|------|
+| V9 | 0.9275 | 0.1633 | 0.0892 | - |
+| V10 | 0.9271 | 0.1637 | 0.0905 | 略退化 |
+| V11 | 待训练 | - | - | 邻域损失 + 幅度信息修复 |
 
 ---
 
-## 任务 1：修正训练超参数默认值
+## 任务 1：修正训练超参数默认值 — **已完成**
 
 ### 解决的问题
 当前超参数导致训练-测试分布不匹配、损失函数失衡，模型学到的 delta 在测试时过度修正。
@@ -37,70 +48,99 @@
 - 排除 0.0：三编码器容易过拟合，需要最低限度正则化
 - 排除 0.2：0.1 已在 BN→LN 修复后确认有效
 
-**决策 1.4：lambda2/lambda3 从 1.0/10.0 → 待定（取决于任务 2）**
-- 理由：当前 L_space≈0、L_time=0，lambda 值无意义。修复邻域损失后根据实际损失量级重新调参。
-- 排除现在就定死：邻域损失修复前后量级可能差异很大，盲定参数无意义
-- 初始尝试值：lambda2=0.5, lambda3=0.5（中性起点，根据训练日志微调）
+**决策 1.4：lambda2/lambda3 初始值 0.5/0.5**
+- 理由：V11 修复邻域损失后，L_space/L_time 将有实际梯度贡献，0.5 作为中性起点，根据训练日志微调。
 
-### 待解决
+### 状态
+- [x] 修改 train_iterative.py 默认参数（V10 已完成）
 - [ ] 修改 train_cloud.py 默认参数
 - [ ] 推送到 GitHub
 
 ---
 
-## 任务 2：排查并修复邻域损失为零
+## 任务 2：排查并修复邻域损失为零 — **已完成**
 
 ### 解决的问题
 L_space≈0.0006、L_time=0.0000，邻域保持损失几乎不贡献梯度。论文架构中 L_space 和 L_time 是核心组件，用于保持潜在空间的时空流形结构。若它们无效，模型退化为普通 autoencoder + 一致性正则。
 
-### 已作决策
+### 根因分析与修复（2026-03-25 代码审查发现）
 
-**决策 2.1：优先排查 L_time=0 的根因，再决定修复方案**
-- 理由：L_time 完全为零比 L_space≈0.0006 更异常。当前代码中 temporal_preservation_loss 对 z_var（变量级表示）做 L2 归一化后计算距离。若编码器尚未学到有意义的区分（训练初期），所有 z_var 近似相同方向 → 归一化后距离≈0。
-- 排除"直接删除 L2 归一化"：归一化是防坍塌的关键机制，不能简单去掉
-- 排除"加大 lambda3"：基础值为零，乘以再大的系数仍为零
+发现 5 个 bug，已全部修复并通过编译 + 梯度冒烟测试验证：
 
-**可能的修复方向（需验证后选择）：**
-1. 在 L2 归一化之前加入温度缩放（temperature scaling）
-2. 对邻域损失使用 cosine similarity 替代 L2 distance
-3. 检查 z_var 的实际数值分布，确认是否存在表示坍塌
+**Bug 1（P0）：L_time 梯度完全断裂**
+- 根因：`compute_temporal_neighborhood_with_mapping` 中 `z_b = z[b].numpy()` 将 TF tensor 转为 numpy，随后 `z_var = tf.constant(np.stack(...))` 创建无梯度的常量。L_time 虽能计算出数值，但 `tape.gradient()` 对所有模型参数返回零梯度。
+- 修复：用 `tf.gather` + `tf.reduce_mean` + `tf.stack` 重写 z_var 计算，保持 z → z_var → z_var_neighbors 的完整梯度链。
+- 文件：`models/neighborhood.py`
+- 验证：`grad is None = False`，`sum(z_var)` 对 z 的梯度范数非零。
 
-### 待解决
-- [ ] 在 AutoDL 上加诊断代码打印 z_var 分布
-- [ ] 确认 neighborhood_info 中 z_var、z_var_neighbors 是否正确计算
-- [ ] 选择并实施修复方案
+**Bug 2（P1）：L_space/L_time 只正则化 encoder_orig，不影响 encoder_space/encoder_time**
+- 根因：`AECS.call()` 中 `compute_neighborhood_embeddings` 只传入 `z_orig`，导致 `z_neighbors_space` 和 `z_var` 都从 encoder_orig 的输出收集。空间/时间编码器完全没有邻域保持约束。
+- 修复：L_space 改为从 z_space 收集邻居 + 用 z_space 做锚点；L_time 从 z_time 计算 z_var。
+- 文件：`models/ae_cs.py`（neighborhood_info 构造）、`models/losses.py`（`z_space_anchor`）
+
+**Bug 3（P2）：Decoder 收到 L2 归一化后的 z_fused，丢失幅度信息**
+- 根因：z_fused 是 L2-normalized 向量的加权组合，编码器输出的幅度信息全部丢失，decoder 只能从方向信息重建 delta。
+- 修复：gating 网络仍在归一化空间计算 alpha（保证稳定性），但 z_fused 改为未归一化 z 的加权组合。
+- 文件：`models/ae_cs.py`（`AECS.call()` 和 `fuse_representations()`）
+
+**Bug 4（P3）：evaluate.py 未从 config 恢复 stride**
+- 根因：评估默认 stride=1（训练 stride=12），产生大量重叠窗口浪费计算。
+- 修复：`data_loader.preprocessor.stride = config.get('stride', 12)`
+- 文件：`evaluate.py`
+
+**Bug 5（P3）：reconstruction_loss 文档字符串描述不存在的 corrupted_mask 参数**
+- 修复：更新文档，准确描述 mask 参数含义。
+- 文件：`models/losses.py`
+
+**性能优化：消除重复邻域计算**
+- 旧代码：调用两次 `compute_neighborhood_embeddings`（一次 z_space，一次 z_time），空间 KNN 搜索（基于 X）重复计算。
+- 优化：只调用一次（传 z_time），复用 `indices_space` 对 z_space 做 `tf.gather`。
+
+### 状态
+- [x] 根因确认：L_time=0 是梯度断裂（非表示坍塌）
+- [x] L_time 梯度修复 + 冒烟测试通过
+- [x] L_space/L_time 编码器正则化目标修复
+- [x] Decoder 幅度信息修复
+- [x] evaluate.py stride 修复
+- [x] 语法编译通过（python -m compileall）
 
 ---
 
-## 任务 3：在 AutoDL 上重新训练
+## 任务 3：在 AutoDL 上重新训练（V11） — **待执行**
 
 ### 解决的问题
-用修正后的参数重新训练，验证是否超过 KNN 基线。
+用修正后的代码重新训练，验证邻域损失修复是否使模型超过 KNN 基线。
 
 ### 已作决策
 
-**决策 3.1：早停指标从 val_total → val_recon**
-- 理由：val_total 被 L_consist 主导。当前模型选择标准偏向"一致性好"而非"重建准"。最佳 epoch 可能不是重建质量最高的 epoch。
-- 排除保持 val_total：已证明选出的模型重建能力不够
-- 排除使用 val_recon + val_consist 加权组合：增加调参复杂度，recon 才是最终评价指标
+**决策 3.1：早停指标从 val_total → val_recon**（V10 已实现）
 
-**决策 3.2：训练命令**
+**决策 3.2：V11 训练要点**
+- 代码基础：包含任务 2 的全部 bug 修复
+- 关键变化：L_space 和 L_time 首次有实际梯度贡献
+- 需关注：训练日志中 L_space 和 L_time 的量级，据此调整 lambda2/lambda3
+
+**决策 3.3：训练命令**
 ```bash
 python train_cloud.py \
   --p_drop 0.2 \
   --dropout_rate 0.1 \
   --lambda1 0.5 \
-  --lambda2 <任务2确定> \
-  --lambda3 <任务2确定> \
+  --lambda2 0.5 \
+  --lambda3 0.5 \
   --epochs 100 \
   --early_stopping_patience 20 \
-  --checkpoint_dir checkpoints_v10
+  --checkpoint_dir checkpoints_v11
 ```
 
 ### 待解决
-- [ ] 任务 1、2 完成后执行
-- [ ] 监控训练日志，确认 L_recon 梯度占比提升
-- [ ] 对比 v9 和 v10 的 per-feature 性能
+- [x] 已执行 V10 训练与评估（AutoDL）
+- [x] 已对比 V9 与 V10 的 per-feature 性能
+- [ ] **将 V11 代码修复推送到 GitHub**
+- [ ] 在 AutoDL 上执行 V11 训练
+- [ ] 监控训练日志：确认 L_space > 0、L_time > 0、L_recon 梯度占比提升
+- [ ] 若 L_space/L_time 量级过大或过小，微调 lambda2/lambda3
+- [ ] V11 评估并与 V9/V10 对比，验证是否超过 R²=0.93
 
 ---
 
@@ -176,9 +216,9 @@ python train_cloud.py \
 ## 执行顺序
 
 ```
-任务1 (修参数) → 任务2 (修邻域损失) → 任务3 (重新训练)
-                                           ↓
-                                      任务4 (5组实验) → 任务5 (基线对比)
+任务1 (修参数) ──── 已完成
+                          ↘
+任务2 (修邻域损失) ── 已完成 → 任务3 (V11 重新训练) ← 当前步骤
+                                        ↓
+                                   任务4 (5组实验) → 任务5 (基线对比)
 ```
-
-任务 1 和 2 可以并行开发，但必须在任务 3 之前完成。

@@ -123,21 +123,15 @@ def generate_augmented_masks(mask, Q=5, p_drop=0.1, sigma_c=None):
 
 def reconstruction_loss(x_true, x_pred, mask):
     """
-    重建损失 L_recon (Algorithm 1, line 16)
+    重建损失 L_recon (Algorithm 1, line 16)。
 
-    V9 关键修复：当提供 corrupted_mask 时，仅在"额外掩盖"的位置计算损失�?
-
-    原因：残差连�?x_hat = x_knn + delta 导致�?
-    - 仍在 corrupted_mask 中的位置: x_knn = x_true �?delta 目标 = 0 (无用信号)
-    - 被额外掩盖的位置: x_knn = KNN填充 �?delta 目标 = x_true - KNN (有用信号)
-    旧版在全�?mask 上计算，80% 零信号淹没了 20% 有用信号 �?delta 永远学到 0�?
+    损失在传入的 mask 位置上计算；调用方可通过构造 recon_mask
+    （例如仅额外掩盖位置）控制监督区域。
 
     Args:
-        x_true: [batch, time, features] - 真实观测�?
-        x_pred: [batch, time, features] - 预测�?
-        mask: [batch, time, features] - 原始掩码矩阵 (1=observed, 0=missing)
-        corrupted_mask: [batch, time, features] - 损坏后的掩码 (可�?
-            当提供时，仅�?(mask - corrupted_mask) 即额外掩盖的位置计算损失
+        x_true: [batch, time, features] - 真实观测值
+        x_pred: [batch, time, features] - 预测值
+        mask: [batch, time, features] - 重建损失掩码 (1=compute loss, 0=ignore)
 
     Returns:
         loss: scalar - 重建损失
@@ -378,8 +372,9 @@ def total_loss(x_true, x_pred, mask, z_orig, z_corrupted_list,
     if neighborhood_info is not None and 'z_neighbors_space' in neighborhood_info:
         z_neighbors_spatial = neighborhood_info['z_neighbors_space']
         weights_spatial = neighborhood_info.get('weights_space', None)
+        z_anchor = neighborhood_info.get('z_space_anchor', z_orig)
         L_space = spatial_preservation_loss(
-            z_orig, z_neighbors_spatial,
+            z_anchor, z_neighbors_spatial,
             weights_spatial=weights_spatial,
             mask=mask
         )

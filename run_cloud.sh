@@ -1,8 +1,7 @@
-﻿#!/bin/bash
+#!/bin/bash
 # ============================================================
-# AE-CS V9 Cloud One-Click Script
+# AE-CS V11 Cloud One-Click Script
 # - Install deps
-# - Verify V9 fixes
 # - Train with full logs
 # - Auto evaluate
 # - Package artifacts for download
@@ -10,8 +9,8 @@
 
 set -euo pipefail
 
-CHECKPOINT_DIR="checkpoints_v9"
-RESULTS_DIR="results/eval_v9"
+CHECKPOINT_DIR="checkpoints_v11"
+RESULTS_DIR="results/eval_v11"
 ARTIFACT_ROOT="artifacts"
 RUN_TS="$(date +%Y%m%d_%H%M%S)"
 RUN_DIR="${ARTIFACT_ROOT}/run_${RUN_TS}"
@@ -19,26 +18,25 @@ LOG_DIR="${RUN_DIR}/logs"
 
 mkdir -p "${LOG_DIR}" "${RESULTS_DIR}" "${CHECKPOINT_DIR}" "${RUN_DIR}"
 
-VERIFY_LOG="${LOG_DIR}/verify.log"
 TRAIN_LOG="${LOG_DIR}/train.log"
 EVAL_LOG="${LOG_DIR}/eval.log"
 ENV_LOG="${LOG_DIR}/env.txt"
 PIP_FREEZE_LOG="${LOG_DIR}/pip_freeze.txt"
-PACKAGE_PATH="${RUN_DIR}/ae_cs_v9_${RUN_TS}.tar.gz"
+PACKAGE_PATH="${RUN_DIR}/ae_cs_v11_${RUN_TS}.tar.gz"
 
 echo "============================================================"
-echo "AE-CS V9 Cloud Pipeline"
+echo "AE-CS V11 Cloud Pipeline"
 echo "Run dir: ${RUN_DIR}"
 echo "============================================================"
 
 echo ""
-echo "[1/6] Install Python dependencies..."
+echo "[1/5] Install Python dependencies..."
 pip install tensorflow==2.10.0 numpy pandas scikit-learn -q
 pip install faiss-cpu -q
 echo "  Done."
 
 echo ""
-echo "[2/6] Collect environment info..."
+echo "[2/5] Collect environment info..."
 {
   echo "Timestamp: ${RUN_TS}"
   echo "Working dir: $(pwd)"
@@ -49,7 +47,7 @@ echo "[2/6] Collect environment info..."
 pip freeze > "${PIP_FREEZE_LOG}" || true
 
 echo ""
-echo "[3/6] Check GPU..."
+echo "[3/5] Check GPU..."
 python3 -c "
 import tensorflow as tf
 gpus = tf.config.list_physical_devices('GPU')
@@ -64,11 +62,7 @@ else:
 " | tee -a "${ENV_LOG}"
 
 echo ""
-echo "[4/6] Run verify_v9.py (log: ${VERIFY_LOG})..."
-python3 verify_v9.py 2>&1 | tee "${VERIFY_LOG}"
-
-echo ""
-echo "[5/6] Train model (log: ${TRAIN_LOG})..."
+echo "[4/5] Train model (log: ${TRAIN_LOG})..."
 python3 train_cloud.py \
     --checkpoint_dir "${CHECKPOINT_DIR}" \
     --epochs 100 \
@@ -77,7 +71,7 @@ python3 train_cloud.py \
     2>&1 | tee "${TRAIN_LOG}"
 
 echo ""
-echo "[6/6] Evaluate model (log: ${EVAL_LOG})..."
+echo "[5/5] Evaluate model (log: ${EVAL_LOG})..."
 python3 evaluate.py \
     --checkpoint_dir "${CHECKPOINT_DIR}" \
     --output_dir "${RESULTS_DIR}" \
@@ -94,7 +88,6 @@ echo ""
 echo "============================================================"
 echo "Pipeline finished."
 echo "Logs:"
-echo "  - ${VERIFY_LOG}"
 echo "  - ${TRAIN_LOG}"
 echo "  - ${EVAL_LOG}"
 echo "Results:"

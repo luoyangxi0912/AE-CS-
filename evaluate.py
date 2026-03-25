@@ -55,6 +55,7 @@ def load_model_and_data(checkpoint_dir, data_path):
     )
     data_loader.preprocessor.data_path = Path(data_path)
     data_loader.preprocessor.window_size = config.get('window_size', 48)
+    data_loader.preprocessor.stride = config.get('stride', 12)
 
     datasets = data_loader.prepare(
         missing_rate=config.get('missing_rate', 0.2),

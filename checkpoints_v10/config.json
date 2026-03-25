@@ -1,0 +1,23 @@
+{
+    "data_path": "hangmei_90_拼接好的.csv",
+    "n_features": 44,
+    "window_size": 48,
+    "batch_size": 32,
+    "latent_dim": 32,
+    "hidden_units": 128,
+    "k_spatial": 5,
+    "k_temporal": 5,
+    "dropout_rate": 0.1,
+    "l2_reg": 0.0005,
+    "learning_rate": 0.001,
+    "p_drop": 0.2,
+    "n_corrupted": 3,
+    "p_consist": 0.1,
+    "lambda1": 0.5,
+    "lambda2": 0.5,
+    "lambda3": 0.5,
+    "stride": 12,
+    "missing_rate": 0.2,
+    "missing_type": "MCAR",
+    "seed": 42
+}
